@@ -100,12 +100,11 @@ public class WorkerController {
     @ResponseBody
     @PostMapping("/findWorkListByShop_1")
     public Map<String,Object> findWorkListByShop_1(@RequestBody PageUtil pageUtil){
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("success",true);
         map.put("msg","");
         try {
             List<Map<String,Object>>  workerList = workerService.findWorkerList_1(pageUtil);
-            System.out.println(JSON.toJSONString(workerList));
             map.put("workerList",workerList);
             List<WorkerPic>  workerPicList = workerService.findWorkerPicById(pageUtil);
             map.put("workePicrList",workerPicList);

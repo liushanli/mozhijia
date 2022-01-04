@@ -9,6 +9,7 @@ import com.gexin.rp.sdk.http.IGtPush;
 import com.gexin.rp.sdk.template.TransmissionTemplate;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class PushUtil {
 
@@ -85,13 +86,6 @@ public class PushUtil {
             response = result.getResponse();
         }
         return response;
-    }
-
-    public static void main(String[] args){
-        PushUtil pushUtil = new PushUtil();
-        //pushMessage
-        pushUtil.pushMessage("","fdsafddfsd");
-        System.out.println("====--");
     }
 
 }

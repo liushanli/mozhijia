@@ -129,7 +129,7 @@ public class ShopController {
     @ResponseBody
     @RequestMapping(value = "/findShopWorkInfoByCons",method = RequestMethod.POST)
     public Map<String,Object> findShopWorkInfoByCons(@RequestBody Map<String,Object> map_1){
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("success",true);
         map.put("msg","");
         try {

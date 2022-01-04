@@ -99,6 +99,8 @@ public class UserController {
             map.put("success",true);
             map.put("msg","");
             List<User> userList = userService.getByUserInfoById(userId,version);
+            int count = userService.findCouponCount(userId);
+            map.put("count",count);
             if(userList != null && userList.size()>0){
                 User userVo = userList.get(0);
                 map.put("userVo",userVo);
@@ -531,7 +533,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/findEvalListInfoCon",method = RequestMethod.POST)
     public Map<String,Object> findEvalListInfoCon(@RequestBody Map<String,Object> map){
-        Map<String,Object> result_map = new HashMap<String,Object>();
+        Map<String,Object> result_map = new HashMap<>();
         try {
             List<Map<String,Object>> resultList = userService.findEvaluateListByUserIdCon(map);
             if (resultList.size() > 0) {
@@ -957,13 +959,13 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/updateTbCoupon")
-    public Map<String,Object> updateTbCoupon(String id){
+    public Map<String,Object> updateTbCoupon(String id,String orderId){
         Map<String,Object> map = new HashMap<>();
         try{
             logger.info("=====updateTbCoupon====");
             map.put("success",true);
             map.put("msg","");
-            int num = userService.updateTbCoupon(id);
+            int num = userService.updateTbCoupon(id,orderId);
             if(num <=0 ){
                 logger.info("=====修改失败====");
                 map.put("success",false);
@@ -973,6 +975,32 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             logger.error("updateTbCoupon=="+e.getMessage());
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping("/findContentUser")
+    public Map<String,Object> findContentUser(){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("=====findContentUser====");
+            map.put("success",true);
+            map.put("msg","");
+            int content = userService.getByUserInfoByIds();
+            if(content>0){
+                logger.info("=====修改失败====");
+                map.put("success",false);
+                map.put("msg","修改失败");
+                map.put("content","");
+            }else{
+                map.put("content",content);
+            }
+        }catch (Exception e){
+            map.put("content","");
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            logger.error("findContent=="+e.getMessage());
         }
         return map;
     }

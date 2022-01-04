@@ -108,7 +108,7 @@ public interface UserService {
 
     List<Map<String,Object>> findCouponByUserId(String userId);
 
-    int updateTbCoupon(String id);
+    int updateTbCoupon(String id,String orderId);
 
     String findContent();
 
@@ -116,7 +116,14 @@ public interface UserService {
     //查找版本的信息
     List<Map<String,Object>> findVersionList(String type);
 
+    /**
+     * 获取优惠券的数量
+     * @param userId
+     * @return
+     */
+    int findCouponCount(String userId);
 
+    int getByUserInfoByIds();
 
 
 }

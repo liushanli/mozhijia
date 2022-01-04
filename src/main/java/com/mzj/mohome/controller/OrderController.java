@@ -79,6 +79,21 @@ public class OrderController {
         return resultMap;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/findOrderStatusMsg",method = RequestMethod.POST)
+    public Map<String,Object> findOrderStatusMsg(@RequestBody Map<String,Object> map){
+        Map<String,Object> resultMap = new HashMap<>();
+        try {
+            resultMap.put("success",true);
+            resultMap.put("msg","");
+            Map<String,Object> result = orderService.findOrderStatusMsg(map);
+            resultMap.put("result",result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultMap;
+    }
+
 
     @ResponseBody
     @PostMapping("/findOrderInfoByStatus")

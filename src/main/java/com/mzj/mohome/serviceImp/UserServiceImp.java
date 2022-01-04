@@ -49,6 +49,18 @@ public class UserServiceImp implements UserService {
         return userMapper.getById(id);
     }
 
+    public int getByUserInfoByIds(){
+        List<User> list=  userMapper.getByUserInfoById(null);
+        logger.info("集合为："+list.size());
+        for (User user:list){
+            int count = userMapper.findCount(user.getUserId());
+            logger.info("count=="+count);
+            if(count<=0){
+                userMapper.addCouponUserId(user.getUserId(),"");
+            }
+        }
+        return 0;
+    }
 
     //登录时判断用户是否存在
     public List<User> getByUserInfoById(String userId,String version){
@@ -90,19 +102,19 @@ public class UserServiceImp implements UserService {
         //存在的话，则修改该用户的登陆时间
         List<User> userVoList = new ArrayList<>();
         if(StringUtils.isNotEmpty(phone)&&StringUtils.isNotEmpty(sendCode)) {
-
-
             List<Map<String, Object>> mapList = userMapper.getByUserInfoExist(phone, sendCode);
             if(mapList.size()>0 && mapList != null){
                 userVoList = userMapper.getByUserInfoByPhoneExist(phone);
                 if(userVoList.size()<=0 || userVoList == null){
-                    int num = userMapper.addUserInfo(phone,RandomUtil.randomName(false,4));
+                    String userId = UUID.randomUUID().toString();
+                    logger.info("首次登陆添加用户id:{},获取优惠券",userId);
+                    int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4));
+                    userMapper.addCouponUserId(userId,null);
                     if(num>0){
                         userVoList = userMapper.getByUserInfoByPhoneExist(phone);
                     }
                 }
             }
-
         }else if(StringUtils.isNotEmpty(openId))
             userVoList = userMapper.getByUserInfoExistWhat(openId);
         else{
@@ -134,16 +146,16 @@ public class UserServiceImp implements UserService {
         }
         return userVoList;
     }
-
-
-
     //登录时判断用户是否存在
     public List<User> getByUserExistPhone(String phone) throws Exception{
         //存在的话，则修改该用户的登陆时间
 
         List<User> userVoList = userMapper.getByUserInfoByPhoneExist(phone);
         if(userVoList.size()<=0 || userVoList == null){
-            int num = userMapper.addUserInfo(phone,RandomUtil.randomName(false,4));
+            String userId = UUID.randomUUID().toString();
+            int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4));
+            userMapper.addCouponUserId(userId,null);
+            logger.info("首次登陆添加用户id:{},获取优惠券",userId);
             if(num>0){
                 userVoList = userMapper.getByUserInfoByPhoneExist(phone);
             }
@@ -294,7 +306,7 @@ public class UserServiceImp implements UserService {
             workersMapper.updateWorkTimeById(aboutTime,workerId,"1");
 
             //短信下发
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             map.put("account", "N7792689");//API账号
             map.put("password", "jdzgl5twQ");//API密码
             map.put("msg", "摩之家新订单提醒：\n" +
@@ -304,7 +316,7 @@ public class UserServiceImp implements UserService {
                     "预约地址：" + mapperPayRecordById.get("address") +
                     "预约技师：" + mapperPayRecordById.get("workerName") +
                     "技师电话：" + mapperPayRecordById.get("workerPhone"));//短信内容
-            map.put("phone", "13621883997");//手机号
+            map.put("phone", "13524908775");//手机号
             map.put("report", report);//是否需要状态报告
             map.put("extend", extend);//自定义扩展码
             JSONObject js = (JSONObject) JSONObject.toJSON(map);
@@ -503,7 +515,9 @@ public class UserServiceImp implements UserService {
         try {
 
             String shopId =  ToolsUtil.getString(map.get("shopId"));
-            return userMapper.findEvaluateListByUserId(null,shopId);
+            Integer page = ToolsUtil.getString(map.get("page"))!=null?(Integer)map.get("page"):1;
+            page = (page-1)*6;
+            return userMapper.findEvaluateListByUserIdPage(null,shopId,page);
         }
 
         catch (Exception e){
@@ -550,11 +564,12 @@ public class UserServiceImp implements UserService {
             String sex = ToolsUtil.getString(map.get("sex"));
             String phone = ToolsUtil.getString(map.get("phone"));
             String appleData = ToolsUtil.getString(map.get("appleData"));
-            int num = 0;
+            int num;
+            String userId = UUID.randomUUID().toString();
             if(StringUtils.isNotEmpty(appleData) && appleData != null){
-                num = userMapper.addAppleUserInfo(appleData, RandomUtil.randomName(false,5));
+                num = userMapper.addAppleUserInfo(userId,appleData, RandomUtil.randomName(false,5));
             }else{
-                num = userMapper.addWhatUserInfo(phone,nickName,imgUrl,openId,sex);
+                num = userMapper.addWhatUserInfo(userId,phone,nickName,imgUrl,openId,sex);
             }
             return num;
         }catch (Exception e){
@@ -632,7 +647,8 @@ public class UserServiceImp implements UserService {
             String nickName = RandomUtil.randomName(false,4);
             String sex = "";
             String phone = ToolsUtil.getString(map.get("phone"));
-            int num = userMapper.addWhatUserInfo(phone,nickName,imgUrl,openId,sex);
+            String userId = UUID.randomUUID().toString();
+            int num = userMapper.addWhatUserInfo(userId,phone,nickName,imgUrl,openId,sex);
             return num;
         }catch (Exception e){
             System.out.println("添加错误："+e.getMessage());
@@ -657,8 +673,10 @@ public class UserServiceImp implements UserService {
     //登录时判断用户是否存在
     public String addUserPhone(String phone) throws Exception{
         //存在的话，则修改该用户的登陆时间
-        String userId = "";
-        int num = userMapper.addUserInfo(phone,RandomUtil.randomName(false,4));
+        String userId = UUID.randomUUID().toString();
+        int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4));
+        logger.info("首次登陆添加用户id:{},获取优惠券",userId);
+        userMapper.addCouponUserId(userId,null);
         if(num>0){
            List<User> user = userMapper.getByUserInfoByPhoneExist(phone);
            userId = user.get(0).getUserId();
@@ -682,8 +700,13 @@ public class UserServiceImp implements UserService {
         return mapList;
     }
 
-    public int updateTbCoupon(String id){
-        return userMapper.updateTbCoupon(id);
+    public int updateTbCoupon(String id,String orderId){
+        int count = userMapper.updateTbCoupon("1",id,orderId);
+        if(count>0){
+            Map<String,Object> mapList = userMapper.findCouponById(id);
+            userMapper.addCouponUserId(mapList.get("userId").toString(),"");
+        }
+        return count;
     }
 
     public String findContent(){
@@ -692,5 +715,9 @@ public class UserServiceImp implements UserService {
 
     public List<Map<String,Object>> findVersionList(String type){
         return userMapper.findVersion(type);
+    }
+
+    public int findCouponCount(String userId){
+        return userMapper.findCount(userId);
     }
 }

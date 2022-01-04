@@ -91,20 +91,15 @@ public interface ShopMapper {
 
 
     //根绝店铺来查询员工的信息
-    @Select("<script> " +
-            " select t.userName,t.imgUrl,t.phone,t.introduce,t.serviceArea,t.workerTitle,t.isOnline,CONVERT(varchar(100), loginTime, 120) loginTime," +
-            "t.orderNum,t.workerId,shop.shopName,(select top 1 dateHHmm from TB_WorkerTime where isBusy = 0 and [date]>DATEADD(Minute,30, GETDATE()) and workerId =  t.workerId order by id)  dateHHmm,\n" +
-            " ISNULL(t1.sellNum,0) sellNum,t.jd,t.wd,\n" +
-            " t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId \n" +
-            "  left join (select COUNT(1) sellNum,t.workerId from TB_Order t left join TB_Product p on t.productId =  p.productId \n" +
-            "  where  t.status = 1 or (t.status &gt;= 3 and t.status &lt;= 9) group by t.workerId) t1\n" +
-            "  on t.workerId = t1.workerId\n" +
-            "  where 1=1  and shop.isOnline = 1 " +
-            " <if test='shopId != null'> and t.shopId = #{shopId} </if>" +
-            " <if test='onLine != null'> and t.isOnline = #{onLine} </if>" +
-            " order by sellSum  </script>")
+    @Select("<script>select top 10 * from (" +
+            " select " +
+            " row_number() over(order by t.orderNum desc) as rownumber,\n" +
+            " t.userName,t.imgUrl,t.phone,t.introduce,t.serviceArea,t.workerTitle,t.isOnline,CONVERT(varchar(100)," +
+            " loginTime, 120) loginTime,t.orderNum,t.workerId,shop.shopName,t.jd,t.wd," +
+            "             t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId " +
+            ") t where rownumber &gt; ${page} </script>")
     List<Map<String,Object>> findWorkerListByShopId(@Param("city") String city,@Param("shopId")String shopId,
-                                                    @Param("onLine")String onLine);
+                                                    @Param("onLine")String onLine,@Param("page")Integer page);
 
 
     @Update("update TB_Worker set isOnline = #{isOnline}  where workerId = #{workerId}")

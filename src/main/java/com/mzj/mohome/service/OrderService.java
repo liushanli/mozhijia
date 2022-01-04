@@ -29,6 +29,7 @@ public interface OrderService {
     //接单时，所触发的修改操作
     int updateOrderInfo(Map<String,Object> map);
 
+    Map<String,Object> findOrderStatusMsg(Map<String,Object> map);
     //修改订单退款
     int updateReturnOrder(Map<String,Object> map);
 

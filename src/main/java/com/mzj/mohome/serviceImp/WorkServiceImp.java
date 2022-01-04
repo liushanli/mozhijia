@@ -14,6 +14,8 @@ import com.winnerlook.model.PrivacyUnbindBody;
 import com.winnerlook.model.VoiceResponseResult;
 import com.winnerlook.util.MD5Util;
 import org.apache.commons.lang.StringUtils;
+import org.gavaghan.geodesy.Ellipsoid;
+import org.gavaghan.geodesy.GlobalCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Service;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static com.mzj.mohome.util.MapUtil.getDistanceMeter;
 
 @Service("workerService")
 public class WorkServiceImp implements WorkerService {
@@ -136,8 +140,8 @@ public class WorkServiceImp implements WorkerService {
                 List<Map<String,Object>> list =  workersMapper.findEvaluate(worker.get("workerId").toString());
                 if(list!=null && list.size()>0){
                     Map<String,Object> map1 = list.get(0);
-                    int maxNum = Integer.parseInt(map1.get("maxNum").toString());
-                    int minNum =Integer.parseInt(map1.get("minNum").toString());
+                    float maxNum = Float.parseFloat(map1.get("maxNum").toString());
+                    float minNum =Float.parseFloat(map1.get("minNum").toString());
                     if (maxNum > 0) {
                         if (minNum/maxNum <= 0.2) {
                             worker.put("star", 1);
@@ -748,8 +752,8 @@ public class WorkServiceImp implements WorkerService {
         DecimalFormat df = new DecimalFormat("0%");
         if(pageUtil!=null){
             String shopId = ToolsUtil.getString(pageUtil.getShopId());
-            Integer page = (pageUtil.getPage()-1)*6;
-            Integer size = pageUtil.getPage()*6;
+            Integer page = (pageUtil.getPage()-1)*5;
+            Integer size = pageUtil.getPage()*5;
             String workId = ToolsUtil.getString(pageUtil.getWorkerId());
             String userName = ToolsUtil.getString(pageUtil.getUserName());
             String shopName = ToolsUtil.getString(pageUtil.getShopName());
@@ -769,25 +773,32 @@ public class WorkServiceImp implements WorkerService {
 
             String jd = ToolsUtil.getString(pageUtil.getJd());
             String wd = ToolsUtil.getString(pageUtil.getWd());
+            logger.info("经纬度：jd={},wd={}",jd,wd);
             List<Map<String,Object>> workerList  = workersMapper.findWorkerList_2(jd,wd,city,shopName,userName,workId,shopId,page,size,genderDesc,onLine,productId,evalNmsDesc);
+            List<Map<String,Object>> workerList_1  = new ArrayList<>();
             logger.info("====ToolsUtil.getCityFlag(city)=="+ToolsUtil.getCityFlag(city));
             logger.info("findWorkerList===workerList==="+workerList.size());
            if(workerList!=null && workerList.size()>0){
 
+               logger.info("-------start------");
+               Long oldtime=new Date().getTime();
                 for(Map<String,Object> worker : workerList) {
+
                     String radius = ToolsUtil.getString(worker.get("radius"));
-                    String distance = ToolsUtil.getString(worker.get("distance"));
+                    String workerId = worker.get("workerId").toString();
+                   /* String dateMM = workersMapper.getDateMM(workerId);
+                    worker.put("dateHHmm",dateMM);*/
+                    Long distance = Long.parseLong(worker.get("distance").toString()) ;
                     if(StringUtils.isNotEmpty(radius)){
                         Float radius_1 = Float.parseFloat(radius);
                         radius_1 = radius_1/1000;
                         float b = (float)(Math.round(radius_1*100))/100;
-                        worker.put("radius",b);
+                        worker.put("workerRadius",b);
                     }
+
                     if (distance != null) {
-                        Float distanc = Float.parseFloat(distance);
+                        Float distanc = (float)distance;
                         if (distanc > 1000) {
-                            //distance = distanc/1000;
-                            // f = distanc/1000;
                             distanc = distanc / 1000;
                             float b = (float) (Math.round(distanc * 100)) / 100;
                             worker.put("distance", b + "km");
@@ -795,10 +806,9 @@ public class WorkServiceImp implements WorkerService {
                             worker.put("distance", distanc + "m");
                         }
                     }
-                    /*String dateHHMM = workersMapper.getDateHHM(worker.get("workerId").toString());
-                    worker.put("dateHHmm",dateHHMM);*/
-
-                    List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(worker.get("workerId").toString());
+                    //获取技师的标签
+                    List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(workerId);
+                    logger.info("技师的标签：{}",mapList!=null?JSON.toJSONString(mapList):"");
                     if (mapList != null && mapList.size() > 0) {
                         for (int i = 0; i < mapList.size(); i++) {
                             Map<String, Object> map = mapList.get(i);
@@ -815,12 +825,28 @@ public class WorkServiceImp implements WorkerService {
                         number = (int) worker.get("sellSum") + (int) worker.get("sellNum");
                         worker.put("sellNum", number);
                     }
+                    logger.info("获取技师的订单数量：{}",number);
                     worker.put("sellSum", worker.get("sellSum") != null ? worker.get("sellSum") : 0);
-                    List<Map<String, Object>> list = workersMapper.findEvaluate(worker.get("workerId").toString());
+
+                    String quality = ToolsUtil.getStringValue(worker.get("quality"));
+                    String percentage = ToolsUtil.getStringValue(worker.get("percentage"));
+                    if(StringUtils.isNotEmpty(quality)){
+                        worker.put("star",quality);
+                    }else{
+                        worker.put("star",5);
+                    }
+
+                    if(StringUtils.isNotEmpty(percentage)){
+                        worker.put("evaluateNumLv",percentage);
+                    }else{
+                        worker.put("evaluateNumLv","100%");
+                    }
+                  /*  List<Map<String, Object>> list = workersMapper.findEvaluate(worker.get("workerId").toString());
                     if (list != null && list.size() > 0) {
                         Map<String,Object> map1 = list.get(0);
-                        int maxNum = Integer.parseInt(map1.get("maxNum").toString());
-                        int minNum =Integer.parseInt(map1.get("minNum").toString());
+                        float maxNum = Float.parseFloat(map1.get("maxNum").toString());
+                        float minNum =Float.parseFloat(map1.get("minNum").toString());
+                        logger.info("获取用户的总数{}，成功数量：{}",maxNum,minNum);
                         if (maxNum > 0) {
                             if (minNum/maxNum <= 0.2) {
                                 worker.put("star", 1);
@@ -840,21 +866,17 @@ public class WorkServiceImp implements WorkerService {
                     } else {
                         worker.put("evaluateNumLv", "100%");
                         worker.put("star", 5);
-                    }
+                    }*/
+                    workerList_1.add(worker);
                 }
+               Long systime=new Date().getTime();
+               Long time = (systime - oldtime);//相差毫秒数
+                logger.info("jieshu的毫秒为：{}",time);
             }
            logger.info("===findWorkerList_1 end==");
-            //logger.info("数据为："+JSON.toJSONString(workerList));
             return workerList;
         }
         return null;
-    }
-
-    public static void main(String[] args){
-        int a = 3;
-        int b = 2;
-        float s =(float)b/(float)a;
-        System.out.println((s<0.7)+"=="+(b/a));
     }
 
     public List<Map<String,Object>> workerInfoListByInfo(String shopId,String city){

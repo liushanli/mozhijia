@@ -1,5 +1,7 @@
 package com.mzj.mohome.serviceImp;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.entity.PayRecord;
 
@@ -10,6 +12,7 @@ import com.mzj.mohome.mapper.WorkersMapper;
 import com.mzj.mohome.service.OrderService;
 import com.mzj.mohome.service.ProductService;
 import com.mzj.mohome.service.WorkerService;
+import com.mzj.mohome.util.SmsSendUtil;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.vo.OrderDto;
 import com.mzj.mohome.vo.OrderVo;
@@ -19,8 +22,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -56,7 +62,7 @@ public class OrderServiceImp implements OrderService {
         String workerId = ToolsUtil.getString(map.get("workerId"));
         String shopId = ToolsUtil.getString(map.get("shopId"));
         String pageStr = ToolsUtil.getString(map.get("page"));
-        Integer page = StringUtils.isNotEmpty(pageStr)?0:Integer.parseInt(pageStr);
+        Integer page = StringUtils.isNotEmpty(pageStr)?Integer.parseInt(pageStr):1;
         List<OrderVo> orderList = null;
         OrderDto orderDto = new OrderDto();
         orderDto.setOrderId(orderId);
@@ -122,8 +128,8 @@ public class OrderServiceImp implements OrderService {
         Order order = new Order();
         SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         int num = 0;
-        Map<String,Object>  map_2 = new HashMap<String,Object>();
-        Map<String,Object>  map_1 = new HashMap<String,Object>();
+        Map<String,Object>  map_2 = new HashMap<>();
+        Map<String,Object>  map_1 = new HashMap<>();
         try {
             map_1 = (Map<String, Object>) map.get("json");
             order.setWorkerId(String.valueOf(map.get("workerId")));
@@ -251,6 +257,8 @@ public class OrderServiceImp implements OrderService {
            }else if(stats.equals("-1")){
                objectMap.put("statusDesc","订单待退款");
            }
+           int count = orderMapper.findCouponId(orderId);
+           objectMap.put("coupon",count);
            mapList.add(objectMap);
        }
         return mapList;
@@ -324,30 +332,43 @@ public class OrderServiceImp implements OrderService {
             Order order = new Order();
             order.setOrderId(ToolsUtil.getString(map.get("orderId")));
             order.setShopReceiveTime(new Date());
-            order.setWorkerName(ToolsUtil.getString(map.get("workerName")));
-            order.setOrderReviceId(ToolsUtil.getString(map.get("workerId")));
-            order.setOrderReviceName(ToolsUtil.getString(map.get("workerName")));
-            order.setWorkerPhone(ToolsUtil.getString(map.get("workerPhone")));
+            String workerIdDes = ToolsUtil.getString(map.get("workerId"));
+            Map<String,Object> objectMap = orderMapper.findWorkerInfo(order.getOrderId());
             String status = ToolsUtil.getString(map.get("status"));
             int numer = 0;
             if(status!=null){
                 List<Map<String,Object>> mapList = orderMapper.findWorkerOrderList(order.getOrderId(),status);
-
+                String workerId = ToolsUtil.getString(objectMap.get("workerId"));
                 List<Map<String,Object>> mapList_1 = orderMapper.findWorkerOrderListById(order.getOrderId());
                 Map<String,Object> map1 = mapList_1.get(0);
-                String workerId = ToolsUtil.getString(map1.get("workerId"));
+
                 String date = ToolsUtil.getString(map1.get("aboutTime"));
                 logger.info("该订单"+order.getOrderId()+"，状态修改为"+status);
                 if(mapList == null || mapList.size()<=0 ){
                     order.setStatus(Integer.parseInt(status));
                     if(Integer.parseInt(status)>=3 && Integer.parseInt(status)<=5){
                         if(Integer.parseInt(status)==3){
+                            if(StringUtils.isEmpty(workerIdDes)){
+                                order.setWorkerName(ToolsUtil.getString(objectMap.get("userName")));
+                                order.setWorkerPhone(ToolsUtil.getString(objectMap.get("phone")));
+                                order.setOrderReviceId(ToolsUtil.getString(objectMap.get("shopId")));
+                                order.setOrderReviceName(ToolsUtil.getString(objectMap.get("shopName")));
+                            }else{
+                                order.setWorkerName(ToolsUtil.getString(objectMap.get("userName")));
+                                order.setWorkerPhone(ToolsUtil.getString(objectMap.get("phone")));
+                                order.setOrderReviceId(ToolsUtil.getString(objectMap.get("workerId")));
+                                order.setOrderReviceName(ToolsUtil.getString(objectMap.get("userName")));
+                            }
+
                             workersMapper.updateWorkTimeById(date,workerId,"1");
                         }
                          numer = orderMapper.updateOrderInfo(order);
                     }
                     else if(status.equals("6")|| status.equals("8") || status.equals("-1") || status.equals("7")){
                         numer = orderMapper.updateOrderInfoStatus(order);
+                        if(status.equals("8") || status.equals("7")){
+                            orderMapper.updateOrdersTimes(workerId,order.getOrderId());
+                        }
                     }
                     else if(status.equals("9")){
                         numer = orderMapper.updateOrderStatusTime(order);
@@ -365,6 +386,78 @@ public class OrderServiceImp implements OrderService {
             return 0;
         }
     }
+
+    /**
+     * 0：待付款，1：已付款，2：付款失败，3：已接单，
+     * 4：服务人员出发 5：服务人员到达 6：开始服务
+     * 7：用户确认完成  8：技师确认完成服务  9：用户评价
+     * 10：申请退款，11：退款失败，12：退款成功，-1：取消订单
+     * @param map
+     * @return
+     */
+   public Map<String,Object> findOrderStatusMsg(Map<String,Object> map){
+       List<Map<String,Object>> mapList_1 = orderMapper.findWorkerOrderListById(map.get("orderId").toString());
+       Map<String,Object> map1 = mapList_1.get(0);
+       logger.info("查询订单信息：{}", JSON.toJSONString(mapList_1));
+       String statusDesc = "";
+       String status = "";
+       switch (map1.get("status").toString()){
+           case "0":
+               statusDesc = "该订单待付款";
+               break;
+           case "1":
+               statusDesc = "该订单已付款，是否进行下一步";
+               status = "3";
+               break;
+           case "2":
+               statusDesc = "该订单付款失败";
+               break;
+           case "3":
+               statusDesc = "该订单已接单，是否进行下一步";
+               status = "4";
+               break;
+           case "4":
+               statusDesc = "该订单服务人员出发，是否进行下一步";
+               status = "5";
+               break;
+           case "5":
+               statusDesc = "该订单服务人员到达，是否进行下一步";
+               status = "6";
+               break;
+           case "6":
+               statusDesc = "该订单已开始服务，是否进行下一步";
+               status = "8";
+               break;
+           case "7":
+               statusDesc = "该订单用户确认完成";
+               break;
+           case "8":
+               statusDesc = "该订单技师确认完成";
+               status = "8";
+               break;
+           case "9":
+               statusDesc = "该订单用户已评价";
+               break;
+           case "10":
+               statusDesc = "该订单已申请退款";
+               break;
+           case "11":
+               statusDesc = "该订单已退款失败";
+               break;
+           case "12":
+               statusDesc = "该订单已退款成功";
+               break;
+           case "-1":
+               statusDesc = "该订单已取消订单";
+               break;
+           default:
+                   break;
+       }
+       Map<String,Object> map2 = new HashMap<>();
+       map2.put("status",status);
+       map2.put("statusDesc",statusDesc);
+       return map2;
+   }
 
     //修改订单退款
     public int updateReturnOrder(Map<String,Object> map){
@@ -482,6 +575,134 @@ public class OrderServiceImp implements OrderService {
             }
         }
         return  mapList;
+    }
+
+
+    /**
+     * 每一分钟执行一次，给每个技师发送信息
+     */
+    /*@Scheduled(cron = "0 0/1 * * * ?")
+    @Async*/
+    public void jobCron() {
+        Thread.currentThread().setName("cron表达式执行");
+        List<Map<String,Object>> list =  orderMapper.findWorkerInfoNew();
+        if(list!= null && list.size()>0){
+
+            logger.info("开始修改这些订单状态");
+            List<String> stringList = new ArrayList<String>();
+            for(Map<String,Object> map : list){
+                stringList.add(map.get("phone").toString());
+                orderMapper.updateInfoNew(map.get("workerId").toString());
+            }
+            String listToStr = String.join(",", stringList);
+            logger.info("发送给的号码为=="+listToStr);
+            OrderServiceImp orderServiceImp = new OrderServiceImp();
+            orderServiceImp.SmsSendCode(listToStr);
+        }
+    }
+
+
+
+
+
+
+
+    public String SmsSendCode(String phone){
+       /* List<Map<String,Object>> mapList = userMapper.findSmsCode(phone);
+        String message = "";
+        if(mapList!=null && mapList.size()<=5){*/
+        SmsSendUtil smsSendUtil = new SmsSendUtil();
+        String random = smsSendUtil.randomCode();
+        //短信下发
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("account","YZM2505206");//API账号
+        map.put("password","sV6pFg5QHX1bda");//API密码
+        map.put("msg","【摩之家】您好，你有新订单，请及时查收");//短信内容
+        map.put("phone",phone);//手机号findWorkListByShop
+        map.put("report",true);//是否需要状态报告
+        map.put("extend",123);//自定义扩展码
+        JSONObject js = (JSONObject) JSONObject.toJSON(map);
+        System.out.println("js===="+js);
+        logger.info("js===="+js);
+        String jsonStr = smsSendUtil.sendSmsByPost("http://smssh1.253.com/msg/send/json",js.toString());
+        net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(jsonStr);
+           /* message = (String)jsonObject.get("errorMsg");
+            if(StringUtils.isEmpty(message)){
+                userMapper.addSmsSendInfo(phone,random);
+            }
+            logger.info("message==="+message);
+            System.out.println("message==="+message);*/
+        System.out.println(jsonObject);
+      /*  }else{
+            logger.info("已发送五次");
+            message = "验证码每天只能发送五次，请您明天再试";
+        }*/
+
+        return null;
+    }
+
+    /**
+     * 每1分钟查询一次，是否有订单十五分钟之类没有付款执行一次
+     */
+    /*@Scheduled(cron = "0 0/1 * * * ?")
+    @Async*/
+    public void jobCronCouponId() {
+        logger.info("每1分钟执行一次，修改优惠券");
+        List<String> userList =  userMapper.findCouponDate();
+        if(userList!=null && userList.size()>0){
+           for (String id : userList)
+           {
+               userMapper.updateTbCoupon("0",id,"");
+           }
+        }
+    }
+
+
+    /**
+     * 每一分钟执行一次
+     */
+    /*@Scheduled(cron = "0 0/5 * * * ?")
+    @Async*/
+    public void jobCronStat() {
+        logger.info("每五分钟执行一次，星级评价");
+        updateStat();
+    }
+
+
+
+    private void updateStat(){
+        logger.info("updateStat===修改技师星级");
+        //进行修改每个技师的评价星级
+        List<Map<String,Object>> mapList = workersMapper.findEvaluateInfo_1();
+        DecimalFormat df = new DecimalFormat("0%");
+        //查询技师的订单数
+        if(mapList != null && mapList.size() > 0){
+            for(Map<String,Object> map : mapList){
+                float maxNum = Float.parseFloat(map.get("maxNum").toString());
+                float minNum =Float.parseFloat(map.get("minNum").toString());
+                int star = 5;
+                String evaluateNumLv = "100%";
+                if (maxNum > 0) {
+                    if (minNum/maxNum <= 0.2) {
+                        star = 1;
+                    } else if (minNum/maxNum <= 0.4) {
+                        star = 2;
+                    } else if (minNum/maxNum <= 0.6) {
+                        star = 3;
+                    } else if (minNum/maxNum <= 0.8) {
+                        star = 4;
+                    } else if (minNum/maxNum <= 1) {
+                        star = 5;
+                    }
+                    evaluateNumLv = minNum > 0 ? df.format(minNum / maxNum) : "100%";
+                    map.put("evaluateNumLv", evaluateNumLv);
+                } else {
+                    map.put("evaluateNumLv", evaluateNumLv);
+                    map.put("star", star);
+                }
+                workersMapper.updateWorkerStar(map.get("workerId").toString(),star,evaluateNumLv);
+            }
+        }
     }
 }
 

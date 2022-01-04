@@ -1,47 +1,147 @@
 package com.mzj.mohome.util;
-public class MapUtil {
 
 
-        /**
-         * 地球半径,单位 km
-         */
-        private static final double EARTH_RADIUS = 6378.137;
+import java.io.BufferedReader;
 
-        /**
-         * 根据经纬度，计算两点间的距离
-         *
-         * @param longitude1 第一个点的经度
-         * @param latitude1  第一个点的纬度
-         * @param longitude2 第二个点的经度
-         * @param latitude2  第二个点的纬度
-         * @return 返回距离 单位千米
-         */
-        public static double getDistance(double longitude1, double latitude1, double longitude2, double latitude2) {
-            // 纬度
-            double lat1 = Math.toRadians(latitude1);
-            double lat2 = Math.toRadians(latitude2);
-            // 经度
-            double lng1 = Math.toRadians(longitude1);
-            double lng2 = Math.toRadians(longitude2);
-            // 纬度之差
-            double a = lat1 - lat2;
-            // 经度之差
-            double b = lng1 - lng2;
-            // 计算两点距离的公式
-            double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
-                    Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(b / 2), 2)));
-            // 弧长乘地球半径, 返回单位: 千米
-            s =  s * EARTH_RADIUS;
-            return s;
+import java.io.IOException;
+
+import java.io.InputStreamReader;
+
+import java.net.MalformedURLException;
+
+import java.net.URL;
+
+import java.net.URLConnection;
+
+import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import net.sf.json.JSONObject;
+import org.gavaghan.geodesy.Ellipsoid;
+import org.gavaghan.geodesy.GeodeticCalculator;
+import org.gavaghan.geodesy.GeodeticCurve;
+import org.gavaghan.geodesy.GlobalCoordinates;
+
+@Slf4j
+public  class MapUtil {
+    private static String key = "efb831362ea4ab89625825771a29ad39";
+    public static void main(String[] args){
+
+        Long s = 100089L;
+        System.out.println( ( (float)s/1000));
+        /*String start = "浙江省杭州市西湖区";
+
+        String end = "郑州市金水区";
+
+        String startLonLat = getLonLat(start);
+
+        String endLonLat = getLonLat(end);
+
+        System.out.println(startLonLat);
+
+        System.out.println(endLonLat);*/
+        /*121.253758,31.117122==121.34921,31.155279*/
+        Long dis = getDistance("121.253758,31.117122","121.34921,31.155279");
+
+        System.out.println(dis);
+
+        System.out.println("经纬度距离计算结果：" + getDistance(121.253758,31.117122, 121.34921,31.155279) + "米");
+
+
+        GlobalCoordinates source = new GlobalCoordinates(121.253758,31.117122);
+        GlobalCoordinates target = new GlobalCoordinates(121.34921,31.155279);
+
+        Long meter1 = (long)getDistanceMeter(source, target, Ellipsoid.Sphere);
+        double meter2 = getDistanceMeter(source, target, Ellipsoid.WGS84);
+        System.out.println("Sphere坐标系计算结果："+meter1 + "米");
+        System.out.println("WGS84坐标系计算结果："+meter2 + "米");
+
+
+    }
+
+    private static String getLonLat(String address){
+//返回输入地址address的经纬度信息, 格式是 经度,纬度
+
+        String queryUrl = "http://restapi.amap.com/v3/geocode/geo?key="+key+"&address="+address;
+
+        String queryResult = getResponse(queryUrl); //高德接品返回的是JSON格式的字符串
+
+        JSONObject jo = new JSONObject().fromObject(queryResult);
+
+        System.out.println("-=======================------");
+
+        System.out.println(jo.toString());
+
+        JSONArray ja = jo.getJSONArray("geocodes");
+
+        System.out.println(ja.toString());
+
+        return new JSONObject().fromObject(ja.getString(0)).get("location").toString();
+
+    }
+
+    public static Long getDistance(String startLonLat, String endLonLat){
+        //返回起始地startAddr与目的地endAddr之间的距离，单位：米
+        log.info("==="+startLonLat);
+        log.info("==="+endLonLat);
+        String queryUrl = "http://restapi.amap.com/v3/distance?key="+key+"&origins="+startLonLat+"&destination="+endLonLat+"&type=1";
+        String queryResult = getResponse(queryUrl);
+        System.out.println(queryResult);
+        JSONObject jo = new JSONObject().fromObject(queryResult);
+        JSONArray ja = jo.getJSONArray("results");
+        Long result = Long.parseLong(new JSONObject().fromObject(ja.getString(0)).get("distance").toString());
+        return result;
+    }
+
+    private static String getResponse(String serverUrl){
+//用JAVA发起http请求，并返回json格式的结果
+
+        StringBuffer result = new StringBuffer();
+
+        try {
+            URL url = new URL(serverUrl);
+
+            URLConnection conn = url.openConnection();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String line;
+
+            while((line = in.readLine()) != null){
+                result.append(line);
+
+            }
+
+            in.close();
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
         }
 
-        public static void main(String[] args) {
-          /*  double d = getDistance(121.233958,31.105238, 121.4778854709201, 31.258792588975691);
-            System.out.println(d);*/
-          String name = "12343";
-          Float f = Float.parseFloat(name);
-          f = f/1000;
-          float b = (float)(Math.round(f*100))/100;
-          System.out.println(b);
+        return result.toString();
+
+    }
+
+
+
+
+        public static double getDistance(double longitudeFrom, double latitudeFrom, double longitudeTo, double latitudeTo) {
+            GlobalCoordinates source = new GlobalCoordinates(latitudeFrom, longitudeFrom);
+            GlobalCoordinates target = new GlobalCoordinates(latitudeTo, longitudeTo);
+
+            return new GeodeticCalculator().calculateGeodeticCurve(Ellipsoid.Sphere, source, target).getEllipsoidalDistance();
         }
+
+    public static double getDistanceMeter(GlobalCoordinates gpsFrom, GlobalCoordinates gpsTo, Ellipsoid ellipsoid){
+        //创建GeodeticCalculator，调用计算方法，传入坐标系、经纬度用于计算距离
+        GeodeticCurve geoCurve = new GeodeticCalculator().calculateGeodeticCurve(ellipsoid, gpsFrom, gpsTo);
+
+        return geoCurve.getEllipsoidalDistance();
+    }
+
 }

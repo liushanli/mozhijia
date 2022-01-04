@@ -33,7 +33,7 @@ public interface OrderMapper {
 
 
     //查询订单列表信息
-    @Select("<script> select top 10000 * from (" +
+    @Select("<script> select top 10 * from (" +
             "select row_number() over(order by orders.id desc) as rownumber, " +
             "orders.*,shop.shopName,shop.servicePhone, p.imgUrl as imgProductUrl from TB_Order orders join TB_Shop shop on orders.shopId = shop.shopId join\n" +
             " TB_Product p on orders.productId = p.productId  where 1=1 and orders.status not in(0,2) " +
@@ -146,7 +146,10 @@ public interface OrderMapper {
     int updateOrderInfoStatus(Order order);
 
 
-
+    @Select("select w.userName,w.phone,w.workerId,s.shopName,s.shopPhone,s.shopId from TB_Worker w join TB_Shop s on w.shopId = s.shopId where w.workerId = ( \n" +
+            " select workerId from TB_Order where orderId = #{orderId}" +
+            ")")
+    Map<String,Object> findWorkerInfo(@Param("orderId") String orderId);
 
 
 
@@ -159,10 +162,19 @@ public interface OrderMapper {
     @Update("update TB_Order set status = #{status},workconfirmTime = GETDATE()  where orderId =#{orderId} ")
     int updateOrderStatusTime(Order order);
 
+    @Update("UPDATE TB_WorkerTime set isBusy=0 where id in (select top 5 id from TB_WorkerTime where [date]>=  (select aboutTime from TB_Order where orderId = #{orderId}) " +
+            "and workerId = #{workerId} " +
+            ")")
+    int updateOrdersTimes(@Param("workerId") String workerId,@Param("orderId") String orderId);
 
     //修改订单退款
     @Update("update TB_Order set status = 10,returnReason=#{returnReason},returnMoney=#{returnMoney},returnType=0  where orderId =#{orderId}")
     int updateReturnOrder(Order order);
+
+    @Select("select COUNT(1) from TB_CouponAndUserId where orderId = #{orderId} and isUser = 1")
+    int findCouponId(@Param("orderId") String orderId);
+
+
 
 
     @Select("select * from TB_Order where orderId = #{orderId}")
@@ -200,7 +212,13 @@ public interface OrderMapper {
             ") t order by payTime desc")
     List<Map<String,Object>> findOrderList(String userId);
 
+    //查询新订单，且未发送订单的人员
+    @Select("select w.phone,w.workerId from TB_Order t join TB_Worker w on t.workerId = w.workerId where t.status = 1  and t.orderSMSFlag = 0  group by w.phone,w.workerId")
+    List<Map<String,Object>> findWorkerInfoNew();
 
+    //查询新订单，把状态进行修改为已发送的
+    @Update("update TB_Order set orderSMSFlag = 1 where workerId = #{phoneDesc} and status = 1 and  orderSMSFlag = 0")
+    int updateInfoNew(String phoneDesc);
 
 
 

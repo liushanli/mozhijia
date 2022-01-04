@@ -55,16 +55,17 @@ public interface WorkersMapper {
 
     //根绝店铺来查询员工的信息
     @Select("<script>" +
-          "SELECT w2.n," +
-            " (select top 1 (dateStr+' '+dateHHmm) dateHHmm from TB_WorkerTime where isBusy = 0 and [date]>DATEADD(Minute,30, GETDATE()) and workerId =  w1.workerId)  dateHHmm," +
-            "w1.* FROM tb_workerInfo(#{city},#{jd},#{wd}) w1," +
-            "(SELECT TOP (${sizeNum}) row_number () OVER ( ORDER BY distance asc, t.ID asc" +
-            " <if test='evalNmsDesc == null '> ,orderNum asc </if>" +
+            "SELECT w2.n," +
+            "w1.*," +
+            " (select top 1 (dateStr+' '+dateHHmm) dateHHmm from TB_WorkerTime where isBusy = 0 and [date]>DATEADD(Minute,30, GETDATE()) and workerId =  w1.workerId)  dateHHmm "+
+            " FROM tb_workerInfo(#{city},#{jd},#{wd}) w1," +
+            "(SELECT TOP (${sizeNum}) row_number () OVER ( ORDER BY " +
+            " <if test='evalNmsDesc == null '> distance asc,t.ID asc,orderNum asc </if>" +
             " <if test='evalNmsDesc != null'>" +
-            " <if test='evalNmsDesc == 1 '>,evaluateNum asc</if>" +
-            " <if test='evalNmsDesc == 2 '>,evaluateNum desc</if>" +
+            " <if test='evalNmsDesc == 1 '> evaluateNum asc</if>" +
+            " <if test='evalNmsDesc == 2 '> evaluateNum desc</if>" +
             " </if>"+
-            " ) n, t.ID FROM tb_workerInfo(#{city},#{jd},#{wd}) t" +
+            " ) n, t.ID FROM tb_workerInfo(#{city},#{jd},#{wd}) t " +
             " <if test='productId != null'> left JOIN TB_WorkerSerProduct tbP on t.workerId = tbP.workerId </if> " +
             "  where 1=1 " +
             " <if test='shopId != null'> and shopId = #{shopId} </if>" +
@@ -87,14 +88,66 @@ public interface WorkersMapper {
                                               @Param("evalNmsDesc")String evalNmsDesc);
 
 
+    @Select("<script> select * from (\n" +
+            "select w.*,wp.jd workerJd,wp.wd workerWd, \n" +
+            "tp.shopName,\n" +
+            "\t(SELECT COUNT (1) sellNum FROM TB_Order t_order \n" +
+            "            LEFT JOIN TB_Product p1 ON t_order.productId = p1.productId WHERE t_order.status = 1 OR ( t_order.status &gt;= 3 AND t_order.status &lt;= 9 ) \n" +
+            "            and t_order.workerId = w.workerId ) sellNum,\n" +
+            "\twp.radius workerRadius,\n" +
+            "\twp.provinceId,\n" +
+            "\twp.province,\n" +
+            "\twp.cityId,\n" +
+            "\twp.city,\n" +
+            "\twp.areaId,\n" +
+            "\twp.area,\n" +
+            "(\n" +
+            "SELECT COUNT\n" +
+            "\t( 1 ) \n" +
+            "FROM\n" +
+            "\tTB_Evaluate e\n" +
+            "\tINNER JOIN TB_Order o ON e.orderId = o.orderId \n" +
+            "WHERE\n" +
+            "\to.workerId = w.workerId \n" +
+            "\t) evaluateNum,"+
+            "row_number() OVER(order by w.orderNum) n from TB_Worker w join TB_WorkerPoint wp on w.workerId = wp.workerId\n" +
+            "INNER JOIN TB_ShopPoint tp ON w.shopId = tp.shopId and tp.city = #{city} \n" +
+            "<if test='productId != null'> JOIN TB_WorkerSerProduct tbP on w.workerId = tbP.workerId </if> " +
+            " where wp.city = #{city} " +
+            " <if test='productId != null'> and tbP.productId = #{productId} </if> "+
+            " <if test='shopId != null'> and w.shopId = #{shopId} </if> " +
+            " <if test='onLine != null'> and w.isOnline = #{onLine} </if> " +
+            " <if test='shopName != null'> and tp.shopName = #{shopName} </if> " +
+            " <if test='workerId!=null'> and w.workerId = #{workerId} </if> " +
+            " <if test='userName!=null'> and (w.userName like concat('%',#{userName},'%') or (w.nickName like concat('%',#{userName},'%'))) </if> "+
+            " <if test='genderDesc != null '> and w.gender= #{genderDesc} </if> " +
+            ") t where t.n &gt; ${pages} and t.n &lt;= ${sizeNum} </script>")
+    List<Map<String,Object>> findWorkerList_3(@Param("jd") String jd,@Param("wd") String wd,
+                                              @Param("city") String city,@Param("shopName")String shopName,
+                                              @Param("userName")String userName,@Param("workerId") String workerId,
+                                              @Param("shopId")String shopId, @Param("pages")Integer pages,
+                                              @Param("sizeNum")Integer sizeNum,@Param("genderDesc") String genderDesc,
+                                              @Param("onLine")String onLine,@Param("productId")String productId,
+                                              @Param("evalNmsDesc")String evalNmsDesc);
+
+
+
+    /**
+     * 获取技师的时间段
+     * @param workerId
+     * @return
+     */
+    @Select("select top 1 (dateStr+' '+dateHHmm) dateHHmm from TB_WorkerTime where isBusy = 0 and date>DATEADD(Minute,30, GETDATE()) and workerId = #{workerId}")
+    String getDateMM(@Param("workerId")String workerId);
+
     @Select("<script> select works.*,(SELECT COUNT (1) sellNum FROM TB_Order t " +
             "LEFT JOIN TB_Product p ON t.productId = p.productId WHERE t.status = 1 OR ( t.status &gt;= 3 AND t.status &lt;= 9 ) \n" +
             "and t.workerId = works.workerId ) sellNum from " +
             "TB_Worker works " +
             " join TB_WorkerPoint tp on works.workerId = tp.workerId " +
-            "where works.orderNum is not null and works.isOnline = 1 and tp.city = #{city}" +
+            "where  works.isOnline = 1 and tp.city = #{city}" +
             "<if test='shopId!=null'> and works.shopId = #{shopId}</if>" +
-            "  order by works.orderNum asc </script>")
+            "  order by works.orderNum desc </script>")
     List<Map<String,Object>> workerInfoListByInfo(@Param("shopId") String shopId,@Param("city")String city);
 
 
@@ -179,7 +232,7 @@ public interface WorkersMapper {
             " ) t ")
     List<Map<String,Object>> findEvaluate(String workId);
 
-    @Select("select e.id,e.content,e.returnContent,e.star,e.imgUrl,e.updateTime,o.workerId,o.workerName workName,o.province,o.area,o.productName" +
+    @Select("select e.id,e.content,e.returnContent,e.star,e.imgUrl,e.updateTime,o.workerId,o.workerName workName,o.province,o.area,o.productName,u.nickName userName " +
             " from TB_Evaluate e join TB_Order o on e.orderId = o.orderId \n" +
             "             join TB_Worker w on o.workerId = w.workerId\n" +
             "             left join TB_User u on e.userId = u.userId \n" +
@@ -350,4 +403,27 @@ public interface WorkersMapper {
     //查询版本信息
     @Update("update TB_Worker set version = #{version} where phone = #{phone}")
     int updateVersion(@Param("version") String version,@Param("phone")String phone);
+
+    @Update("update TB_Worker set quality = #{star},percentage = #{evaluateNumLv} where workerId = #{workerId}")
+    int updateWorkerStar(@Param("workerId") String workerId,@Param("star") int star,
+                         @Param("evaluateNumLv") String evaluateNumLv);
+
+    //查询评价表
+    @Select("select sum(maxNum) maxNum,sum(minNum) minNum,workerId from (\n" +
+            "            select count(1) maxNum,0 minNum,w.workerId  from TB_Evaluate e join TB_Order o on e.orderId = o.orderId \n" +
+            "                         join TB_Worker w on o.workerId = w.workerId\n" +
+            "                         left join TB_User u on e.userId = u.userId \n" +
+            "                         where  w.isOnline = '1'  group by w.workerId\n" +
+            "             union all\n" +
+            "             select 0 maxNum,count(1) minNum,w.workerId from TB_Evaluate e join TB_Order o on e.orderId = o.orderId \n" +
+            "                         join TB_Worker w on o.workerId = w.workerId\n" +
+            "                         left join TB_User u on e.userId = u.userId\n" +
+            "                         where  w.isOnline = '1'   and e.star>=3  group by w.workerId\n" +
+            "           ) t GROUP BY workerId")
+    List<Map<String,Object>> findEvaluateInfo_1();
+
+
+
+
+
 }

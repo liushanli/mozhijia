@@ -1,14 +1,13 @@
 package com.mzj.mohome.util;
 
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.text.NumberFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class ToolsUtil {
     private final static Logger logger = LoggerFactory.getLogger(ToolsUtil.class);
@@ -106,11 +105,11 @@ public class ToolsUtil {
 
             commands.add("-ss");
 
-            commands.add("1");//这个参数是设置截取视频多少秒时的画面
+            commands.add("0.5");//这个参数是设置截取视频多少秒时的画面
 
             commands.add("-t");
 
-            commands.add("0.001");
+            commands.add("1");
 
             commands.add("-s");
 
@@ -148,15 +147,35 @@ public class ToolsUtil {
         }
     }
 
+    public static String getStringValue(Object value){
+        if(value!=null && value != "" && value != "null"){
+            return value.toString();
+        }else{
+            return "";
+        }
+    }
+
     public static void main(String[] args) {
 
-        //processImg("D:\\work\\Admin\\Upload\\worker_ImgUrl\\20210520\\compress_video_791817576.mp4","D:\\work\\ffmpeg.exe");
-        /*String name = "D:/work/Admin/Upload/worker_ImgUrl/20210523/compress_video_1117863920.jpg";
+        Map<String,Object> map = new HashMap<>();
+        map.put("x",null);
+        map.put("y","null");
+        map.put("z","");
+        map.put("q","ddd");
+        System.out.println(getStringValue(map.get("x")));
+        System.out.println(getStringValue(map.get("y")));
+        System.out.println(getStringValue(map.get("z")));
+        System.out.println(getStringValue(map.get("q")));
+
+
+      /*  List<String> list =  processImg("D:/work/Admin/Upload/worker_ImgUrl/20211020/compress_video_2500753990.mp4","D:\\work\\ffmpeg.exe");
+      System.out.println(JSON.toJSONString(list));*/
+       /* String name = "D:/work/Admin/Upload/worker_ImgUrl/20210523/compress_video_1117863920.jpg";
         System.out.println(name.substring(21));*/
-        boolean flag = getCityFlag("上海市");
+      /*  boolean flag = getCityFlag("上海市");
         boolean flag_1 = getCityFlag("安徽省");
         boolean flag_2 = getCityFlag("合肥市");
         boolean flag_3 = getCityFlag("松江区");
-        System.out.println(flag+"_"+flag_1+"==="+flag_3+"==="+flag_2);
+        System.out.println(flag+"_"+flag_1+"==="+flag_3+"==="+flag_2);*/
     }
 }

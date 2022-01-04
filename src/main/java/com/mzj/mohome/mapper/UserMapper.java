@@ -51,21 +51,21 @@ public interface UserMapper {
 
     //如果用户不存在则直接添加到数据库
     @Insert("insert into TB_User(userId,userName,phone,nickName,loginType,loginTime,addTime,isBlackList,level,imgUrl)\n" +
-            "VALUES(REPLACE(NEWID(),'-',''),#{name},#{phoneDesc},#{name},0,GETDATE(),GETDATE(),0,0,'/static/images/userLogo.png')")
-    int addUserInfo(@Param("phoneDesc") String phoneDesc,@Param("name")String name) throws Exception;
+            "VALUES(#{userId},#{name},#{phoneDesc},#{name},0,GETDATE(),GETDATE(),0,0,'/static/images/userLogo.png')")
+    int addUserInfo(@Param("userId")String userId,@Param("phoneDesc") String phoneDesc,@Param("name")String name) throws Exception;
 
     //如果用户不存在则直接添加到数据库微信
     @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level)\n" +
-            "VALUES(REPLACE(NEWID(),'-',''),#{phoneDesc},#{phoneDesc},#{nickName},#{imgUrl},#{sex},#{openId}, 0,GETDATE(),GETDATE(),0,0)")
-    int addWhatUserInfo(@Param("phoneDesc")String phoneDesc, @Param("nickName")String nickName,
+            "VALUES(#{userId},#{phoneDesc},#{phoneDesc},#{nickName},#{imgUrl},#{sex},#{openId}, 0,GETDATE(),GETDATE(),0,0)")
+    int addWhatUserInfo(@Param("userId")String userId,@Param("phoneDesc")String phoneDesc, @Param("nickName")String nickName,
                         @Param("imgUrl") String imgUrl, @Param("openId")String openId,
                         @Param("sex")String sex) throws Exception;
 
 
     //如果用户不存在则直接添加到数据库微信
     @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,appleData)\n" +
-            " VALUES(REPLACE(NEWID(),'-',''),#{nickName},'',#{nickName},'','','', 0,GETDATE(),GETDATE(),0,0,#{appleData})")
-    int addAppleUserInfo(@Param("appleData") String appleData, @Param("nickName")String nickName) throws Exception;
+            " VALUES(#{userId},#{nickName},'',#{nickName},'','','', 0,GETDATE(),GETDATE(),0,0,#{appleData})")
+    int addAppleUserInfo(@Param("userId")String userId,@Param("appleData") String appleData, @Param("nickName")String nickName) throws Exception;
 
 
 
@@ -170,11 +170,31 @@ public interface UserMapper {
             " VALUES(#{name},${gender},${age},#{phone},#{address},${year},${isUser},#{workExperience},#{imgUrl},GETDATE())")
     int addRecurit(Recurit recurit);
 
+    /**
+     * 分页的数据
+     * @param userId
+     * @param shopId
+     * @return
+     */
+    @Select("<script> select top 6 * from ("+
+    "select row_number() over(order by e.updateTime desc) as rownumber,e.id,e.orderId," +
+            "e.userId,o.workerId workId,e.content,e.star,e.imgUrl," +
+            "CONVERT(varchar(100), e.updateTime, 23) updateTime," +
+            "o.province+' '+o.city+' '+o.area as address,o.serviceNumber,o.payOnline," +
+            "p.productName,o.workerName,u.nickName userName,u.imgUrl userImgUrl,sp.shopName," +
+            "sp.shopId,e.returnContent from TB_Evaluate e join TB_Order o " +
+            "on e.orderId = o.orderId join TB_Product p on o.productId = p.productId join " +
+            "TB_User u on e.userId = u.userId  join TB_Shop sp on o.shopId = sp.shopId"+
+            " where  1=1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
+            "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
+            ") t where rownumber &gt; ${page} </script>")
+    List<Map<String,Object>> findEvaluateListByUserIdPage(@Param("userId") String userId, @Param("shopId")String shopId,@Param("page")Integer page);
 
-    @Select("<script> select e.id,e.orderId,e.userId,o.workerId workId,e.content,e.star,e.imgUrl,CONVERT(varchar(100), e.updateTime, 23) updateTime,o.address,o.serviceNumber,o.payOnline,p.productName," +
-            " o.workerName,u.userName,u.imgUrl userImgUrl,sp.shopName,sp.shopId,e.returnContent from TB_Evaluate e join TB_Order o on e.orderId = o.orderId join TB_Product p on o.productId = p.productId " +
+
+
+    @Select("<script> select e.id,e.orderId,e.userId,o.workerId workId,e.content,e.star,e.imgUrl,CONVERT(varchar(100), e.updateTime, 23) updateTime,o.province+' '+o.city+' '+o.area as address,o.serviceNumber,o.payOnline,p.productName,o.workerName,u.nickName userName,u.imgUrl userImgUrl,sp.shopName,sp.shopId,e.returnContent from TB_Evaluate e join TB_Order o on e.orderId = o.orderId join TB_Product p on o.productId = p.productId \n" +
             " join TB_User u on e.userId = u.userId " +
-            " join TB_Shop sp on o.shopId = sp.shopId " +
+            " join TB_Shop sp on o.shopId = sp.shopId  " +
             " where  1=1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             " order by e.updateTime desc </script>")
@@ -247,8 +267,22 @@ public interface UserMapper {
     List<Map<String,Object>> findCouponByUserId(String userId);
 
 
-    @Update("update TB_CouponAndUserId set isUser = 1 where id = #{id}")
-    int updateTbCoupon(String id);
+    @Select("select * from TB_CouponAndUserId where  id= #{id} ")
+    Map<String,Object> findCouponById(String id);
+
+
+    @Update("update TB_CouponAndUserId set isUser = #{isUser},orderId=#{orderId} where id = #{id}")
+    int updateTbCoupon(@Param("isUser")String isUser,@Param("id")String id,@Param("orderId") String orderId);
+
+    /**
+     * 查询是否有用户十五分钟内没有支付，且给返还优惠券
+     * @return
+     */
+    @Select(" select id from TB_CouponAndUserId where orderId in ( " +
+            " select orderId from TB_Order where status = 0 and addTime <= dateadd(minute,-15,GETDATE()) and addTime >= dateadd(DAY,-2,GETDATE())\n" +
+            " ) ")
+    List<String> findCouponDate();
+
 
 
     @Select("select content from tb_content where isOnline = 1")
@@ -261,4 +295,13 @@ public interface UserMapper {
     //查询版本信息
     @Update("update TB_User set version = #{version} where userId = #{userId}")
     int updateVersion(@Param("version") String version,@Param("userId") String userId);
+
+    /**
+     * 查询优惠券的数量
+     * @param userId
+     * @return
+     */
+    @Select("select count(1) from TB_CouponAndUserId where userId = #{userId} and isUser = 0")
+    int findCount(@Param("userId") String userId);
+
 }

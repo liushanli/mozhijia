@@ -126,9 +126,13 @@ public class ShopServiceImp implements ShopService {
         String shopId = ToolsUtil.getString(map.get("shopId"));
         String city = ToolsUtil.getString(map.get("city"));
         String onLine = ToolsUtil.getString(map.get("onLine"));
-        List<Map<String,Object>> mapList_1 = shopMapper.findWorkerListByShopId(city,shopId,onLine);
+        Integer page = ToolsUtil.getString(map.get("page"))!=null?(Integer)map.get("page"):1;
+        page = (page-1)*10;
+        List<Map<String,Object>> mapList_1 = shopMapper.findWorkerListByShopId(city,shopId,onLine,page);
         DecimalFormat df = new DecimalFormat("0%");
         if(mapList_1!=null){
+            logger.info("==========start=======");
+            Long oldtime=new Date().getTime();
            for(Map<String,Object> worker : mapList_1) {
                    List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(worker.get("workerId").toString());
                    if (mapList != null && mapList.size() > 0) {
@@ -142,33 +146,41 @@ public class ShopServiceImp implements ShopService {
                                worker.put("evalStatus_3", map5.get("name").toString());
                        }
                    }
-                   worker.put("sellSum", worker.get("SellSum") != null ? worker.get("SellSum") : 0);
-                   List<Map<String, Object>> list = workersMapper.findEvaluate(worker.get("workerId").toString());
-                   if (list != null && list.size() > 0) {
-                       Map<String,Object> map1 = list.get(0);
-                       int maxNum = Integer.parseInt(map1.get("maxNum").toString());
-                       int minNum =Integer.parseInt(map1.get("minNum").toString());
-                       if (maxNum > 0) {
-                           if (minNum/maxNum <= 0.2) {
-                               worker.put("star", 1);
-                           } else if (minNum/maxNum <= 0.4) {
-                               worker.put("star", 2);
-                           } else if (minNum/maxNum <= 0.6) {
-                               worker.put("star", 3);
-                           } else if (minNum/maxNum <= 0.8) {
-                               worker.put("star", 4);
-                           } else if (minNum/maxNum <= 1) {
-                               worker.put("star", 5);
-                           }
-                       } else {
+               /*String dateMM = workersMapper.getDateMM(worker.get("workerId").toString());
+               worker.put("dateHHmm",dateMM);*/
+               worker.put("evaluateNum",0);
+               worker.put("sellSum", worker.get("SellSum") != null ? worker.get("SellSum") : 0);
+               List<Map<String, Object>> list = workersMapper.findEvaluate(worker.get("workerId").toString());
+               if (list != null && list.size() > 0) {
+                   Map<String,Object> map1 = list.get(0);
+                   int maxNum = Integer.parseInt(map1.get("maxNum").toString());
+                   int minNum =Integer.parseInt(map1.get("minNum").toString());
+                   worker.put("evaluateNum",maxNum);
+                   if (maxNum > 0) {
+                       if (minNum/maxNum <= 0.2) {
+                           worker.put("star", 1);
+                       } else if (minNum/maxNum <= 0.4) {
+                           worker.put("star", 2);
+                       } else if (minNum/maxNum <= 0.6) {
+                           worker.put("star", 3);
+                       } else if (minNum/maxNum <= 0.8) {
+                           worker.put("star", 4);
+                       } else if (minNum/maxNum <= 1) {
                            worker.put("star", 5);
                        }
-                       worker.put("evaluateNumLv", minNum > 0 ? df.format(minNum / maxNum) : "100%");
                    } else {
-                       worker.put("evaluateNumLv", "100%");
                        worker.put("star", 5);
                    }
+                   worker.put("evaluateNumLv", minNum > 0 ? df.format(minNum / maxNum) : "100%");
+               } else {
+                   worker.put("evaluateNum",0);
+                   worker.put("evaluateNumLv", "100%");
+                   worker.put("star", 5);
+               }
            }
+            Long systime=new Date().getTime();
+            Long time = (systime - oldtime);//相差毫秒数
+            logger.info("==========end=======耗时：{}",time);
         }
         return  mapList_1;
     }
