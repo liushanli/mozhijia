@@ -220,7 +220,7 @@ public class OrderServiceImp implements OrderService {
                objectMap.put("workconfirmTime",sdf.format(objectMap.get("workconfirmTime")));
            }
            objectMap.put("addTime",sdf.format(objectMap.get("addTime")));
-           objectMap.put("aboutTime",sdf_1.format(objectMap.get("aboutTime")));
+           objectMap.put("aboutTime",sdf.format(objectMap.get("aboutTime")));
            stats = String.valueOf(objectMap.get("status"));
            objectMap.put("newOrdefindWorkEvalrUrl","../jishi-detail/jishi-detail?workerId="+objectMap.get("workerId"));
            objectMap.put("evalHide","none");
@@ -280,7 +280,7 @@ public class OrderServiceImp implements OrderService {
         String status = "";
         for(Map<String,Object> objectMap:orderVos){
             objectMap.put("addTime",sdf.format(objectMap.get("addTime")));
-            objectMap.put("aboutTime",sdf_1.format(objectMap.get("aboutTime")));
+            objectMap.put("aboutTime",sdf.format(objectMap.get("aboutTime")));
             stats = String.valueOf(objectMap.get("status"));
             objectMap.put("newOrdefindWorkEvalrUrl","../jishi-detail/jishi-detail?workerId="+objectMap.get("workerId"));
             objectMap.put("evalHide","none");
@@ -379,10 +379,10 @@ public class OrderServiceImp implements OrderService {
             }
 
 
-            System.out.println("修改成功");
+            logger.info("修改成功");
             return numer;
         }catch (Exception e){
-            System.out.println("修改失败："+e.getMessage());
+            logger.info("修改失败："+e.getMessage());
             return 0;
         }
     }

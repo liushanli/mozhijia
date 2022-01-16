@@ -50,15 +50,14 @@ public class UserServiceImp implements UserService {
     }
 
     public int getByUserInfoByIds(){
-        List<User> list=  userMapper.getByUserInfoById(null);
+        List<User> list=  userMapper.getUserInfo();
         logger.info("集合为："+list.size());
-        for (User user:list){
-            int count = userMapper.findCount(user.getUserId());
-            logger.info("count=="+count);
-            if(count<=0){
-                userMapper.addCouponUserId(user.getUserId(),"");
+        if(list.size()>0 && list != null){
+            for (User user:list){
+                    userMapper.addCouponUserId(user.getUserId(),"");
             }
         }
+
         return 0;
     }
 

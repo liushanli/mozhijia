@@ -39,6 +39,11 @@ public interface UserMapper {
     @Select("select top 1 t.* from TB_User t where t.isBlackList = 0 and userId = #{userId} order by id desc ")
     List<User> getByUserInfoById(String userId);
 
+    @Select("select * from TB_User " +
+            " where userId not in (select DISTINCT userId from TB_CouponAndUserId where isUser=0) and isBlackList =0")
+    List<User> getUserInfo();
+
+
     //登录时判断客户是否存在
     @Select("<script>select top 1 t.* from TB_User t " +
             " where 1=1 and openId = #{openId} and t.isBlackList = 0  order by t.id desc </script>")
