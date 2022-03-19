@@ -694,7 +694,7 @@ public class WorkerController {
      * @return
      */
     @ResponseBody
-    @RequestMapping(value = "/delWorkerInfo",method = RequestMethod.POST)
+    @RequestMapping(value = "/delWorkerInfo",method = RequestMethod.GET)
     public Map<String,Object> delWorkerInfo(String workerId){
         Map<String,Object> result_map = new HashMap<>();
         try {

@@ -31,7 +31,7 @@ public interface ShopMapper {
 
     //查询店铺工作的时间
     @Select("<script> select w.* from TB_ShopTime w join TB_Worker t on w.shopId = t.shopId " +
-            " where  1=1 <if test='shopId!=null'> and w.shopId=#{shopId} </if> " +
+            " where  1=1 and t.is_del = 1  <if test='shopId!=null'> and w.shopId=#{shopId} </if> " +
             " <if test='workerId!=null'> and t.workerId = #{workerId} </if> " +
             " and w.date &gt;= #{startTime} and w.date &lt; #{endTime}  " +
             "  order by w.[date] </script>")
@@ -81,7 +81,7 @@ public interface ShopMapper {
 
 
     //查询店员属于店铺
-    @Select("select s.trafficPice,s.trafficStartTime,s.trafficEndTime from TB_Shop s join TB_Worker w on s.shopId = w.shopId and w.workerId = #{workerId}")
+    @Select("select s.trafficPice,s.trafficStartTime,s.trafficEndTime from TB_Shop s join TB_Worker w on s.shopId = w.shopId and w.workerId = #{workerId} and w.is_del = 1 ")
     List<Map<String,Object>> findShopTimeConByWorkId(String workerId);
 
     @Update("update TB_WorkerPoint set jd = #{jd},wd = #{wd}  where workerId = #{workerId}")
@@ -96,7 +96,7 @@ public interface ShopMapper {
             " row_number() over(order by t.orderNum desc) as rownumber,\n" +
             " t.userName,t.imgUrl,t.phone,t.introduce,t.serviceArea,t.workerTitle,t.isOnline,CONVERT(varchar(100)," +
             " loginTime, 120) loginTime,t.orderNum,t.workerId,shop.shopName,t.jd,t.wd," +
-            "             t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId " +
+            "             t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId and t.is_del = 1 " +
             ") t where rownumber &gt; ${page} </script>")
     List<Map<String,Object>> findWorkerListByShopId(@Param("city") String city,@Param("shopId")String shopId,
                                                     @Param("onLine")String onLine,@Param("page")Integer page);
@@ -106,8 +106,8 @@ public interface ShopMapper {
     int updateJishiOnline(@Param("workerId") String workerId,@Param("isOnline")String isOnline);
 
 
-    @Insert("insert into TB_Worker(workerId,userName,phone,isOnline,loginTime,sellSum)\n" +
-            "values(REPLACE(NEWID(),'-',''),#{phoneDesc},#{phoneDesc},0,GETDATE(),15)")
+    @Insert("insert into TB_Worker(workerId,userName,phone,isOnline,loginTime,sellSum,is_del)\n" +
+            "values(REPLACE(NEWID(),'-',''),#{phoneDesc},#{phoneDesc},0,GETDATE(),15,1)")
     int addWorkInfo(String phoneDesc);
 
 }
