@@ -309,4 +309,12 @@ public interface UserMapper {
     @Select("select count(1) from TB_CouponAndUserId where userId = #{userId} and isUser = 0")
     int findCount(@Param("userId") String userId);
 
+    /**
+     * 删除用户
+     * @param userId
+     * @return
+     */
+    @Delete("delete from TB_User where id = #{userId}")
+    int delUserById(String userId);
+
 }

@@ -719,4 +719,9 @@ public class UserServiceImp implements UserService {
     public int findCouponCount(String userId){
         return userMapper.findCount(userId);
     }
+
+    public int delUserById(String userId){
+        logger.info("删除用户Id:{}",userId);
+        return userMapper.delUserById(userId);
+    }
 }

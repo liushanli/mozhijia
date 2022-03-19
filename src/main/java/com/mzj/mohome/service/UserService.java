@@ -125,5 +125,12 @@ public interface UserService {
 
     int getByUserInfoByIds();
 
+    /**
+     * 注销用户操作
+     * @param userId
+     * @return
+     */
+    int delUserById(String userId);
+
 
 }
