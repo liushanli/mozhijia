@@ -1059,11 +1059,11 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/delUserInfoById")
-    public Map<String,Object> delUserInfoById(String id){
+    public Map<String,Object> delUserInfoById(String userId){
         Map<String,Object> result_map = new HashMap<>();
         try {
-            int nums = userService.delUserById(id);
-            logger.info("注销用户{}，是否修改成功：{}",id,nums);
+            int nums = userService.delUserById(userId);
+            logger.info("注销用户{}，是否修改成功：{}",userId,nums);
             if (nums > 0) {
                 result_map.put("success", true);
                 result_map.put("nums",nums);

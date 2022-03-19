@@ -11,11 +11,11 @@ import java.util.Map;
 @Mapper
 public interface UserMapper {
     //获取用户名单
-    @Select("select * from tb_user where id=${id}")
+    @Select("select * from tb_user where id=${id} and is_del = 1")
     List<User> getById(Integer id) throws Exception;
 
     //登录时判断用户是否存在
-    @Select("select * from tb_user  where phone = #{phoneDesc}")
+    @Select("select * from tb_user  where phone = #{phoneDesc}  and is_del = 1")
     List<User> getByUserExist(String phoneDesc) throws Exception;
 
     //更改用户信息
@@ -23,7 +23,7 @@ public interface UserMapper {
             "<if test='nickName != null'> ,nickName = #{nickName} </if>" +
             "<if test='imgUrl != null'> ,imgUrl = #{imgUrl} </if>" +
             "<if test='cardId != null'> ,cardId = #{cardId},cardName = #{cardName},cardStartTime = getdate(),cardEndTime = DATEADD(mm,${month},GETDATE()) </if>" +
-            "where id = #{id}</script>")
+            "where id = #{id}  and is_del = 1 </script>")
     int updUser(User user);
 
     //登录时判断客户是否存在
@@ -31,45 +31,45 @@ public interface UserMapper {
     List<Map<String,Object>> getByUserInfoExist(@Param("phoneDesc") String phoneDesc, @Param("sendCode")String sendCode) throws Exception;
 
     @Select("select top 1 t.* from TB_User t  " +
-            "where 1=1 and t.isBlackList = 0 and t.phone = #{phoneDesc} ")
+            "where 1=1 and t.isBlackList = 0 and t.phone = #{phoneDesc}  and t.is_del = 1")
     List<User> getByUserInfoByPhoneExist(@Param("phoneDesc") String phoneDesc) throws Exception;
 
 
     //登录时判断客户是否存在
-    @Select("select top 1 t.* from TB_User t where t.isBlackList = 0 and userId = #{userId} order by id desc ")
+    @Select("select top 1 t.* from TB_User t where t.isBlackList = 0 and userId = #{userId} and t.is_del = 1 order by id desc ")
     List<User> getByUserInfoById(String userId);
 
     @Select("select * from TB_User " +
-            " where userId not in (select DISTINCT userId from TB_CouponAndUserId where isUser=0) and isBlackList =0")
+            " where userId not in (select DISTINCT userId from TB_CouponAndUserId where isUser=0) and isBlackList =0 and is_del = 1")
     List<User> getUserInfo();
 
 
     //登录时判断客户是否存在
     @Select("<script>select top 1 t.* from TB_User t " +
-            " where 1=1 and openId = #{openId} and t.isBlackList = 0  order by t.id desc </script>")
+            " where 1=1 and openId = #{openId} and t.isBlackList = 0 and t.is_del = 1 order by t.id desc </script>")
     List<User> getByUserInfoExistWhat(@Param("openId") String openId) throws Exception;
 
     //登录时判断客户是否存在
     @Select("<script>select top 1 t.* from TB_User t " +
-            " where 1=1 and  t.appleData = #{appleData} and t.isBlackList = 0 order by t.id desc </script>")
+            " where 1=1 and  t.appleData = #{appleData} and t.isBlackList = 0 and t.is_del = 1 order by t.id desc </script>")
     List<User> getByUserInfoExistApple(@Param("appleData") String appleData) throws Exception;
 
     //如果用户不存在则直接添加到数据库
-    @Insert("insert into TB_User(userId,userName,phone,nickName,loginType,loginTime,addTime,isBlackList,level,imgUrl)\n" +
-            "VALUES(#{userId},#{name},#{phoneDesc},#{name},0,GETDATE(),GETDATE(),0,0,'/static/images/userLogo.png')")
+    @Insert("insert into TB_User(userId,userName,phone,nickName,loginType,loginTime,addTime,isBlackList,level,imgUrl,is_del)\n" +
+            "VALUES(#{userId},#{name},#{phoneDesc},#{name},0,GETDATE(),GETDATE(),0,0,'/static/images/userLogo.png',1)")
     int addUserInfo(@Param("userId")String userId,@Param("phoneDesc") String phoneDesc,@Param("name")String name) throws Exception;
 
     //如果用户不存在则直接添加到数据库微信
-    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level)\n" +
-            "VALUES(#{userId},#{phoneDesc},#{phoneDesc},#{nickName},#{imgUrl},#{sex},#{openId}, 0,GETDATE(),GETDATE(),0,0)")
+    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,is_del)\n" +
+            "VALUES(#{userId},#{phoneDesc},#{phoneDesc},#{nickName},#{imgUrl},#{sex},#{openId}, 0,GETDATE(),GETDATE(),0,0,1)")
     int addWhatUserInfo(@Param("userId")String userId,@Param("phoneDesc")String phoneDesc, @Param("nickName")String nickName,
                         @Param("imgUrl") String imgUrl, @Param("openId")String openId,
                         @Param("sex")String sex) throws Exception;
 
 
     //如果用户不存在则直接添加到数据库微信
-    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,appleData)\n" +
-            " VALUES(#{userId},#{nickName},'',#{nickName},'','','', 0,GETDATE(),GETDATE(),0,0,#{appleData})")
+    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,appleData,is_del)\n" +
+            " VALUES(#{userId},#{nickName},'',#{nickName},'','','', 0,GETDATE(),GETDATE(),0,0,#{appleData},1)")
     int addAppleUserInfo(@Param("userId")String userId,@Param("appleData") String appleData, @Param("nickName")String nickName) throws Exception;
 
 
@@ -83,15 +83,15 @@ public interface UserMapper {
     @Update("update TB_User set appleData = #{appleData},loginTime = GETDATE() where phone = #{phoneDesc} ")
     int updateUserInfoByApple(@Param("appleData") String appleData, @Param("phoneDesc")String phoneDesc) throws Exception;
 
-    @Update("update TB_User set loginTime = GETDATE() where phone = #{phoneDesc}")
+    @Update("update TB_User set loginTime = GETDATE() where phone = #{phoneDesc} and is_del = 1")
     int updateUserInfo(String phoneDesc) throws Exception;
 
     //根据openId来修改手机号信息
-    @Update("update TB_User set phone = #{phoneDesc} where openId = #{openId}")
+    @Update("update TB_User set phone = #{phoneDesc} where openId = #{openId} and is_del = 1")
     int updateUserPhone(@Param("phoneDesc") String phoneDesc, @Param("openId")String openId) throws Exception;
 
     //根据手机号查询是否存在有重复的
-    @Select("select *  from TB_User where phone = #{phoneDesc}")
+    @Select("select *  from TB_User where phone = #{phoneDesc} and is_del = 1")
     List<User> findUserCount(String phoneDesc) throws Exception;
 
 
@@ -190,7 +190,7 @@ public interface UserMapper {
             "sp.shopId,e.returnContent from TB_Evaluate e join TB_Order o " +
             "on e.orderId = o.orderId join TB_Product p on o.productId = p.productId join " +
             "TB_User u on e.userId = u.userId  join TB_Shop sp on o.shopId = sp.shopId"+
-            " where  1=1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
+            " where  1=1 and u.is_del = 1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             ") t where rownumber &gt; ${page} </script>")
     List<Map<String,Object>> findEvaluateListByUserIdPage(@Param("userId") String userId, @Param("shopId")String shopId,@Param("page")Integer page);
@@ -200,7 +200,7 @@ public interface UserMapper {
     @Select("<script> select e.id,e.orderId,e.userId,o.workerId workId,e.content,e.star,e.imgUrl,CONVERT(varchar(100), e.updateTime, 23) updateTime,o.province+' '+o.city+' '+o.area as address,o.serviceNumber,o.payOnline,p.productName,o.workerName,u.nickName userName,u.imgUrl userImgUrl,sp.shopName,sp.shopId,e.returnContent from TB_Evaluate e join TB_Order o on e.orderId = o.orderId join TB_Product p on o.productId = p.productId \n" +
             " join TB_User u on e.userId = u.userId " +
             " join TB_Shop sp on o.shopId = sp.shopId  " +
-            " where  1=1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
+            " where  1=1 and u.is_del = 1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             " order by e.updateTime desc </script>")
     List<Map<String,Object>> findEvaluateListByUserId(@Param("userId") String userId, @Param("shopId")String shopId);
@@ -251,7 +251,7 @@ public interface UserMapper {
     @Select("\n" +
             "select o.workerId,o.productName,o.phone,w.phone workerPhone,w.userName workerName,o.address,o.aboutTime,r.buyType,r.status,CONVERT(VARCHAR(20),r.payTime,120) payTime,ISNULL(u.surplusMoney,0) surplusMoney from TB_PayRecord r join TB_Order o on (r.orderId = o.orderId or r.orderId2 = o.orderId) join TB_Worker w on o.workerId = w.workerId \n" +
             "join TB_User u on o.userId = u.userId\n" +
-            "where r.orderId = #{orderId}")
+            "where  r.orderId = #{orderId} and u.is_del = 1")
     Map<String,Object> findPayRecordById(String orderId);
 
 
@@ -298,7 +298,7 @@ public interface UserMapper {
     List<Map<String,Object>> findVersion(String version);
 
     //查询版本信息
-    @Update("update TB_User set version = #{version} where userId = #{userId}")
+    @Update("update TB_User set version = #{version} where userId = #{userId} and is_del = 1")
     int updateVersion(@Param("version") String version,@Param("userId") String userId);
 
     /**
@@ -314,7 +314,7 @@ public interface UserMapper {
      * @param userId
      * @return
      */
-    @Delete("delete from TB_User where id = #{userId}")
+    @Update("update TB_User set is_del = 2 where userId  = #{userId}")
     int delUserById(String userId);
 
 }

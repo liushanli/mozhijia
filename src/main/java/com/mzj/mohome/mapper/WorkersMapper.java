@@ -10,7 +10,7 @@ import java.util.Map;
 @Mapper
 public interface WorkersMapper {
 
-    @Select("select * from tb_worker where workerId = #{workerId}")
+    @Select("select * from tb_worker where workerId = #{workerId} and is_del = 1")
     Map<String,Object> findWorkerById(String workerId);
 
 
@@ -29,7 +29,7 @@ public interface WorkersMapper {
             " where  t.status = 1 or (t.status &gt;= 3 and t.status &lt;= 9) group by t.workerId) t1" +
             " on t.workerId = t1.workerId" +
             " <if test='productId != null'> left JOIN TB_WorkerSerProduct tbP on t.workerId = tbP.workerId </if> " +
-            " where 1=1 and t.isOnline = '1' and shop.isOnline = 1  " +
+            " where 1=1 and t.isOnline = '1' and t.is_del = 1 and shop.isOnline = 1  " +
             " <if test='city != null'> and tp.city =  #{city} </if>" +
             " <if test='productId != null'> and tbP.productId = #{productId} </if>" +
             " <if test='shopId != null'> and t.shopId = #{shopId} </if>" +
@@ -113,7 +113,7 @@ public interface WorkersMapper {
             "row_number() OVER(order by w.orderNum) n from TB_Worker w join TB_WorkerPoint wp on w.workerId = wp.workerId\n" +
             "INNER JOIN TB_ShopPoint tp ON w.shopId = tp.shopId and tp.city = #{city} \n" +
             "<if test='productId != null'> JOIN TB_WorkerSerProduct tbP on w.workerId = tbP.workerId </if> " +
-            " where wp.city = #{city} " +
+            " where  wp.city = #{city} and w.is_del = 1 " +
             " <if test='productId != null'> and tbP.productId = #{productId} </if> "+
             " <if test='shopId != null'> and w.shopId = #{shopId} </if> " +
             " <if test='onLine != null'> and w.isOnline = #{onLine} </if> " +
@@ -145,7 +145,7 @@ public interface WorkersMapper {
             "and t.workerId = works.workerId ) sellNum from " +
             "TB_Worker works " +
             " join TB_WorkerPoint tp on works.workerId = tp.workerId " +
-            "where  works.isOnline = 1 and tp.city = #{city}" +
+            "where  works.isOnline = 1 and works.is_del = 1 and tp.city = #{city}" +
             "<if test='shopId!=null'> and works.shopId = #{shopId}</if>" +
             "  order by works.orderNum desc </script>")
     List<Map<String,Object>> workerInfoListByInfo(@Param("shopId") String shopId,@Param("city")String city);
@@ -168,7 +168,7 @@ public interface WorkersMapper {
             " TB_Shop shop on t.shopId = shop.shopId" +
             " INNER JOIN TB_ShopPoint tp ON t.shopId = tp.shopId " +
             " left join (select COUNT(1) sellNum,t.workerId from TB_Order t left join TB_Product p on t.productId =  p.productId" +
-            " where  t.status = 1 or (t.status &gt;= 3 and t.status &lt;= 9) group by t.workerId) t1" +
+            " where  t.is_del = 1 and t.status = 1 or (t.status &gt;= 3 and t.status &lt;= 9) group by t.workerId) t1" +
             " on t.workerId = t1.workerId" +
             " <if test='productId != null'> left JOIN TB_WorkerSerProduct tbP on t.workerId = tbP.workerId </if> " +
             " where 1=1 and t.isOnline = '1' and shop.isOnline = 1  " +
@@ -203,7 +203,7 @@ public interface WorkersMapper {
 
     //登录时判断员工是否存在
     @Select("select t.*,shop.shopName from TB_Worker t left  join TB_ShopPoint shop on t.shopId = shop.shopId\n" +
-            "where   t.phone = #{phoneDesc}")
+            "where   t.phone = #{phoneDesc} and t.is_del = 1 ")
     List<Worker> findWorkInfoExist(String phoneDesc) throws Exception;
 
     //修改登陆时间
@@ -223,12 +223,12 @@ public interface WorkersMapper {
             "select count(1) maxNum,0 minNum from TB_Evaluate e join TB_Order o on e.orderId = o.orderId " +
             "             join TB_Worker w on o.workerId = w.workerId" +
             "             left join TB_User u on e.userId = u.userId " +
-            "             where  w.isOnline = '1'  and o.workerId = #{workId}" +
+            "             where  w.isOnline = '1'  and w.is_del = 1 and o.workerId = #{workId}" +
             " union all" +
             " select 0 maxNum,count(1) minNum from TB_Evaluate e join TB_Order o on e.orderId = o.orderId " +
             "             join TB_Worker w on o.workerId = w.workerId" +
             "             left join TB_User u on e.userId = u.userId " +
-            "             where  w.isOnline = '1'   and star>=3 and o.workerId = #{workId}" +
+            "             where  w.isOnline = '1'  and w.is_del = 1  and star>=3 and o.workerId = #{workId}" +
             " ) t ")
     List<Map<String,Object>> findEvaluate(String workId);
 
@@ -236,7 +236,7 @@ public interface WorkersMapper {
             " from TB_Evaluate e join TB_Order o on e.orderId = o.orderId \n" +
             "             join TB_Worker w on o.workerId = w.workerId\n" +
             "             left join TB_User u on e.userId = u.userId \n" +
-            "             where  w.isOnline = '1'  and o.workerId = #{workId} order by updateTime desc")
+            "             where  w.isOnline = '1'  and w.is_del = 1  and o.workerId = #{workId} order by updateTime desc")
     List<Map<String,Object>> findEvaluateInfo(String workId);
 
 
@@ -246,7 +246,7 @@ public interface WorkersMapper {
             " ,o.productName,o.province,o.area  from TB_Evaluate e join TB_Order o on e.orderId = o.orderId " +
             " join TB_Worker w on o.workerId = w.workerId " +
             " left join TB_User u on e.userId = u.userId "+
-            " where  w.isOnline = '1' and o.productId = #{productId} order by e.updateTime desc ")
+            " where  w.isOnline = '1'  and w.is_del = 1 and o.productId = #{productId} order by e.updateTime desc ")
     List<Map<String,Object>> findEvaluateByProductId(String productId);
 
 
@@ -413,17 +413,13 @@ public interface WorkersMapper {
             "            select count(1) maxNum,0 minNum,w.workerId  from TB_Evaluate e join TB_Order o on e.orderId = o.orderId \n" +
             "                         join TB_Worker w on o.workerId = w.workerId\n" +
             "                         left join TB_User u on e.userId = u.userId \n" +
-            "                         where  w.isOnline = '1'  group by w.workerId\n" +
+            "                         where  w.isOnline = '1'  and w.is_del = 1  group by w.workerId\n" +
             "             union all\n" +
             "             select 0 maxNum,count(1) minNum,w.workerId from TB_Evaluate e join TB_Order o on e.orderId = o.orderId \n" +
             "                         join TB_Worker w on o.workerId = w.workerId\n" +
             "                         left join TB_User u on e.userId = u.userId\n" +
-            "                         where  w.isOnline = '1'   and e.star>=3  group by w.workerId\n" +
+            "                         where  w.isOnline = '1'   and w.is_del = 1 and e.star>=3  group by w.workerId\n" +
             "           ) t GROUP BY workerId")
     List<Map<String,Object>> findEvaluateInfo_1();
-
-
-
-
 
 }
