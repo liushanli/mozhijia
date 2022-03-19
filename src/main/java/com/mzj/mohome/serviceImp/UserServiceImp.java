@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -49,6 +51,11 @@ public class UserServiceImp implements UserService {
         return userMapper.getById(id);
     }
 
+    /**
+     * 查看是否没有优惠券的用户，并赋值给他
+     */
+    @Scheduled(cron = "0 0/30 * * * ?")
+    @Async
     public int getByUserInfoByIds(){
         List<User> list=  userMapper.getUserInfo();
         logger.info("集合为："+list.size());
