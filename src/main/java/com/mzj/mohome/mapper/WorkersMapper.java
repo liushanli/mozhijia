@@ -422,6 +422,14 @@ public interface WorkersMapper {
             "           ) t GROUP BY workerId")
     List<Map<String,Object>> findEvaluateInfo_1();
 
+    /**
+     * 注销技师
+     * @param workerId
+     * @return
+     */
+    @Delete("delete from TB_Worker where workerId = #{workerId}")
+    int delWorkerInfoById(@Param("workerId") String workerId);
+
 
 
 

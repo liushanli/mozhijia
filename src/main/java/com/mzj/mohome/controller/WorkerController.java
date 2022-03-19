@@ -688,5 +688,31 @@ public class WorkerController {
         return map;
     }
 
+    /**
+     * 注销信息
+     * @param workerId
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/delWorkerInfo",method = RequestMethod.POST)
+    public Map<String,Object> delWorkerInfo(String workerId){
+        Map<String,Object> result_map = new HashMap<>();
+        try {
+            result_map.put("success", false);
+            result_map.put("msg", null);
+            int re = workerService.delWorkerInfoById(workerId);
+            if(re>0){
+                result_map.put("success", true);
+                result_map.put("msg", "修改成功");
+            }
+            result_map.put("delNum",re);
+        }catch (Exception e){
+            result_map.put("success", false);
+            result_map.put("msg", null);
+            result_map.put("delNum",0);
+        }
+        return result_map;
+    }
+
 }
 

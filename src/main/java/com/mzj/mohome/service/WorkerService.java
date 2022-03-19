@@ -86,4 +86,6 @@ public interface WorkerService {
     Map<String,Object> findWorkerInfoBy(String phone,String version);
 
     List<Map<String,Object>> workerInfoListByInfo(String shopId,String city);
+
+    int delWorkerInfoById(String workerId);
 }

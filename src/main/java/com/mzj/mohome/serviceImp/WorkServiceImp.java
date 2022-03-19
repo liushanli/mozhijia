@@ -895,4 +895,9 @@ public class WorkServiceImp implements WorkerService {
         return workList;
     }
 
+    public int delWorkerInfoById(String workerId){
+        logger.info("技师的workerId:{}",workerId);
+        return workersMapper.delWorkerInfoById(workerId);
+    }
+
 }
