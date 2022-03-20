@@ -309,4 +309,7 @@ public interface UserMapper {
     @Select("select count(1) from TB_CouponAndUserId where userId = #{userId} and isUser = 0")
     int findCount(@Param("userId") String userId);
 
+    @Select("select count(1) from TB_SmsSend where phone = #{phone} and sendCode = #{smsCode}")
+    int findSms(@Param("phone") String phone,@Param("smsCode")String smsCode);
+
 }
