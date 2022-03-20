@@ -317,4 +317,7 @@ public interface UserMapper {
     @Update("update TB_User set is_del = 2 where userId  = #{userId}")
     int delUserById(String userId);
 
+    @Select("select count(1) from TB_SmsSend where phone = #{phone} and sendCode = #{smsCode}")
+    int findSms(@Param("phone") String phone,@Param("smsCode")String smsCode);
+
 }

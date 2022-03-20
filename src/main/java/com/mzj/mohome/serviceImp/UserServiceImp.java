@@ -724,4 +724,8 @@ public class UserServiceImp implements UserService {
         logger.info("删除用户Id:{}",userId);
         return userMapper.delUserById(userId);
     }
+    public  int findSms(String phone,String sendCode){
+        logger.info("注销手机号:{},验证码：{}",phone,sendCode);
+        return userMapper.findSms(phone,sendCode);
+    }
 }

@@ -132,5 +132,11 @@ public interface UserService {
      */
     int delUserById(String userId);
 
-
+    /**
+     * 根据手机号和验证码来获取信息
+     * @param phone
+     * @param sendCode
+     * @return
+     */
+    int findSms(String phone,String sendCode);
 }

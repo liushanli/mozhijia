@@ -1079,5 +1079,27 @@ public class UserController {
         return result_map;
     }
 
+    @ResponseBody
+    @GetMapping("/findUserInfoBySms")
+    public Map<String,Object> delUserInfoById(String phone,String sendCode){
+        Map<String,Object> result_map = new HashMap<>();
+        try {
+            int nums = userService.findSms(phone,sendCode);
+            logger.info("注销用户手机号{}，是否注销成功：{}",phone,nums);
+            if (nums > 0) {
+                result_map.put("success", true);
+                result_map.put("nums",nums);
+            }else{
+                result_map.put("success", false);
+                result_map.put("nums",0);
+            }
+        }catch (Exception e){
+            result_map.put("success", false);
+            result_map.put("evaluate",null);
+            logger.error("用户注销异常信息:{}",e);
+        }
+        return result_map;
+    }
+
 
 }
