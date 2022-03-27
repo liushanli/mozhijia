@@ -644,8 +644,8 @@ public class OrderServiceImp implements OrderService {
     /**
      * 每1分钟查询一次，是否有订单十五分钟之类没有付款执行一次
      */
-    @Scheduled(cron = "0 0/1 * * * ?")
-    @Async
+   /* @Scheduled(cron = "0 0/1 * * * ?")
+    @Async*/
     public void jobCronCouponId() {
         logger.info("每1分钟执行一次，修改优惠券");
         List<String> userList =  userMapper.findCouponDate();
