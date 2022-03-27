@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -405,7 +406,11 @@ public class WorkServiceImp implements WorkerService {
 
     public List<Map<String,Object>> findEvaluateByProductId(Map<String,Object> map){
         String id = String.valueOf(map.get("productId"));
-        List<Map<String,Object>> mapList = workersMapper.findEvaluateByProductId(id);
+        Integer row = 5;
+        Integer page = map.get("page")!=null && map.get("page")!=""?Integer.parseInt(map.get("page").toString()):1;
+        Integer start = (page-1)*row;
+        Integer end = page*row;
+        List<Map<String,Object>> mapList = workersMapper.findEvaluateByProductId(id,start,end);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if(mapList!=null && mapList.size()>0){
             for(Map<String,Object> mapInfo : mapList){

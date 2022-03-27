@@ -139,7 +139,8 @@ public class WorkerController {
     @ResponseBody
     @PostMapping("/findWorkEvalByProduct")
     public Map<String,Object> findWorkEvalByProduct(@RequestBody Map<String,Object> objectMap){
-        Map<String, Object> map = new HashMap<String, Object>();
+        logger.info("请求参数：{}",JSON.toJSONString(objectMap));
+        Map<String, Object> map = new HashMap<>();
         map.put("success",true);
         map.put("msg","");
         try {

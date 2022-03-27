@@ -242,12 +242,20 @@ public interface WorkersMapper {
 
 
     //查询评价表根据productId
-    @Select("select e.*,w.userName workName,o.workerId workId,u.imgUrl headImg,u.nickName userName" +
+/*    @Select("select e.*,w.userName workName,o.workerId workId,u.imgUrl headImg,u.nickName userName" +
             " ,o.productName,o.province,o.area  from TB_Evaluate e join TB_Order o on e.orderId = o.orderId " +
             " join TB_Worker w on o.workerId = w.workerId " +
             " left join TB_User u on e.userId = u.userId "+
-            " where  w.isOnline = '1'  and w.is_del = 1 and o.productId = #{productId} order by e.updateTime desc ")
-    List<Map<String,Object>> findEvaluateByProductId(String productId);
+            " where  w.isOnline = '1'  and w.is_del = 1 and o.productId = #{productId} order by e.updateTime desc ")*/
+    @Select("select * from ( " +
+            " select e.*,w.userName workName,o.workerId workId,u.imgUrl headImg,u.nickName userName " +
+            " ,o.productName,o.province,o.area,row_number() over  (order by  e.updateTime desc) n " +
+            " from TB_Evaluate e join TB_Order o on e.orderId = o.orderId  " +
+            "  join TB_Worker w on o.workerId = w.workerId " +
+            "  left join TB_User u on e.userId = u.userId " +
+            "  where  w.isOnline = '1'  and w.is_del = 1 and o.productId = #{productId} " +
+            ") hhh  where hhh.n > ${startPage} and hhh.n <= ${endPage}")
+    List<Map<String,Object>> findEvaluateByProductId(@Param("productId")String productId,@Param("startPage")Integer startPage,@Param("endPage") Integer endPage);
 
 
     //删除和员工关联图片
