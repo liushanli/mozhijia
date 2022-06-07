@@ -716,6 +716,31 @@ public class UserServiceImp implements UserService {
         return userMapper.findVersion(type);
     }
 
+    //查找版本的信息
+    public Map<String,Object> findVersionListNew(String userId,String type,String version){
+        logger.info("查询用户的版本，是否更新");
+        int count = userMapper.findVersionNew(userId,type);
+        Map<String,Object> map1 = userMapper.findVersionInfo(version,type);
+        Map<String,Object> map = new HashMap<>();
+        if(count>0 && map1 != null){
+            logger.info("该用户{}，可以更新,更新中间表",userId);
+            map.put("success",true);
+            map.put("url",map1.get("url"));
+            userMapper.updUserVersion(userId,String .valueOf(map1.get("version")));
+        }else if(count<=0 && map1 != null ){
+            logger.info("该用户{}，可以更新，把他添加到中间表",userId);
+            map.put("url",map1.get("url"));
+            map.put("success",true);
+            userMapper.addUserVersion(userId,version);
+        }else{
+            logger.info("该用户{}，不可以更新，没有更新地址",userId);
+            map.put("success",false);
+        }
+        return map;
+    }
+
+
+
     public int findCouponCount(String userId){
         return userMapper.findCount(userId);
     }

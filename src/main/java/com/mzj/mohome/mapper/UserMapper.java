@@ -298,6 +298,16 @@ public interface UserMapper {
     List<Map<String,Object>> findVersion(String version);
 
     //查询版本信息
+    @Select("select * from tb_version where type = #{type} and version>#{version} and status = 1")
+    Map<String,Object> findVersionInfo(@Param("version")String version,@Param("type")String type);
+
+    //查询版本信息
+    @Select("select count(1) from tb_user_version where userId = #{userId} and recStatus = '1' " +
+            " and version < (select version from TB_Version where type = #{type} and status = '1')")
+    int findVersionNew(@Param("userId")String userId,@Param("type")String type);
+
+
+    //查询版本信息
     @Update("update TB_User set version = #{version} where userId = #{userId} and is_del = 1")
     int updateVersion(@Param("version") String version,@Param("userId") String userId);
 
@@ -320,4 +330,26 @@ public interface UserMapper {
     @Select("select count(1) from TB_SmsSend where phone = #{phone} and sendCode = #{smsCode}")
     int findSms(@Param("phone") String phone,@Param("smsCode")String smsCode);
 
+
+    /**
+     * 添加版本的中间表
+     */
+    @Insert("INSERT into tb_user_version(userId,version,createTime,lastTime,recStatus) " +
+            "values(#{userId},#{version},GETDATE(),GETDATE(),'1')")
+    int addUserVersion(@Param("userId") String userId,@Param("version")String version);
+
+
+    /**
+     * 修改版本的中间表
+     */
+    @Update("update tb_user_version set version = #{version},lastTime=GETDATE() where userId = #{userId}")
+    int updUserVersion(@Param("userId") String userId,@Param("version")String version);
+
+    /**
+     * 根据用户id来判断版本号
+     * @param userId
+     * @return
+     */
+    @Select("select * from tb_user_version where userId = #{userId} and recStatus = '1'")
+    Map<String,Object> findUserVersion(@Param("userId") String userId);
 }

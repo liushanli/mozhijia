@@ -116,6 +116,9 @@ public interface UserService {
     //查找版本的信息
     List<Map<String,Object>> findVersionList(String type);
 
+    //查找版本的信息
+    Map<String,Object> findVersionListNew(String userId,String type,String version);
+
     /**
      * 获取优惠券的数量
      * @param userId

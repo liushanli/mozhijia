@@ -1058,6 +1058,24 @@ public class UserController {
     }
 
     @ResponseBody
+    @GetMapping("/findVersionNew")
+    public Map<String,Object> findVersionNew(String type,String userId,String version){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("=====findVersionNew====type:{},userId=={}",type,userId);
+            map.put("success",true);
+            map.put("msg","");
+             map = userService.findVersionListNew(userId,type,version);
+            logger.info("findVersionNew==获取到的返回信息为：{}",JSON.toJSONString(map));
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success",false);
+            logger.error("findVersionNew=="+e.getMessage());
+        }
+        return map;
+    }
+
+    @ResponseBody
     @GetMapping("/delUserInfoById")
     public Map<String,Object> delUserInfoById(String userId){
         Map<String,Object> result_map = new HashMap<>();

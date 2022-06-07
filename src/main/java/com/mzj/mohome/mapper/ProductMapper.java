@@ -98,7 +98,7 @@ public interface ProductMapper {
     List<Map<String,Object>> findProductListInfoWorkId(@Param("shopId") String shopId,@Param("workerId") String workerId);
 
 
-    @Select("select p.price, p.id,p.shopId,p.productId,p.imgUrl,p.productName,p.detail,p.productTime,p.isRecom,p.orderNum,p.contentText,p.oldPrice,p.memberPrice,p.groupPrice,p.serviceNumber,p.serviceArea,p.personnel,p.addTime,p.isOnline,s.orderInfo,ISNULL(tp.couponType, 0) couponType,tp.secondPrice,t.sellSum,p.sellSum sellNum from TB_Product p join TB_Shop s on p.shopId = s.shopId left join (select * from TB_Coupon where GETDATE() BETWEEN startTime and endTime and status = 1 and couponType = 1) tp on p.productId = tp.productId\n" +
+    @Select("select s.shopName,p.price, p.id,p.shopId,p.productId,p.imgUrl,p.productName,p.detail,p.productTime,p.isRecom,p.orderNum,p.contentText,p.oldPrice,p.memberPrice,p.groupPrice,p.serviceNumber,p.serviceArea,p.personnel,p.addTime,p.isOnline,s.orderInfo,ISNULL(tp.couponType, 0) couponType,tp.secondPrice,t.sellSum,p.sellSum sellNum from TB_Product p join TB_Shop s on p.shopId = s.shopId left join (select * from TB_Coupon where GETDATE() BETWEEN startTime and endTime and status = 1 and couponType = 1) tp on p.productId = tp.productId\n" +
             "  left join (select COUNT(1) sellSum,t.productId from TB_Order t left join TB_Product p on t.productId =  p.productId \n" +
             "  where t.status = 1 or (t.status >= 3 and t.status <= 9)   group by t.productId) t\n" +
             "  on p.productId = t.productId " +
