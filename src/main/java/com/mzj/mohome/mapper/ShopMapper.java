@@ -96,7 +96,9 @@ public interface ShopMapper {
             " row_number() over(order by t.orderNum desc) as rownumber,\n" +
             " t.userName,t.imgUrl,t.phone,t.introduce,t.serviceArea,t.workerTitle,t.isOnline,CONVERT(varchar(100)," +
             " loginTime, 120) loginTime,t.orderNum,t.workerId,shop.shopName,t.jd,t.wd," +
-            "             t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId and t.is_del = 1 " +
+            "             t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId " +
+            "and t.is_del = 1 <if test='onLine!=null'> and t.isOnline = #{onLine} </if>" +
+            "<if test='shopId != null'> and t.shopId = #{shopId} </if>" +
             ") t where rownumber &gt; ${page} </script>")
     List<Map<String,Object>> findWorkerListByShopId(@Param("city") String city,@Param("shopId")String shopId,
                                                     @Param("onLine")String onLine,@Param("page")Integer page);

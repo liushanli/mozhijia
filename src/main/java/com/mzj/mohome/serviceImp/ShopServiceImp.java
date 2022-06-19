@@ -146,8 +146,6 @@ public class ShopServiceImp implements ShopService {
                                worker.put("evalStatus_3", map5.get("name").toString());
                        }
                    }
-               /*String dateMM = workersMapper.getDateMM(worker.get("workerId").toString());
-               worker.put("dateHHmm",dateMM);*/
                worker.put("evaluateNum",0);
                worker.put("sellSum", worker.get("SellSum") != null ? worker.get("SellSum") : 0);
                List<Map<String, Object>> list = workersMapper.findEvaluate(worker.get("workerId").toString());
