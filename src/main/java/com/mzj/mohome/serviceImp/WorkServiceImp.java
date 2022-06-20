@@ -220,7 +220,9 @@ public class WorkServiceImp implements WorkerService {
                         objectMap.put("workVo",null);
                         objectMap.put("shopStatus",1);*/
                         logger.info("添加用户");
-                        shopMapper.addWorkInfo(phone);
+                        Random random = new Random();
+                        int nums = random.nextInt(20)+10;
+                        shopMapper.addWorkInfo(phone,nums);
                         objectMap.put("msg","添加用户");
                         objectMap.put("success",false);
                         objectMap.put("workVo",null);
@@ -236,7 +238,6 @@ public class WorkServiceImp implements WorkerService {
             return objectMap;
         }
     }
-
 
     //根据用户手机号，验证码来判断用户是否存在
     public Map<String,Object> findWorkerInfoBy(String phone,String version){
@@ -272,7 +273,9 @@ public class WorkServiceImp implements WorkerService {
                     objectMap.put("workVo",null);
                     objectMap.put("shopStatus",1);*/
                     logger.info("添加用户");
-                    shopMapper.addWorkInfo(phone);
+                    Random random = new Random();
+                    int nums = random.nextInt(20)+10;
+                    shopMapper.addWorkInfo(phone,nums);
                     objectMap.put("msg", "添加用户");
                     objectMap.put("success", false);
                     objectMap.put("workVo", null);
