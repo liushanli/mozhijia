@@ -118,8 +118,8 @@ public interface OrderMapper {
      * 添加订单信息
      * @return
      */
-    @Insert("INSERT INTO TB_Order([orderId], [shopId], [productId], [userId], [workerId], [productName], [oldPrice], [price], [memberPrice],  [status], [userName], [province], [city], [area], [address], [phone], [jd], [wd], [detail], [trafficPrice], [remarks], [serviceNumber], [aboutTime], [orderPayTime],[addTime],[payOnline],[bargainPrice]) \n" +
-            "VALUES (#{orderId},#{shopId}, #{productId}, #{userId},#{workerId},#{productName},#{oldPrice},#{price},#{memberPrice},#{status}, #{userName}, #{province}, #{city},#{area},#{address},#{phone},#{jd},#{wd},#{detail},#{trafficPrice},#{remarks},#{serviceNumber}, #{aboutTime},getdate(), getdate(),#{payOnline},#{bargainPrice});")
+    @Insert("INSERT INTO TB_Order([orderId], [shopId], [productId], [userId], [workerId], [productName], [oldPrice], [price], [memberPrice],  [status], [userName], [province], [city], [area], [address], [phone], [jd], [wd], [detail], [trafficPrice], [remarks], [serviceNumber], [aboutTime], [orderPayTime],[addTime],[payOnline],[bargainPrice],updateTime) \n" +
+            "VALUES (#{orderId},#{shopId}, #{productId}, #{userId},#{workerId},#{productName},#{oldPrice},#{price},#{memberPrice},#{status}, #{userName}, #{province}, #{city},#{area},#{address},#{phone},#{jd},#{wd},#{detail},#{trafficPrice},#{remarks},#{serviceNumber}, #{aboutTime},getdate(), getdate(),#{payOnline},#{bargainPrice},GETDATE())")
     int addOrderInfo(Order order);
 
     //查询该商品的秒杀价
@@ -132,6 +132,7 @@ public interface OrderMapper {
             "orderReviceId=#{orderReviceId},orderReviceName=#{orderReviceName},workerPhone=#{workerPhone}," +
             "workerName=#{workerName}  " +
             "<if test='status==3'> ,shopReceiveTime = getdate()</if>" +
+            ",updateTime = GETDATE()" +
             "where orderId =#{orderId} </script>")
     int updateOrderInfo(Order order);
 
@@ -139,8 +140,8 @@ public interface OrderMapper {
     @Update("<script> update TB_Order set " +
             "status = #{status} " +
             "<if test='status == 8'> ,workconfirmTime = getdate() </if> " +
-
             "<if test='status == 6'> ,serviceCompleteTime=getdate() </if> " +
+            ",updateTime = GETDATE()" +
             " where orderId =#{orderId} " +
             "</script>")
     int updateOrderInfoStatus(Order order);
@@ -159,7 +160,7 @@ public interface OrderMapper {
     @Select("select * from TB_Order where orderId = #{orderId}")
     List<Map<String,Object>> findWorkerOrderListById(String orderId);
 
-    @Update("update TB_Order set status = #{status},workconfirmTime = GETDATE()  where orderId =#{orderId} ")
+    @Update("update TB_Order set status = #{status},workconfirmTime = GETDATE(),updateTime = GETDATE()  where orderId =#{orderId} ")
     int updateOrderStatusTime(Order order);
 
     @Update("UPDATE TB_WorkerTime set isBusy=0 where id in (select top 5 id from TB_WorkerTime where [date]>=  (select aboutTime from TB_Order where orderId = #{orderId}) " +
@@ -168,7 +169,7 @@ public interface OrderMapper {
     int updateOrdersTimes(@Param("workerId") String workerId,@Param("orderId") String orderId);
 
     //修改订单退款
-    @Update("update TB_Order set status = 10,returnReason=#{returnReason},returnMoney=#{returnMoney},returnType=0  where orderId =#{orderId}")
+    @Update("update TB_Order set status = 10,returnReason=#{returnReason},returnMoney=#{returnMoney},returnType=0,updateTime = GETDATE()  where orderId =#{orderId}")
     int updateReturnOrder(Order order);
 
     @Select("select COUNT(1) from TB_CouponAndUserId where orderId = #{orderId} and isUser = 1")
@@ -217,7 +218,7 @@ public interface OrderMapper {
     List<Map<String,Object>> findWorkerInfoNew();
 
     //查询新订单，把状态进行修改为已发送的
-    @Update("update TB_Order set orderSMSFlag = 1 where workerId = #{phoneDesc} and status = 1 and  orderSMSFlag = 0")
+    @Update("update TB_Order set orderSMSFlag = 1,updateTime = GETDATE() where workerId = #{phoneDesc} and status = 1 and  orderSMSFlag = 0")
     int updateInfoNew(String phoneDesc);
 
 
