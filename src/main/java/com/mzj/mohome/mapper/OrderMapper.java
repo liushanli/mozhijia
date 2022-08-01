@@ -37,6 +37,7 @@ public interface OrderMapper {
             "select row_number() over(order by orders.id desc) as rownumber, " +
             "orders.*,shop.shopName,shop.servicePhone, p.imgUrl as imgProductUrl from TB_Order orders join TB_Shop shop on orders.shopId = shop.shopId join\n" +
             " TB_Product p on orders.productId = p.productId  where 1=1 and orders.status not in(0,2) " +
+            " and orders.workerId = #{workerId} and  orders.status != 0 " +
             "<if test='statusDesc != null'> " +
             "<if test='statusDesc==3'> and orders.status &gt;= 3 and orders.status &lt; 7 </if>" +
             "<if test='statusDesc==4'> and orders.status &gt;= 7 and orders.status &lt;= 9 </if>" +
