@@ -142,4 +142,25 @@ public interface UserService {
      * @return
      */
     int findSms(String phone,String sendCode);
+
+    /**
+     * 添加注册者
+     * @param register
+     * @return
+     */
+    int addRegister(Register register);
+
+    /**
+     * 根据用户id来查询信息
+     * @param userId
+     * @return
+     */
+    Register findRegisterByUserId(String userId);
+
+    /**
+     * 获取是否隐藏的状态
+     * @return
+     */
+    int getUserStatus();
+
 }

@@ -352,4 +352,14 @@ public interface UserMapper {
      */
     @Select("select * from tb_user_version where userId = #{userId} and recStatus = '1'")
     Map<String,Object> findUserVersion(@Param("userId") String userId);
+
+    @Insert("insert into tb_Register(id,userId,userName,idCard,recStatus,crtTime,lstUpdTime)\n"+
+            " VALUES(#{id},#{userId},#{userName},#{idCard},'1',GETDATE(),getDATE())")
+    int addRegisterInfo(Register register);
+
+    @Select("select id,userId,userName,IdCard from tb_Register where userId = #{userId} and recStatus = '1'")
+    Register findRegisterByUserId(String userId);
+
+    @Select("select status from tb_hidden where id = 1")
+    int getUserStatus();
 }

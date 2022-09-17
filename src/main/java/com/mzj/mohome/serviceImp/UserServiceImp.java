@@ -753,4 +753,17 @@ public class UserServiceImp implements UserService {
         logger.info("注销手机号:{},验证码：{}",phone,sendCode);
         return userMapper.findSms(phone,sendCode);
     }
+
+    public int addRegister(Register register){
+        register.setId(UUID.randomUUID().toString().toUpperCase());
+        return userMapper.addRegisterInfo(register);
+    }
+
+    public Register findRegisterByUserId(String userId){
+        return userMapper.findRegisterByUserId(userId);
+    }
+
+    public int getUserStatus(){
+        return  userMapper.getUserStatus();
+    }
 }

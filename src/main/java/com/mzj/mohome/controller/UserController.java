@@ -1119,5 +1119,35 @@ public class UserController {
         return result_map;
     }
 
+    @RequestMapping("/addRegisterInfo")
+    public Map<String,Object> addRegisterInfo(@RequestBody Register register){
+        logger.info("请求信息：{}",JSON.toJSONString(register));
+        Map<String,Object> map = new HashMap<>();
+        int num = userService.addRegister(register);
+        logger.info("添加数量：{}",num);
+        map.put("num",num);
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping("/queryRegisterInfo")
+    public Map<String,Object> queryRegisterInfo(String userId){
+        logger.info("用户id为：",userId);
+        Map<String,Object> map = new HashMap<>();
+        map.put("data","");
+        if(StringUtils.isNotEmpty(userId)){
+            Register register = userService.findRegisterByUserId(userId);
+            map.put("data",register);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping("/queryUserStatus")
+    public Map<String,Object> queryUserStatus(){
+        Map<String,Object> map = new HashMap<>();
+        map.put("number",userService.getUserStatus());
+        return map;
+    }
 
 }
