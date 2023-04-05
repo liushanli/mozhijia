@@ -228,4 +228,28 @@ public class OrderController {
         return resultMap;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/delOrderInfo",method = RequestMethod.POST)
+    public Map<String,Object> delOrderInfo(@RequestBody Map<String,Object> map){
+        Map<String,Object> resultMap = new HashMap<>();
+        String orderId = map.get("orderId").toString();
+        try {
+
+            resultMap.put("success",true);
+            resultMap.put("msg","");
+            int count = orderService.delOrderInfo(orderId);
+            if(count>0){
+                resultMap.put("success",false);
+                resultMap.put("msg","删除失败");
+            }
+        } catch (Exception e) {
+            resultMap.put("success",false);
+            resultMap.put("msg","删除失败");
+            log.error("该订单id：{}删除订单失败：{}",orderId,e);
+        }
+        return resultMap;
+    }
+
+
+
 }

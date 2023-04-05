@@ -396,7 +396,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public List<Address> findAddress(Map<String,Object> map) {
-        String id = ((map.get("id")!=null && map.get("userId")!="")?String.valueOf(map.get("id")):null);
+        String id = ((map.get("id")!=null && map.get("id")!="")?String.valueOf(map.get("id")):null);
         String userId = ((map.get("userId")!=null && map.get("userId")!="")?String.valueOf(map.get("userId")):null);
         String isDefault = (map.get("isDefault")!="" && map.get("isDefault")!=null)?String.valueOf(map.get("isDefault")):null;
         return userMapper.findAddress(id,userId,isDefault);

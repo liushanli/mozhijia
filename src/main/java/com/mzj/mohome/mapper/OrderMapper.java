@@ -11,12 +11,12 @@ import java.util.Map;
 @Mapper
 public interface OrderMapper {
 
-    @Select("select *from TB_Order where orderId = #{orderId}")
+    @Select("select *from TB_Order where orderId = #{orderId} and isDel = '2'")
     Map<String,Object> findOrder(String orderId);
 
     //查询订单列表信息
     @Select("<script>  select orders.*,shop.shopName,shop.servicePhone, p.imgUrl as imgProductUrl from TB_Order orders join TB_Shop shop on orders.shopId = shop.shopId join\n" +
-            " TB_Product p on orders.productId = p.productId  where 1=1 " +
+            " TB_Product p on orders.productId = p.productId  where orders.isDel = '2' " +
             "<if test='statusDesc != null'> " +
             "<if test='statusDesc==3'> and orders.status &gt;= 3 and orders.status &lt; 7 </if>" +
             "<if test='statusDesc==4'> and orders.status &gt;= 7 and orders.status &lt;= 9 </if>" +
@@ -36,7 +36,7 @@ public interface OrderMapper {
     @Select("<script> select top 10 * from (" +
             "select row_number() over(order by orders.id desc) as rownumber, " +
             "orders.*,shop.shopName,shop.servicePhone, p.imgUrl as imgProductUrl from TB_Order orders join TB_Shop shop on orders.shopId = shop.shopId join\n" +
-            " TB_Product p on orders.productId = p.productId  where 1=1 and orders.status not in(0,2) " +
+            " TB_Product p on orders.productId = p.productId  where orders.isDel = '2' and orders.status not in(0,2) " +
             " and orders.workerId = #{workerId} and  orders.status != 0 " +
             "<if test='statusDesc != null'> " +
             "<if test='statusDesc==3'> and orders.status &gt;= 3 and orders.status &lt; 7 </if>" +
@@ -60,7 +60,7 @@ public interface OrderMapper {
             "t.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
             "t.payType,t.fillMoney,t.remarks,t.shopReceiveTime,t.serviceCompleteTime,t.workconfirmTime from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
-            "where t.status != 0\n" +
+            "where t.isDel = '2' and t.status != 0\n" +
             "union all \n" +
             "select t.id,t.userId, p.imgUrl,p.productId,p.productName,t.status,t.addTime,t.orderId,t.payOnline," +
             "t.serviceNumber,p.productTime,t.trafficPrice,tw.userName workerName,tw.phone workerPhone, " +
@@ -68,7 +68,7 @@ public interface OrderMapper {
             "t.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
             "t.payType,t.fillMoney,t.remarks,t.shopReceiveTime,t.serviceCompleteTime,t.workconfirmTime from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
-            "where  t.status = 0 and  DateDiff(s,t.addTime,GETDATE()) &lt;= 900\n" +
+            "where t.isDel = '2' and t.status = 0 and  DateDiff(s,t.addTime,GETDATE()) &lt;= 900\n" +
             ") t " +
             "where 1=1 and t.status != 2 " +
             "<if test='statusDesc!=null'> " +
@@ -92,7 +92,7 @@ public interface OrderMapper {
             "tw.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
             "t.payType,t.fillMoney,t.remarks from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
-            "where t.status != 0\n" +
+            "where t.isDel = '2' and t.status != 0\n" +
             "union all \n" +
             "select t.id,t.userId, p.imgUrl,p.productId,p.productName,t.status,t.addTime,t.orderId,t.payOnline," +
             "t.serviceNumber,p.productTime,t.trafficPrice,tw.userName workerName,tw.phone workerPhone, " +
@@ -100,7 +100,7 @@ public interface OrderMapper {
             "tw.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone, t.returnMoney,t.tradeNo," +
             "t.payType,t.fillMoney,t.remarks from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
-            "where  t.status = 0 and  DateDiff(s,t.addTime,GETDATE()) &lt;= 900\n" +
+            "where t.isDel = '2' and t.status = 0 and  DateDiff(s,t.addTime,GETDATE()) &lt;= 900\n" +
             ") t " +
             "where 1=1 and t.status != 2 <if test='statusDesc != null'> and (t.status =1 or " +
             "(t.status &gt;= 3 and t.status &lt; 7)) </if> " +
@@ -119,8 +119,8 @@ public interface OrderMapper {
      * 添加订单信息
      * @return
      */
-    @Insert("INSERT INTO TB_Order([orderId], [shopId], [productId], [userId], [workerId], [productName], [oldPrice], [price], [memberPrice],  [status], [userName], [province], [city], [area], [address], [phone], [jd], [wd], [detail], [trafficPrice], [remarks], [serviceNumber], [aboutTime], [orderPayTime],[addTime],[payOnline],[bargainPrice],updateTime) \n" +
-            "VALUES (#{orderId},#{shopId}, #{productId}, #{userId},#{workerId},#{productName},#{oldPrice},#{price},#{memberPrice},#{status}, #{userName}, #{province}, #{city},#{area},#{address},#{phone},#{jd},#{wd},#{detail},#{trafficPrice},#{remarks},#{serviceNumber}, #{aboutTime},getdate(), getdate(),#{payOnline},#{bargainPrice},GETDATE())")
+    @Insert("INSERT INTO TB_Order([orderId], [shopId], [productId], [userId], [workerId], [productName], [oldPrice], [price], [memberPrice],  [status], [userName], [province], [city], [area], [address], [phone], [jd], [wd], [detail], [trafficPrice], [remarks], [serviceNumber], [aboutTime], [orderPayTime],[addTime],[payOnline],[bargainPrice],updateTime,isDel) \n" +
+            "VALUES (#{orderId},#{shopId}, #{productId}, #{userId},#{workerId},#{productName},#{oldPrice},#{price},#{memberPrice},#{status}, #{userName}, #{province}, #{city},#{area},#{address},#{phone},#{jd},#{wd},#{detail},#{trafficPrice},#{remarks},#{serviceNumber}, #{aboutTime},getdate(), getdate(),#{payOnline},#{bargainPrice},GETDATE(),'2')")
     int addOrderInfo(Order order);
 
     //查询该商品的秒杀价
@@ -149,7 +149,7 @@ public interface OrderMapper {
 
 
     @Select("select w.userName,w.phone,w.workerId,s.shopName,s.shopPhone,s.shopId from TB_Worker w join TB_Shop s on w.shopId = s.shopId where w.workerId = ( \n" +
-            " select workerId from TB_Order where orderId = #{orderId}" +
+            " select workerId from TB_Order where orderId = #{orderId} and isDel = '2' " +
             ")")
     Map<String,Object> findWorkerInfo(@Param("orderId") String orderId);
 
@@ -158,7 +158,7 @@ public interface OrderMapper {
     @Select("select * from TB_Order where orderId = #{orderId} and status >= #{statusDesc}")
     List<Map<String,Object>> findWorkerOrderList(@Param("orderId") String orderId,@Param("statusDesc")String statusDesc);
 
-    @Select("select * from TB_Order where orderId = #{orderId}")
+    @Select("select * from TB_Order where orderId = #{orderId} and isDel = '2'")
     List<Map<String,Object>> findWorkerOrderListById(String orderId);
 
     @Update("update TB_Order set status = #{status},workconfirmTime = GETDATE(),updateTime = GETDATE()  where orderId =#{orderId} ")
@@ -179,7 +179,7 @@ public interface OrderMapper {
 
 
 
-    @Select("select * from TB_Order where orderId = #{orderId}")
+    @Select("select * from TB_Order where orderId = #{orderId} and isDel = '2'")
     List<Map<String,Object>> orderStatusList(String orderId);
 
     //查询评论的状态
@@ -215,12 +215,18 @@ public interface OrderMapper {
     List<Map<String,Object>> findOrderList(String userId);
 
     //查询新订单，且未发送订单的人员
-    @Select("select w.phone,w.workerId from TB_Order t join TB_Worker w on t.workerId = w.workerId where t.status = 1  and t.orderSMSFlag = 0  group by w.phone,w.workerId")
+    @Select("select w.phone,w.workerId from TB_Order t join TB_Worker w on t.workerId = w.workerId where t.isDel = '2' and t.status = 1  and t.orderSMSFlag = 0  group by w.phone,w.workerId")
     List<Map<String,Object>> findWorkerInfoNew();
 
     //查询新订单，把状态进行修改为已发送的
     @Update("update TB_Order set orderSMSFlag = 1,updateTime = GETDATE() where workerId = #{phoneDesc} and status = 1 and  orderSMSFlag = 0")
     int updateInfoNew(String phoneDesc);
+
+
+    //查询新订单，修改订单未删除的状态
+    @Update("update TB_Order set isDel = 1,isDelTime = GETDATE() where orderId = #{orderId}")
+    int updDelOrderInfo(@Param("orderId") String orderId);
+
 
 
 

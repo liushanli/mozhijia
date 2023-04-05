@@ -1,6 +1,4 @@
 package com.mzj.mohome.service;
-
-import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.vo.OrderVo;
 
 import java.util.List;
@@ -42,4 +40,11 @@ public interface OrderService {
     Map<String,Object> addPhoneUp(Map<String,Object> map);
 
     List<Map<String,Object>> findOrderList(Map<String,Object> map);
+
+    /**
+     * 根据订单删除信息
+     * @param orderId
+     * @return
+     */
+    int delOrderInfo(String orderId);
 }
