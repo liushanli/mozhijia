@@ -900,4 +900,29 @@ public class WorkServiceImp implements WorkerService {
         return workList;
     }
 
+    public Map<String,Object> queryWorkerInfo(Map<String,Object> map){
+        Map<String,Object> objectMap = new HashMap<>();
+        objectMap.put("success",true);
+        objectMap.put("msg","");
+        try {
+            String workerId = map.get("workerId").toString();
+            String orderJd = map.get("jd").toString();
+            String orderWd = map.get("wd").toString();
+            Worker worker = workersMapper.queryTbWorkerInfo(workerId);
+
+            Long dis = GetDistance.getDistance(orderJd+","+orderWd,worker.getJd()+","+worker.getWd());
+            logger.info("dis:{},worker=={}",dis,JSON.toJSONString(worker));
+            if(dis>worker.getRadius()){
+                objectMap.put("success",false);
+                objectMap.put("msg","距离太远，技师无法到达");
+            }
+            return objectMap;
+        }catch (Exception e){
+            logger.error("错误信息为：{}",e);
+            objectMap.put("success",false);
+            objectMap.put("msg","服务异常");
+            return objectMap;
+        }
+    }
+
 }

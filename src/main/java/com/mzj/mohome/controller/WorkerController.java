@@ -689,5 +689,13 @@ public class WorkerController {
         return map;
     }
 
+    @ResponseBody
+    @PostMapping("/queryWorkDis")
+    public Map<String,Object> queryWorkDis(@RequestBody Map<String,Object> map_1){
+
+        logger.info("请求信息为：{}",JSON.toJSONString(map_1));
+       return workerService.queryWorkerInfo(map_1);
+    }
+
 }
 

@@ -1,92 +1,63 @@
 package com.mzj.mohome.util;
+import com.mzj.mohome.vo.MapDto;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import java.util.List;
+import static com.mzj.mohome.util.HttpsService.httpGet;
 
 /**
  * 1.这个需要客户申请个高德API上面的key,也可以自己申请(免费的，很快)
  * */
+@Slf4j
 public class GetDistance {
-    public static void main(String[] args){
-        String start = "北京天安门";
-        String end = "上海市黄浦区西藏中路";
 
-        String startLonLat = getLonLat(start);
-        String endLonLat = getLonLat(end);
-
-        System.out.println("起始地："+start+",经纬度："+startLonLat);
-        System.out.println("终点："+end+",经纬度："+endLonLat);
-
-        Long dis = getDistance(startLonLat,endLonLat);
-        System.out.println("两点间距离："+dis+"米");
-    }
-    /**
-     * 0.得到两个地址间距离
-     * */
-    public static long getDistanceByAdress(String start,String end){
-        String startLonLat = getLonLat(start);
-        String endLonLat = getLonLat(end);
-        long dis = getDistance(startLonLat,endLonLat);
-        return dis;
-    }
-
-    /**
-     * 1.地址转换为经纬度
-     * */
-    private static String getLonLat(String address){
-        //返回输入地址address的经纬度信息, 格式是 经度,纬度
-        String queryUrl = "http://restapi.amap.com/v3/geocode/geo?key=9c4ac6befac0d9f329bdde7f3dbe5f35&address="+address;
-        String queryResult = getResponse(queryUrl);  //高德接品返回的是JSON格式的字符串
-        JSONObject job = JSONObject.parseObject(queryResult);
-        JSONObject jobJSON = JSONObject.parseObject(job.get("geocodes").toString().substring(1, job.get("geocodes").toString().length()-1));
-        String DZ = jobJSON.get("location").toString();
-        System.out.println("经纬度："+DZ);
-        return DZ;
-    }
-
-    /**
-     * 2.经纬度算出两点间距离
-     * */
-    private static long getDistance(String startLonLat, String endLonLat){
-        //返回起始地startAddr与目的地endAddr之间的距离，单位：米
-        Long result = new Long(0);
-        String queryUrl = "http://restapi.amap.com/v3/distance?key=9c4ac6befac0d9f329bdde7f3dbe5f35&origins="+startLonLat+"&destination="+endLonLat;
-        String queryResult = getResponse(queryUrl);
-        JSONObject job = JSONObject.parseObject(queryResult);
-        JSONArray ja = job.getJSONArray("results");
-        JSONObject jobO = JSONObject.parseObject(ja.getString(0));
-        result = Long.parseLong(jobO.get("distance").toString());
-        System.out.println("距离2："+result);
-        return result;
-    }
-
-    /**
-     * 3.发送请求
-     * */
-    private static String getResponse(String serverUrl){
-        //用JAVA发起http请求，并返回json格式的结果
-        StringBuffer result = new StringBuffer();
+    public static MapDto getJW(String address){
         try {
-            URL url = new URL(serverUrl);
-            URLConnection conn = url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            while((line = in.readLine()) != null){
-                result.append(line);
-            }
-            in.close();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            MapDto mapDto = new MapDto();
+            String jsonStr = httpGet("https://api.map.baidu.com/geocoding/v3/?address="+address+"&output=json&ak=Dw4VqR2Z5ygmDxfEVlaz0j2cI3wx9DGn");
+            net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(jsonStr);
+            String result = jsonObject.get("result").toString();
+            net.sf.json.JSONObject jsonObjectResult = net.sf.json.JSONObject.fromObject(result);
+            String location = jsonObjectResult.get("location").toString();
+            net.sf.json.JSONObject location1 = net.sf.json.JSONObject.fromObject(location);
+            String lng = location1.get("lng").toString();
+            String lat = location1.get("lat").toString();
+            mapDto.setLat(lat);
+            mapDto.setLng(lng);
+            return mapDto;
+        }catch (Exception e){
+            log.error("获取地图地址错误为：{}",e);
+            return null;
         }
-        return result.toString();
     }
+
+    /**
+     * 根据两点的经纬度来获取信息
+     * start，end由纬度,经度组成
+     * @param start
+     * @param end
+     * @return
+     */
+    public static Long getDistance(String start,String end){
+        try {
+            String jsonStr_1 = httpGet("https://api.map.baidu.com/directionlite/v1/driving?origin="+start+"&destination="+end+"&ak=Dw4VqR2Z5ygmDxfEVlaz0j2cI3wx9DGn");
+            net.sf.json.JSONObject jsonObject1 = net.sf.json.JSONObject.fromObject(jsonStr_1);
+            String result1 = jsonObject1.get("result").toString();
+            net.sf.json.JSONObject jsonObjectResult1 = net.sf.json.JSONObject.fromObject(result1);
+            List<String> routes = (List<String>)jsonObjectResult1.get("routes");
+
+            net.sf.json.JSONObject location2 = net.sf.json.JSONObject.fromObject(routes.get(0));
+            return Long.parseLong(location2.get("distance").toString());
+        }catch (Exception e){
+            log.error("获取地图距离错误为：{}",e);
+            return 0l;
+        }
+    }
+
+    /*public static void main(String str[]){
+       System.out.println(getJW("上海市"));
+        System.out.println(getJW("上海市浦东新区万德路"));
+        //https://api.map.baidu.com/directionlite/v1/driving?origin=40.01116,116.339303&destination=39.936404,116.452562&ak=Dw4VqR2Z5ygmDxfEVlaz0j2cI3wx9DGn
+        //System.out.println(getDistince("40.01116,116.339303","31.244907000000001,121.468913000000001"));
+    }*/
 }

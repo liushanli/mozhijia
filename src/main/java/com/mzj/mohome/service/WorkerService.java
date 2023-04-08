@@ -86,4 +86,11 @@ public interface WorkerService {
     Map<String,Object> findWorkerInfoBy(String phone,String version);
 
     List<Map<String,Object>> workerInfoListByInfo(String shopId,String city);
+
+    /**
+     * 查询技师与订单的距离
+     * @param map
+     * @return
+     */
+    Map<String,Object> queryWorkerInfo(Map<String,Object> map);
 }

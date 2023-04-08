@@ -430,4 +430,12 @@ public interface WorkersMapper {
             "           ) t GROUP BY workerId")
     List<Map<String,Object>> findEvaluateInfo_1();
 
+    /**
+     * 根据技师id来查询信息
+     * @param workerId
+     * @return
+     */
+    @Select("select jd,wd,radius from TB_WorkerPoint where workerId = #{workerId}")
+    Worker queryTbWorkerInfo(@Param("workerId") String workerId);
+
 }

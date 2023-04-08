@@ -28,9 +28,9 @@ public  class MapUtil {
     private static String key = "efb831362ea4ab89625825771a29ad39";
     public static void main(String[] args){
 
-        Long s = 100089L;
+       /* Long s = 100089L;
         System.out.println( ( (float)s/1000));
-        /*String start = "浙江省杭州市西湖区";
+        String start = "浙江省杭州市西湖区";
 
         String end = "郑州市金水区";
 
@@ -42,15 +42,17 @@ public  class MapUtil {
 
         System.out.println(endLonLat);*/
         /*121.253758,31.117122==121.34921,31.155279*/
-        Long dis = getDistance("121.253758,31.117122","121.34921,31.155279");
+       /* Long dis = getDistance("116.339303,40.011160069003","116.452562,39.93640407532");
 
-        System.out.println(dis);
+        System.out.println(dis);*/
 
+/*
         System.out.println("经纬度距离计算结果：" + getDistance(121.253758,31.117122, 121.34921,31.155279) + "米");
+*/
 
 
-        GlobalCoordinates source = new GlobalCoordinates(121.253758,31.117122);
-        GlobalCoordinates target = new GlobalCoordinates(121.34921,31.155279);
+        GlobalCoordinates source = new GlobalCoordinates(116.339303,40.011160069003);
+        GlobalCoordinates target = new GlobalCoordinates(116.452562,39.93640407532);
 
         Long meter1 = (long)getDistanceMeter(source, target, Ellipsoid.Sphere);
         double meter2 = getDistanceMeter(source, target, Ellipsoid.WGS84);
@@ -60,39 +62,7 @@ public  class MapUtil {
 
     }
 
-    private static String getLonLat(String address){
-//返回输入地址address的经纬度信息, 格式是 经度,纬度
 
-        String queryUrl = "http://restapi.amap.com/v3/geocode/geo?key="+key+"&address="+address;
-
-        String queryResult = getResponse(queryUrl); //高德接品返回的是JSON格式的字符串
-
-        JSONObject jo = new JSONObject().fromObject(queryResult);
-
-        System.out.println("-=======================------");
-
-        System.out.println(jo.toString());
-
-        JSONArray ja = jo.getJSONArray("geocodes");
-
-        System.out.println(ja.toString());
-
-        return new JSONObject().fromObject(ja.getString(0)).get("location").toString();
-
-    }
-
-    public static Long getDistance(String startLonLat, String endLonLat){
-        //返回起始地startAddr与目的地endAddr之间的距离，单位：米
-        log.info("==="+startLonLat);
-        log.info("==="+endLonLat);
-        String queryUrl = "http://restapi.amap.com/v3/distance?key="+key+"&origins="+startLonLat+"&destination="+endLonLat+"&type=1";
-        String queryResult = getResponse(queryUrl);
-        System.out.println(queryResult);
-        JSONObject jo = new JSONObject().fromObject(queryResult);
-        JSONArray ja = jo.getJSONArray("results");
-        Long result = Long.parseLong(new JSONObject().fromObject(ja.getString(0)).get("distance").toString());
-        return result;
-    }
 
     private static String getResponse(String serverUrl){
 //用JAVA发起http请求，并返回json格式的结果
