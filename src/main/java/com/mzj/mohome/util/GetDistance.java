@@ -1,8 +1,12 @@
 package com.mzj.mohome.util;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.mzj.mohome.vo.MapDto;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.mzj.mohome.util.HttpsService.httpGet;
 
 /**
@@ -38,21 +42,26 @@ public class GetDistance {
      * @param end
      * @return
      */
-    public static Long getDistance(String start,String end){
+   /* public static Long getDistance(String start,String end){
         try {
-            String jsonStr_1 = httpGet("https://api.map.baidu.com/directionlite/v1/driving?origin="+start+"&destination="+end+"&ak=Dw4VqR2Z5ygmDxfEVlaz0j2cI3wx9DGn");
-            net.sf.json.JSONObject jsonObject1 = net.sf.json.JSONObject.fromObject(jsonStr_1);
-            String result1 = jsonObject1.get("result").toString();
-            net.sf.json.JSONObject jsonObjectResult1 = net.sf.json.JSONObject.fromObject(result1);
-            List<String> routes = (List<String>)jsonObjectResult1.get("routes");
+            String url = "https://api.map.baidu.com/directionlite/v1/driving";
+            Map<String,String> map_1 = new HashMap<>();
+            map_1.put("origin",start);
+            map_1.put("destination",end);
+            map_1.put("steps_info","0");
+            map_1.put("ak","zdv9i6SuZtRFCVfXey4u49xXRkBWl5FY");
+            JSONObject jsonObject = requestApi.getApi(url,map_1);
+            //数据解析
+            JSONObject result = jsonObject.getJSONObject("result");
+            JSONArray jsonArray = (JSONArray) result.get("routes");
+            Integer distance1 = (Integer) ((JSONObject) jsonArray.get(0)).get("distance");//获取举例米
 
-            net.sf.json.JSONObject location2 = net.sf.json.JSONObject.fromObject(routes.get(0));
             return Long.parseLong(location2.get("distance").toString());
         }catch (Exception e){
             log.error("获取地图距离错误为：{}",e);
             return 0l;
         }
-    }
+    }*/
 
     /*public static void main(String str[]){
        System.out.println(getJW("上海市"));

@@ -58,16 +58,22 @@ public interface OrderMapper {
             "t.serviceNumber,p.productTime,t.trafficPrice,tw.userName workerName,tw.phone workerPhone, " +
             "t.workerId,tw.imgUrl as workerImg,t.aboutTime,t.userName,t.phone,t.address,t.jd userJD," +
             "t.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
-            "t.payType,t.fillMoney,t.remarks,t.shopReceiveTime,t.serviceCompleteTime,t.workconfirmTime from TB_Order t join TB_Product p on t.productId = p.productId " +
+            "t.payType,t.fillMoney,t.remarks,t.shopReceiveTime,t.serviceCompleteTime,t.workconfirmTime," +
+            " t.province,t.city,t.area,t.oldPrice " +
+            " from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
+            " join TB_WorkerPoint tp on t.workerId = tp.workerId " +
             "where t.isDel = '2' and t.status != 0\n" +
             "union all \n" +
             "select t.id,t.userId, p.imgUrl,p.productId,p.productName,t.status,t.addTime,t.orderId,t.payOnline," +
             "t.serviceNumber,p.productTime,t.trafficPrice,tw.userName workerName,tw.phone workerPhone, " +
             "t.workerId,tw.imgUrl as workerImg,t.aboutTime,t.userName,t.phone,t.address,t.jd userJD," +
-            "t.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
-            "t.payType,t.fillMoney,t.remarks,t.shopReceiveTime,t.serviceCompleteTime,t.workconfirmTime from TB_Order t join TB_Product p on t.productId = p.productId " +
+            "t.wd userWD,tp.jd workJd,tp.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
+            "t.payType,t.fillMoney,t.remarks,t.shopReceiveTime,t.serviceCompleteTime,t.workconfirmTime," +
+            " t.province,t.city,t.area,t.oldPrice " +
+            " from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
+            " join TB_WorkerPoint tp on t.workerId = tp.workerId " +
             "where t.isDel = '2' and t.status = 0 and  DateDiff(s,t.addTime,GETDATE()) &lt;= 900\n" +
             ") t " +
             "where 1=1 and t.status != 2 " +
@@ -89,18 +95,22 @@ public interface OrderMapper {
             "select t.id,t.userId, p.imgUrl,p.productId,p.productName,t.status,t.addTime,t.orderId,t.payOnline," +
             "t.serviceNumber,p.productTime,t.trafficPrice,tw.userName workerName,tw.phone workerPhone, " +
             "t.workerId,tw.imgUrl as workerImg,t.aboutTime,t.userName,t.phone,t.address,t.jd userJD," +
-            "tw.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
-            "t.payType,t.fillMoney,t.remarks from TB_Order t join TB_Product p on t.productId = p.productId " +
+            "tw.wd userWD,tp.jd workJd,tp.wd workWd,t.shopId,shop.shopName ,shop.servicePhone,t.returnMoney,t.tradeNo," +
+            "t.payType,t.fillMoney,t.remarks,t.province,t.city,t.area,t.oldPrice " +
+            " from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
+            " join TB_WorkerPoint tp on t.workerId = tp.workerId " +
             "where t.isDel = '2' and t.status != 0\n" +
             "union all \n" +
             "select t.id,t.userId, p.imgUrl,p.productId,p.productName,t.status,t.addTime,t.orderId,t.payOnline," +
             "t.serviceNumber,p.productTime,t.trafficPrice,tw.userName workerName,tw.phone workerPhone, " +
             "t.workerId,tw.imgUrl as workerImg,t.aboutTime,t.userName,t.phone,t.address,t.jd userJD," +
-            "tw.wd userWD,tw.jd workJd,tw.wd workWd,t.shopId,shop.shopName ,shop.servicePhone, t.returnMoney,t.tradeNo," +
-            "t.payType,t.fillMoney,t.remarks from TB_Order t join TB_Product p on t.productId = p.productId " +
+            "tw.wd userWD,tp.jd workJd,tp.wd workWd,t.shopId,shop.shopName ,shop.servicePhone, t.returnMoney,t.tradeNo," +
+            "t.payType,t.fillMoney,t.remarks,t.province,t.city,t.area,t.oldPrice " +
+            "from TB_Order t join TB_Product p on t.productId = p.productId " +
             "join TB_Worker tw on t.workerId = tw.workerId join TB_Shop shop on tw.shopId = shop.shopId " +
-            "where t.isDel = '2' and t.status = 0 and  DateDiff(s,t.addTime,GETDATE()) &lt;= 900\n" +
+            " join TB_WorkerPoint tp on t.workerId = tp.workerId " +
+            " where t.isDel = '2' and t.status = 0 and  DateDiff(s,t.addTime,GETDATE()) &lt;= 900\n" +
             ") t " +
             "where 1=1 and t.status != 2 <if test='statusDesc != null'> and (t.status =1 or " +
             "(t.status &gt;= 3 and t.status &lt; 7)) </if> " +
@@ -119,8 +129,8 @@ public interface OrderMapper {
      * 添加订单信息
      * @return
      */
-    @Insert("INSERT INTO TB_Order([orderId], [shopId], [productId], [userId], [workerId], [productName], [oldPrice], [price], [memberPrice],  [status], [userName], [province], [city], [area], [address], [phone], [jd], [wd], [detail], [trafficPrice], [remarks], [serviceNumber], [aboutTime], [orderPayTime],[addTime],[payOnline],[bargainPrice],updateTime,isDel) \n" +
-            "VALUES (#{orderId},#{shopId}, #{productId}, #{userId},#{workerId},#{productName},#{oldPrice},#{price},#{memberPrice},#{status}, #{userName}, #{province}, #{city},#{area},#{address},#{phone},#{jd},#{wd},#{detail},#{trafficPrice},#{remarks},#{serviceNumber}, #{aboutTime},getdate(), getdate(),#{payOnline},#{bargainPrice},GETDATE(),'2')")
+    @Insert("INSERT INTO TB_Order([orderId], [shopId], [productId], [userId], [workerId], [productName], [oldPrice], [price], [memberPrice],  [status], [userName], [province], [city], [area], [address], [phone], [jd], [wd], [detail], [trafficPrice], [remarks], [serviceNumber], [aboutTime], [orderPayTime],[addTime],[payOnline],[bargainPrice],updateTime,isDel,sourceType,productImgUrl) \n" +
+            "VALUES (#{orderId},#{shopId}, #{productId}, #{userId},#{workerId},#{productName},#{oldPrice},#{price},#{memberPrice},#{status}, #{userName}, #{province}, #{city},#{area},#{address},#{phone},#{jd},#{wd},#{detail},#{trafficPrice},#{remarks},#{serviceNumber}, #{aboutTime},getdate(), getdate(),#{payOnline},#{bargainPrice},GETDATE(),'2',#{sourceType},#{productImgUrl})")
     int addOrderInfo(Order order);
 
     //查询该商品的秒杀价
@@ -172,6 +182,9 @@ public interface OrderMapper {
     //修改订单退款
     @Update("update TB_Order set status = 10,returnReason=#{returnReason},returnMoney=#{returnMoney},returnType=0,updateTime = GETDATE()  where orderId =#{orderId}")
     int updateReturnOrder(Order order);
+
+    @Update("update TB_Order set status=#{status},orderPayType=#{orderPayType}, updateTime = GETDATE()  where orderId =#{orderId}")
+    int updateOrderInfoById(Order order);
 
     @Select("select COUNT(1) from TB_CouponAndUserId where orderId = #{orderId} and isUser = 1")
     int findCouponId(@Param("orderId") String orderId);
@@ -227,7 +240,7 @@ public interface OrderMapper {
     @Update("update TB_Order set isDel = 1,isDelTime = GETDATE() where orderId = #{orderId}")
     int updDelOrderInfo(@Param("orderId") String orderId);
 
-
-
+    @Select("select imgUrl from TB_Product where productId = (select productId from tb_order where orderId=#{orderId})")
+    String findProductImg(String orderId);
 
 }

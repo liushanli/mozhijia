@@ -1,10 +1,13 @@
 package com.mzj.mohome.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.service.WorkerService;
 import com.mzj.mohome.util.ImageUtil;
+import com.mzj.mohome.util.RequestApi;
 import com.mzj.mohome.util.ToolVideo;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.vo.PageUtil;
@@ -115,6 +118,41 @@ public class WorkerController {
         }
         return map;
     }
+
+    @ResponseBody
+    @PostMapping("/findWorkPicList")
+    public Map<String,Object> findWorkPicList(@RequestBody PageUtil pageUtil){
+        Map<String, Object> map = new HashMap<>();
+        map.put("success",true);
+        map.put("msg","");
+        try {
+            List<WorkerPic>  workerPicList = workerService.findWorkerPicById(pageUtil);
+            map.put("workePicrList",workerPicList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success",false);
+            map.put("msg","查询错误，请稍后重试");
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @PostMapping("/findWorkListByShop_2")
+    public Map<String,Object> findWorkListByShop_2(@RequestBody PageUtil pageUtil){
+        Map<String, Object> map = new HashMap<>();
+        map.put("success",true);
+        map.put("msg","");
+        try {
+            List<Map<String,Object>>  workerList = workerService.findWorkerList_2(pageUtil);
+            map.put("workerList",workerList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("success",false);
+            map.put("msg","查询错误，请稍后重试");
+        }
+        return map;
+    }
+
 
 
     @ResponseBody
@@ -696,6 +734,7 @@ public class WorkerController {
         logger.info("请求信息为：{}",JSON.toJSONString(map_1));
        return workerService.queryWorkerInfo(map_1);
     }
+
 
 }
 

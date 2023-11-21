@@ -132,6 +132,49 @@ public interface WorkersMapper {
 
 
 
+    //根绝店铺来查询员工的信息
+   /* @Select("<script>" +
+            "SELECT w2.n," +
+            "w1.*," +
+            " (select top 1 (dateStr+' '+dateHHmm) dateHHmm from TB_WorkerTime where isBusy = 0 and [date]>DATEADD(Minute,30, GETDATE()) and workerId =  w1.workerId)  dateHHmm "+
+            " FROM tb_workInfo_new(#{city}) w1," +
+            "(SELECT TOP (${sizeNum}) row_number () OVER ( ORDER BY t.ID asc,orderNum asc " +
+            " ) n, t.ID FROM tb_workerInfo(#{city},#{jd},#{wd}) t " +
+            " <if test='productId != null'> left JOIN TB_WorkerSerProduct tbP on t.workerId = tbP.workerId </if> " +
+            "  where 1=1 " +
+            " <if test='shopId != null'> and shopId = #{shopId} </if>" +
+            " <if test='productId != null'> and tbP.productId = #{productId} </if>" +
+            " <if test='onLine != null'> and isOnline = #{onLine} </if>" +
+            " <if test='shopName != null'> and shopName = #{shopName} </if>" +
+            " <if test='workerId!=null'> and workerId = #{workerId} </if> " +
+            " <if test='userName!=null'> and (userName like concat('%',#{userName},'%') or (nickName like concat('%',#{userName},'%'))) </if>"+
+            "<if test='genderDesc != null '> and gender= #{genderDesc} </if>" +
+            " ) w2 " +
+            "WHERE " +
+            " w1.ID = w2.ID AND w2.n  &gt; ${pages} ORDER BY w2.n ASC "+
+            "  </script>")*/
+    @Select("<script>" +
+            "SELECT w1.*" +
+            " FROM tb_workInfo_new(#{city},#{jd},#{wd}) w1 " +
+            "WHERE 1=1 " +
+            " <if test='shopId != null'> and shopId = #{shopId} </if>" +
+            " <if test='productId != null'> and tbP.productId = #{productId} </if>" +
+            " <if test='onLine != null'> and isOnline = #{onLine} </if>" +
+            " <if test='shopName != null'> and shopName = #{shopName} </if>" +
+            " <if test='workerId!=null'> and workerId = #{workerId} </if> " +
+            " <if test='userName!=null'> and (userName like concat('%',#{userName},'%') or (nickName like concat('%',#{userName},'%'))) </if>"+
+            "<if test='genderDesc != null '> and gender= #{genderDesc} </if>" +
+            " order by distance " +
+            " offset ${pages} rows fetch next ${sizeNum} rows only"+
+            "  </script>")
+    List<Map<String,Object>> findWorkerList_4(@Param("jd") String jd,@Param("wd") String wd,
+                                              @Param("city") String city,@Param("shopName")String shopName,
+                                              @Param("userName")String userName,@Param("workerId") String workerId,
+                                              @Param("shopId")String shopId, @Param("pages")Integer pages,
+                                              @Param("sizeNum")Integer sizeNum,@Param("genderDesc") String genderDesc,
+                                              @Param("onLine")String onLine,@Param("productId")String productId);
+
+
     /**
      * 获取技师的时间段
      * @param workerId
@@ -291,13 +334,13 @@ public interface WorkersMapper {
                        @Param("id")String id, @Param("workerId")String workerId);
 
     //查询技师的状态栏
-    @Select("select top 3 * from (select e.orderId, c.evalId,c.chooseId,count(1) nums  from TB_Eval_Choose c \n" +
-            "left join TB_Evaluate e on c.evalId = e.id \n" +
-            "left join TB_Order o on e.orderId = o.orderId\n" +
-            "where 1=1 and o.workerId = #{workerId}\n" +
-            "group by e.orderId, c.evalId,c.chooseId) c\n" +
-            "left join TB_EvalChooseDetail d on c.chooseId = d.id\n" +
-            "order by nums desc")
+    @Select("select  name from (select c.chooseId,count(1) nums  from TB_Eval_Choose c" +
+            " left join TB_Evaluate e on c.evalId = e.id " +
+            " left join TB_Order o on e.orderId = o.orderId" +
+            " where 1=1 and o.workerId = #{workerId}" +
+            " group by c.chooseId) c" +
+            " left join TB_EvalChooseDetail d on c.chooseId = d.id" +
+            " order by nums desc ")
     List<Map<String,Object>> findWorkEvalStatus(String workerId);
 
 
@@ -437,5 +480,36 @@ public interface WorkersMapper {
      */
     @Select("select jd,wd,radius from TB_WorkerPoint where workerId = #{workerId}")
     Worker queryTbWorkerInfo(@Param("workerId") String workerId);
+
+    /**
+     * 查询所有员工信息
+     * @return
+     */
+    @Select("select workerId,dateHHmm from TB_Worker where isOnline = 1 and is_del = 1")
+    List<Map<String,String>> queryWorkerList();
+
+    /**
+     * 根据主键ID进行修改最新时间
+     * @param workerId
+     * @param dateHHmm
+     * @return
+     */
+    @Update("update TB_Worker set dateHHmm =#{dateHHmm}  where workerId = #{workerId} and isOnline = 1 and is_del = 1")
+    int updWorkerInfo(@Param("workerId") String workerId,@Param("dateHHmm") String dateHHmm);
+
+    /**
+     * 根据主键ID进行修改标签
+     * @param workerId
+     * @param evalStatus_one
+     * @param evalStatus_two
+     * @param evalStatus_three
+     * @return
+     */
+    @Update("update TB_Worker set evalStatus_one =#{evalStatus_one},evalStatus_two =#{evalStatus_two},evalStatus_three =#{evalStatus_three}  where workerId = #{workerId} and isOnline = 1 and is_del = 1")
+    int updWorkerInfoLabel(@Param("workerId") String workerId
+                    ,@Param("evalStatus_one") String evalStatus_one
+                    ,@Param("evalStatus_two") String evalStatus_two
+                    ,@Param("evalStatus_three") String evalStatus_three);
+
 
 }

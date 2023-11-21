@@ -1,4 +1,5 @@
 package com.mzj.mohome.service;
+import com.mzj.mohome.entity.PayRecord;
 import com.mzj.mohome.vo.OrderVo;
 
 import java.util.List;
@@ -20,6 +21,12 @@ public interface OrderService {
      * @return
      */
     Map<String,Object> addOrderInfo(Map<String,Object> map);
+
+    /**
+     * 添加订单信息
+     * @return
+     */
+    Map<String,Object> addOrderInfoWx(Map<String,Object> map);
 
     //根据状态查询
     List<Map<String,Object>> findOrerListInfo(Map<String,Object> map);
@@ -47,4 +54,11 @@ public interface OrderService {
      * @return
      */
     int delOrderInfo(String orderId);
+
+    /**
+     * 修改支付记录表
+     * @param payRecord
+     * @return
+     */
+    int updOrderInfo(PayRecord payRecord);
 }

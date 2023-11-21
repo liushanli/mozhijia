@@ -42,4 +42,8 @@ public class PayRecord implements Serializable {
     private Integer month;
 
     private String orderId2;
+
+    private String sourceType;
+
+    private String orderPayType;
 }

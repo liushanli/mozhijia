@@ -1,6 +1,8 @@
 package com.mzj.mohome.serviceImp;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.mapper.OrderMapper;
@@ -14,20 +16,17 @@ import com.winnerlook.model.PrivacyUnbindBody;
 import com.winnerlook.model.VoiceResponseResult;
 import com.winnerlook.util.MD5Util;
 import org.apache.commons.lang.StringUtils;
-import org.gavaghan.geodesy.Ellipsoid;
-import org.gavaghan.geodesy.GlobalCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static com.mzj.mohome.util.MapUtil.getDistanceMeter;
 
 @Service("workerService")
 public class WorkServiceImp implements WorkerService {
@@ -62,8 +61,19 @@ public class WorkServiceImp implements WorkerService {
     @Value("${logoUrl}")
     private String logoUrl;
 
+    @Value("${distanceUrl}")
+    private String distanceUrl;
+    @Value("${clientAk}")
+    private String clientAk;
+    @Value("${serverAK}")
+    private String serverAk;
+    @Value("${addressUrl}")
+    private String addressUrl;
+
     @Value("${video_path}")
     private String video_path;
+    @Autowired
+    private RequestApi requestApi;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat simpleDateF = new SimpleDateFormat("yyyy-MM-dd");
@@ -786,7 +796,7 @@ public class WorkServiceImp implements WorkerService {
            if(workerList!=null && workerList.size()>0){
 
                logger.info("-------start------");
-               Long oldtime=new Date().getTime();
+               Long oldtime=System.currentTimeMillis();
                 for(Map<String,Object> worker : workerList) {
 
                     String radius = ToolsUtil.getString(worker.get("radius"));
@@ -817,12 +827,13 @@ public class WorkServiceImp implements WorkerService {
                     if (mapList != null && mapList.size() > 0) {
                         for (int i = 0; i < mapList.size(); i++) {
                             Map<String, Object> map = mapList.get(i);
-                            if (i == 0)
+                            if (i == 0) {
                                 worker.put("evalStatus_1", map.get("name").toString());
-                            else if (i == 1)
+                            } else if (i == 1) {
                                 worker.put("evalStatus_2", map.get("name").toString());
-                            else if (i == 2)
+                            } else if (i == 2) {
                                 worker.put("evalStatus_3", map.get("name").toString());
+                            }
                         }
                     }
                     int number = 0;
@@ -874,7 +885,7 @@ public class WorkServiceImp implements WorkerService {
                     }*/
                     workerList_1.add(worker);
                 }
-               Long systime=new Date().getTime();
+               Long systime=System.currentTimeMillis();
                Long time = (systime - oldtime);//相差毫秒数
                 logger.info("jieshu的毫秒为：{}",time);
             }
@@ -883,6 +894,89 @@ public class WorkServiceImp implements WorkerService {
         }
         return null;
     }
+
+    @Override
+    public List<Map<String,Object>> findWorkerList_2(PageUtil pageUtil) {
+        logger.info("===================findWorkerList_2====start===============");
+        if(pageUtil!=null){
+            String shopId = ToolsUtil.getString(pageUtil.getShopId());
+            Integer page = (pageUtil.getPage()-1)*4;
+            Integer size = 4;
+            String workId = ToolsUtil.getString(pageUtil.getWorkerId());
+            String userName = ToolsUtil.getString(pageUtil.getUserName());
+            String shopName = ToolsUtil.getString(pageUtil.getShopName());
+            String genderDesc = ToolsUtil.getString(pageUtil.getGenderDesc());
+
+            String onLine = ToolsUtil.getString(pageUtil.getOnLine());
+            String city = ToolsUtil.getString(pageUtil.getCity());
+            String productId = ToolsUtil.getString(pageUtil.getProductId());
+            if(onLine==null){
+                onLine = "1";
+            }
+            logger.info("findWorkerList_2===city==="+city);
+
+            String jd = ToolsUtil.getString(pageUtil.getJd());
+            String wd = ToolsUtil.getString(pageUtil.getWd());
+            logger.info("findWorkerList_2==经纬度：jd={},wd={}",jd,wd);
+            List<Map<String,Object>> workerList  = workersMapper.findWorkerList_4(jd,wd,city,shopName,userName,workId,shopId,page,size,genderDesc,onLine,productId);
+            List<Map<String,Object>> workerList_1  = new ArrayList<>();
+            logger.info("====ToolsUtil.getCityFlag(city)=="+ToolsUtil.getCityFlag(city));
+            logger.info("findWorkerList===workerList==="+workerList.size());
+            if(workerList!=null && workerList.size()>0){
+
+                logger.info("-------start------");
+                Long oldtime=System.currentTimeMillis();
+                for(Map<String,Object> worker : workerList) {
+                    String radius = ToolsUtil.getString(worker.get("radius"));
+                    String workerId = worker.get("workerId").toString();
+                    Float radius_1 = Float.parseFloat(radius);
+
+                    Integer distance = getDistances(wd+","+jd,worker.get("wd")+","+worker.get("jd"));
+                   
+                    if(radius_1<distance){
+                        continue;
+                    }
+                    if(distance<1000){
+                        worker.put("distance", distance + "m");
+                    }else{
+                        worker.put("distance", distance/1000 + "km");
+                    }
+                    //好评百分比
+                    worker.put("evaluateNumLv",worker.get("evaluateNumLv").toString()+"%");
+
+                    //标签
+                    if(worker.get("evalStatus_one")!=null) {
+                        worker.put("evalStatus_1", worker.get("evalStatus_one").toString());
+                    }
+                    if(worker.get("evalStatus_two")!=null) {
+                        worker.put("evalStatus_2", worker.get("evalStatus_two").toString());
+                    }
+                    if(worker.get("evalStatus_three")!=null){
+                        worker.put("evalStatus_3", worker.get("evalStatus_three").toString());
+                    }
+                    int sellSum = 0;
+                    int sellNum = 0;
+                    if (worker.get("sellSum") != null) {
+                        sellSum = (int) worker.get("sellSum");
+                    }
+                    if (worker.get("sellNum") != null) {
+                        sellNum = (int) worker.get("sellNum");
+                    }
+                    worker.put("sellSum",sellSum+sellNum);
+
+                    workerList_1.add(worker);
+                }
+                Long systime=System.currentTimeMillis();
+                Long time = (systime - oldtime);//相差毫秒数
+                logger.info("结束的毫秒为：{}",time);
+            }
+            logger.info("===================findWorkerList_2====end===============:"+workerList_1.size());
+            return workerList_1;
+        }
+        return null;
+    }
+
+
 
     public List<Map<String,Object>> workerInfoListByInfo(String shopId,String city){
         List<Map<String,Object>> workList =  workersMapper.workerInfoListByInfo(shopId,city);
@@ -910,7 +1004,7 @@ public class WorkServiceImp implements WorkerService {
             String orderWd = map.get("wd").toString();
             Worker worker = workersMapper.queryTbWorkerInfo(workerId);
 
-            Long dis = GetDistance.getDistance(orderJd+","+orderWd,worker.getJd()+","+worker.getWd());
+            Integer dis = getDistances(orderWd+","+orderJd,worker.getWd()+","+worker.getJd());
             logger.info("dis:{},worker=={}",dis,JSON.toJSONString(worker));
             if(dis>worker.getRadius()){
                 objectMap.put("success",false);
@@ -925,4 +1019,79 @@ public class WorkServiceImp implements WorkerService {
         }
     }
 
+    //获取两者之间的距离
+    public Integer getDistances(String start,String end){
+        Map<String,String> map_1 = new HashMap<>();
+        map_1.put("origin",start);
+        map_1.put("destination",end);
+        map_1.put("steps_info","0");
+        map_1.put("ak",serverAk);
+        JSONObject jsonObject = requestApi.getApi(distanceUrl,map_1);
+
+        //数据解析
+        JSONObject result = jsonObject.getJSONObject("result");
+        Integer distance = 0;
+        if(result != null){
+            JSONArray jsonArray = (JSONArray) result.get("routes");
+            distance = (Integer) ((JSONObject) jsonArray.get(0)).get("distance");//获取举例米
+        }
+        logger.info("请求返回两者的距离为："+distance);
+        return distance;
+    }
+
+
+    /*@Scheduled(cron = "0 0/5 * * * ?")
+    @Async*/
+    public void updateWorkDateHHmm(){
+        Long oldtime=System.currentTimeMillis();
+        logger.info("updateWorkDateHHmm=====修改时间日期定时开始："+(new Date()));
+        List<Map<String,String>> workerList = workersMapper.queryWorkerList();
+
+        if(workerList.size()>0 && workerList != null){
+            updateWorkerInfoLabel(workerList);
+            for(Map<String,String> worker : workerList ){
+                String workerId = worker.get("workerId");
+                String dateHHmm = workersMapper.getDateMM(workerId);
+                if(StringUtils.isEmpty(worker.get("dateHHmm")) || !dateHHmm.equals(worker.get("dateHHmm"))){
+                    workersMapper.updWorkerInfo(workerId,dateHHmm);
+                }
+            }
+        }
+        Long systime=System.currentTimeMillis();
+        //相差毫秒数
+        Long time = systime - oldtime;
+        logger.info("updateWorkDateHHmm=====修改时间日期定时结束==结束的毫秒为：{}",time);
+        logger.info("updateWorkDateHHmm=====修改时间日期定时结束："+(new Date()));
+    }
+    //获取标签，进行修改信息
+    private void updateWorkerInfoLabel(List<Map<String,String>> workerList){
+        Long oldtime=System.currentTimeMillis();
+        logger.info("updateWorkerInfoLabel===start==技师标签修改："+(new Date()));
+        for(Map<String,String> worker : workerList ){
+            String evalStatus_1 = "";
+            String evalStatus_2 = "";
+            String evalStatus_3 = "";
+            String workerId = worker.get("workerId");
+            List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(workerId);
+            logger.info("技师:"+workerId+"的标签："+mapList!=null?JSON.toJSONString(mapList):"");
+            if (mapList != null && mapList.size() > 0) {
+                for (int i = 0; i < mapList.size(); i++) {
+                    Map<String, Object> map = mapList.get(i);
+                    if (i == 0) {
+                        evalStatus_1 = map.get("name").toString();
+                    } else if (i == 1) {
+                        evalStatus_2 = map.get("name").toString();
+                    } else if (i == 2) {
+                        evalStatus_3 = map.get("name").toString();
+                    }
+                }
+                workersMapper.updWorkerInfoLabel(workerId,evalStatus_1,evalStatus_2,evalStatus_3);
+            }
+        }
+        Long systime=System.currentTimeMillis();
+        //相差毫秒数
+        Long time = systime - oldtime;
+        logger.info("updateWorkerInfoLabel===end==技师标签修改==结束的毫秒为：{}",time);
+        logger.info("updateWorkerInfoLabel===end==技师标签修改："+(new Date()));
+    }
 }

@@ -1,13 +1,8 @@
 package com.mzj.mohome.service;
 
-import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.vo.PageUtil;
 import com.winnerlook.model.VoiceResponseResult;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +14,9 @@ public interface WorkerService {
 
     //根绝店铺来查询员工的信息
     List<Map<String,Object>> findWorkerList_1(PageUtil pageUtil);
+
+    //根绝店铺来查询员工的信息
+    List<Map<String,Object>> findWorkerList_2(PageUtil pageUtil);
 
     //根据工作人员的工号，来查询员工的照片信息
     List<WorkerPic> findWorkerPicById(PageUtil pageUtil);

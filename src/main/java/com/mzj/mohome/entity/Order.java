@@ -84,7 +84,7 @@ public class Order implements Serializable {
 /// <summary>
     private Integer serviceNumber;
     /// <summary>
-///支付方式，0：未支付，1：支付宝，2：微信
+///支付方式，1：余额，2：微信，3：支付宝
 /// <summary>
     private String orderPayType;
     /// <summary>
@@ -140,8 +140,10 @@ public class Order implements Serializable {
     //订单退款原因
     private String returnReason;
     private Double fillMoney;
-
-    private String tradeNo; //订单流水号
-
-    private Float bargainPrice; //秒杀价
+    //订单流水号
+    private String tradeNo;
+    //秒杀价
+    private Float bargainPrice;
+    //来源，1：公众号，为空或其他是App
+    private String sourceType;
 }

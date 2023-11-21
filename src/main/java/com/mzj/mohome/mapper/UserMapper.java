@@ -22,8 +22,12 @@ public interface UserMapper {
     @Update("<script> update tb_user  set userId=concat(userId,'') <if test='surplusMoney != null'> ,surplusMoney = ISNULL(surplusMoney, 0) + ${surplusMoney}  </if> " +
             "<if test='nickName != null'> ,nickName = #{nickName} </if>" +
             "<if test='imgUrl != null'> ,imgUrl = #{imgUrl} </if>" +
+            "<if test='level != null'> ,level = #{level} </if>" +
             "<if test='cardId != null'> ,cardId = #{cardId},cardName = #{cardName},cardStartTime = getdate(),cardEndTime = DATEADD(mm,${month},GETDATE()) </if>" +
-            "where id = #{id}  and is_del = 1 </script>")
+            "where  is_del = 1" +
+            "<if test='id != null'> and id = #{id} </if>" +
+            "<if test='userId != null'> and userId = #{userId} </if>" +
+            " </script>")
     int updUser(User user);
 
     //登录时判断客户是否存在
@@ -55,22 +59,23 @@ public interface UserMapper {
     List<User> getByUserInfoExistApple(@Param("appleData") String appleData) throws Exception;
 
     //如果用户不存在则直接添加到数据库
-    @Insert("insert into TB_User(userId,userName,phone,nickName,loginType,loginTime,addTime,isBlackList,level,imgUrl,is_del)\n" +
-            "VALUES(#{userId},#{name},#{phoneDesc},#{name},0,GETDATE(),GETDATE(),0,0,'/static/images/userLogo.png',1)")
-    int addUserInfo(@Param("userId")String userId,@Param("phoneDesc") String phoneDesc,@Param("name")String name) throws Exception;
+    @Insert("insert into TB_User(userId,userName,phone,nickName,loginType,loginTime,addTime,isBlackList,level,imgUrl,is_del,sourceType)\n" +
+            "VALUES(#{userId},#{name},#{phoneDesc},#{name},0,GETDATE(),GETDATE(),0,0,'/static/images/userLogo.png',1,#{sourceType})")
+    int addUserInfo(@Param("userId")String userId,@Param("phoneDesc") String phoneDesc,@Param("name")String name,@Param("sourceType") String sourceType) throws Exception;
 
     //如果用户不存在则直接添加到数据库微信
-    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,is_del)\n" +
-            "VALUES(#{userId},#{phoneDesc},#{phoneDesc},#{nickName},#{imgUrl},#{sex},#{openId}, 0,GETDATE(),GETDATE(),0,0,1)")
+    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,is_del,sourceType)\n" +
+            "VALUES(#{userId},#{phoneDesc},#{phoneDesc},#{nickName},#{imgUrl},#{sex},#{openId}, 0,GETDATE(),GETDATE(),0,0,1,#{sourceType})")
     int addWhatUserInfo(@Param("userId")String userId,@Param("phoneDesc")String phoneDesc, @Param("nickName")String nickName,
                         @Param("imgUrl") String imgUrl, @Param("openId")String openId,
-                        @Param("sex")String sex) throws Exception;
+                        @Param("sex")String sex,
+                        @Param("sourceType") String sourceType) throws Exception;
 
 
     //如果用户不存在则直接添加到数据库微信
-    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,appleData,is_del)\n" +
-            " VALUES(#{userId},#{nickName},'',#{nickName},'','','', 0,GETDATE(),GETDATE(),0,0,#{appleData},1)")
-    int addAppleUserInfo(@Param("userId")String userId,@Param("appleData") String appleData, @Param("nickName")String nickName) throws Exception;
+    @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,appleData,is_del,sourceType)\n" +
+            " VALUES(#{userId},#{nickName},'',#{nickName},'','','', 0,GETDATE(),GETDATE(),0,0,#{appleData},1,#{sourceType})")
+    int addAppleUserInfo(@Param("userId")String userId,@Param("appleData") String appleData, @Param("nickName")String nickName,@Param("sourceType") String sourceType) throws Exception;
 
 
 
@@ -244,9 +249,13 @@ public interface UserMapper {
             "GETDATE(),DATEADD(mm,${month},GETDATE()),GETDATE(), GETDATE())")
     int addPayRecordInfoVip(PayRecord payRecord);
 
-    @Insert(" INSERT INTO [TB_PayRecord]([orderId], [trade_no], [onlinePay], [payType], [payTime], [buyType], [status], [subject], [body], [userId], [message], [user_money], [startTime], [endTime], [updateTime], [addTime],[orderId2]) \n" +
-            " VALUES ( #{orderId},'',#{onlinePay},#{payType}, GETDATE(),#{buyType}, 0,#{subject}, #{body},#{userId}, '',#{userMoney},#{startTime},#{endTime}, GETDATE(), GETDATE(),#{orderId2})")
+    @Insert(" INSERT INTO [TB_PayRecord]([orderId], [trade_no], [onlinePay], [payType], [payTime], [buyType], [status], [subject], [body], [userId], [message], [user_money], [startTime], [endTime], [updateTime], [addTime],[orderId2],[sourceType]) \n" +
+            " VALUES ( #{orderId},'',#{onlinePay},#{payType}, GETDATE(),#{buyType}, 0,#{subject}, #{body},#{userId}, '',#{userMoney},#{startTime},#{endTime}, GETDATE(), GETDATE(),#{orderId2},#{sourceType})")
     int addPayRecordInfoCard(PayRecord payRecord);
+
+    @Update("update TB_PayRecord set trade_no = #{tradeNo},payTime =GETDATE()," +
+            "message = #{message},status='1',payType=#{orderPayType} where orderId = #{orderId}")
+    int updPayRecordOrderInfo(PayRecord payRecord);
 
     @Select("\n" +
             "select o.workerId,o.productName,o.phone,w.phone workerPhone,w.userName workerName,o.address,o.aboutTime,r.buyType,r.status,CONVERT(VARCHAR(20),r.payTime,120) payTime,ISNULL(u.surplusMoney,0) surplusMoney from TB_PayRecord r join TB_Order o on (r.orderId = o.orderId or r.orderId2 = o.orderId) join TB_Worker w on o.workerId = w.workerId \n" +
@@ -362,4 +371,22 @@ public interface UserMapper {
 
     @Select("select status from tb_hidden where id = 1")
     int getUserStatus();
+
+    @Select("select surplusMoney from TB_User where userId = #{userId}")
+    String findUserMoney(String userId);
+
+    @Select("select price from TB_UserPayWhite  where userId = #{userId}")
+    Integer fineUserWhite(String userId);
+
+    @Select("select * from TB_PayRecord where  orderId = #{orderId}")
+    PayRecord findPayRecord(String orderId);
+
+    @Select("select * from TB_Card where cardName = #{cardName} ")
+    Card findCardInfo(String cardName);
+
+    @Select("select token from tb_wxTokenInfo where wxAppid = #{wxAppid} and  GETDATE() BETWEEN startTime and endTime")
+    String getToken(String wxAppid);
+
+    @Update("update tb_wxTokenInfo set startTime = GETDATE(),endTime = DATEADD(HH,2, GETDATE()),token = #{token} where wxAppid = #{wxAppid}")
+    int updTokenInfo(@Param("wxAppid") String wxAppid,@Param("token")String token);
 }

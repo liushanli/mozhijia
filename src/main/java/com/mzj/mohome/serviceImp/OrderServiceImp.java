@@ -16,7 +16,6 @@ import com.mzj.mohome.util.SmsSendUtil;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.vo.OrderDto;
 import com.mzj.mohome.vo.OrderVo;
-import com.mzj.mohome.vo.PageUtil;
 import com.winnerlook.model.VoiceResponseResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -126,6 +125,7 @@ public class OrderServiceImp implements OrderService {
         Order order = new Order();
         SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         int num = 0;
+        String sourceType = "";
         Map<String,Object>  map_2 = new HashMap<>();
         Map<String,Object>  map_1 = new HashMap<>();
         try {
@@ -165,16 +165,20 @@ public class OrderServiceImp implements OrderService {
             order.setAboutTime((map.get("aboutTime")!=null && map.get("aboutTime")!="")?sdf_1.parse(String.valueOf(map.get("aboutTime"))):null);
             order.setOrderPayTime((map.get("orderPayTime")!=null && map.get("orderPayTime")!="") ?sdf.parse(String.valueOf(map.get("orderPayTime"))):null);
             order.setAddTime(new Date());
+            order.setProductImgUrl(ToolsUtil.getString(map.get("productImg")));
             Float f = orderMapper.findSecorndPrice(order.getProductId());
             if(f!=null){
                 order.setBargainPrice(f);
             }else{
                 order.setBargainPrice(0f);
             }
+            //来源类型
+            if(map_1.get("sourceType")!=null){
+                sourceType = String.valueOf(map_1.get("sourceType"));
+            }
+            order.setSourceType(sourceType);
             num = orderMapper.addOrderInfo(order);
-
             if(num>0){
-
                 PayRecord payRecord = new PayRecord();
                 payRecord.setOrderId(order.getOrderId());
                 payRecord.setBody(String.valueOf(map.get("body")));
@@ -182,16 +186,101 @@ public class OrderServiceImp implements OrderService {
                 payRecord.setBuyType(1);
                 payRecord.setOnlinePay(order.getPayOnline());
                 payRecord.setUserId(order.getUserId());
+                payRecord.setSourceType(sourceType);
                 userMapper.addPayRecordInfoCard(payRecord);
                 map_2.put("orderId",order.getOrderId());
             }
         }catch (Exception e){
-            System.out.println("e==="+e.getMessage());
+            logger.error("添加订单异常：{}",e);
             return null;
         }
         return map_2;
     }
 
+    public Map<String,Object> addOrderInfoWx(Map<String,Object> map){
+        Order order = new Order();
+        SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        int num = 0;
+        String sourceType = "";
+        Map<String,Object>  map_2 = new HashMap<>();
+        map_2.put("success",true);
+        map_2.put("msg","");
+        Map<String,Object>  map_1 = new HashMap<>();
+        try {
+            map_1 = (Map<String, Object>) map.get("json");
+            order.setWorkerId(String.valueOf(map.get("workerId")));
+            order.setProductId(String.valueOf(map.get("productId")));
+            System.out.println(map);
+
+            Map<String,Object> worker = workersMapper.findWorkerById(order.getWorkerId());
+            Map<String,Object> product = productMapper.findProductInfoByIdInfo(order.getProductId());
+            order.setShopId(worker.get("shopId").toString());
+            order.setProductName(product.get("productName").toString());
+            order.setOldPrice(Float.parseFloat(product.get("oldPrice").toString()));
+            order.setUserId(String.valueOf(map.get("userId")));
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
+            order.setOrderId("A"+simpleDateFormat.format(new Date())+ToolsUtil.getFourRandom());
+            order.setPrice(Float.parseFloat(product.get("price").toString()));
+            order.setMemberPrice(Float.parseFloat(product.get("memberPrice").toString()));
+
+            order.setPayOnline(Float.parseFloat(String.valueOf(map.get("payOnline"))));
+            order.setStatus(Integer.parseInt(String.valueOf(map.get("status"))));
+            order.setUserName(String.valueOf(map_1.get("userName")));
+
+            order.setProvince(String.valueOf(map_1.get("provice")));
+            order.setCity(String.valueOf(map_1.get("city")));
+            order.setArea(String.valueOf(map_1.get("area")));
+            order.setAddress(String.valueOf(map_1.get("address")));
+            order.setPhone(String.valueOf(map_1.get("userPhone")));
+            order.setJd(Float.parseFloat(String.valueOf(map_1.get("jd"))));
+            order.setWd(Float.parseFloat(String.valueOf(map_1.get("wd"))));
+            order.setDetail(String.valueOf(map_1.get("detail")!=null?map_1.get("detail"):""));
+            order.setRemarks(map_1.get("remarks").toString());
+            order.setTrafficPrice((map.get("trafficPrice")!=null && map.get("trafficPrice")!="")?Integer.parseInt(String.valueOf(map.get("trafficPrice"))):0);
+            order.setServiceNumber(Integer.parseInt(String.valueOf(map.get("serviceNumber"))));
+            SimpleDateFormat sdf_1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            order.setAboutTime((map.get("aboutTime")!=null && map.get("aboutTime")!="")?sdf_1.parse(String.valueOf(map.get("aboutTime"))):null);
+            order.setOrderPayTime((map.get("orderPayTime")!=null && map.get("orderPayTime")!="") ?sdf.parse(String.valueOf(map.get("orderPayTime"))):null);
+            order.setProductImgUrl(ToolsUtil.getString(map.get("productImg")));
+            order.setAddTime(new Date());
+            Float f = orderMapper.findSecorndPrice(order.getProductId());
+            if(f!=null){
+                order.setBargainPrice(f);
+            }else{
+                order.setBargainPrice(0f);
+            }
+            //来源类型
+            if(map_1.get("sourceType")!=null){
+                sourceType = String.valueOf(map_1.get("sourceType"));
+            }
+            order.setSourceType(sourceType);
+            num = orderMapper.addOrderInfo(order);
+            if(num>0){
+                PayRecord payRecord = new PayRecord();
+                payRecord.setOrderId(order.getOrderId());
+                payRecord.setBody(String.valueOf(map.get("body")));
+                payRecord.setSubject(String.valueOf(map.get("subject")));
+                payRecord.setBuyType(1);
+                payRecord.setOnlinePay(order.getPayOnline());
+                payRecord.setUserId(order.getUserId());
+                payRecord.setSourceType(sourceType);
+                userMapper.addPayRecordInfoCard(payRecord);
+                map_2.put("orderId",order.getOrderId());
+                map_2.put("subject",payRecord.getSubject());
+                map_2.put("money",payRecord.getOnlinePay());
+                map_2.put("image",order.getProductImgUrl());
+                map_2.put("userMoney",userMapper.findUserMoney(order.getUserId()));
+            }
+        }catch (Exception e){
+            logger.error("添加订单异常：{}",e);
+            map_2.put("success",false);
+            map_2.put("msg","添加订单异常");
+            return null;
+        }
+        logger.info("返回信息为：{}",JSON.toJSONString(map_2));
+        return map_2;
+    }
 
 
 
@@ -579,6 +668,18 @@ public class OrderServiceImp implements OrderService {
        return orderMapper.updDelOrderInfo(orderId);
     }
 
+    public int updOrderInfo(PayRecord payRecord){
+        if(payRecord.getOrderId().contains("A") && StringUtils.isNotEmpty(payRecord.getMessage()) && payRecord.getMessage().contains("成功")){
+            Order order = new Order();
+            order.setStatus(1);
+            order.setOrderId(payRecord.getOrderId());
+            order.setOrderPayType(payRecord.getOrderPayType());
+            logger.info("该订单"+order.getOrderId()+"修改为1,已付款");
+            orderMapper.updateOrderInfoById(order);
+        }
+        return userMapper.updPayRecordOrderInfo(payRecord);
+
+    }
 
     /**
      * 每一分钟执行一次，给每个技师发送信息

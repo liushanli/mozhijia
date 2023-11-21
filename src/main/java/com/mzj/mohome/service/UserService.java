@@ -15,8 +15,15 @@ public interface UserService {
     //更改用户信息
     String updUserInfo(Map<String,Object> map);
 
+    /**
+     *更改用户信息
+     * @param map
+     * @return
+     */
+    Map<String,Object> updUserInfoWx(Map<String,Object> map);
+
     //登录时判断用户是否存在
-     List<User> getByUserExist(String phone,String sendCode,String openId,String appleData) throws Exception;
+     List<User> getByUserExist(String phone,String sendCode,String openId,String appleData,String sourceType) throws Exception;
 
     //是否發送成功
      String SmsSendCode(String phone);
@@ -91,12 +98,14 @@ public interface UserService {
 
     String addPayRecordInfo(Map<String,Object> map);
 
+    Map<String,Object> addPayRecordInfoWx(Map<String,Object> map);
+
     List<ProvinceCityArea> findProvinceByNameInfo(Map<String,Object> map);
 
     List<User> getByUserInfoById(String userId,String version);
 
     //添加一键登录的用户
-    List<User> getByUserExistPhone(String phone) throws Exception;
+    List<User> getByUserExistPhone(String phone,String sourceType) throws Exception;
 
 
     //添加一键登录的用户
@@ -104,7 +113,7 @@ public interface UserService {
 
     int addCouponUserId(String userId,String parentId);
 
-    String addUserPhone(String phone) throws Exception;
+    String addUserPhone(String phone,String sourceType) throws Exception;
 
     List<Map<String,Object>> findCouponByUserId(String userId);
 
@@ -162,5 +171,12 @@ public interface UserService {
      * @return
      */
     int getUserStatus();
+
+    /**
+     * 根据orderId修改相关信息
+     * @param orderId
+     * @return
+     */
+    int updUserOrderRecord(String orderId);
 
 }

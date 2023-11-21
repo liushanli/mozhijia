@@ -1,5 +1,6 @@
 package com.mzj.mohome.util;
 
+/*
 import com.gexin.rp.sdk.base.IPushResult;
 import com.gexin.rp.sdk.base.impl.SingleMessage;
 import com.gexin.rp.sdk.base.impl.Target;
@@ -7,13 +8,14 @@ import com.gexin.rp.sdk.base.notify.Notify;
 import com.gexin.rp.sdk.exceptions.RequestException;
 import com.gexin.rp.sdk.http.IGtPush;
 import com.gexin.rp.sdk.template.TransmissionTemplate;
+*/
 
 import java.util.Map;
 import java.util.UUID;
 
 public class PushUtil {
 
-    private String URL = "";
+    /*private String URL = "";
 
     private String key = "";
     private String secret = "";
@@ -22,9 +24,9 @@ public class PushUtil {
 
     private String pushAppKey = "";
 
-    /**
+    *//**
      * 推送消息
-     */
+     *//*
     public Map<String, Object> pushMessage(String userId, String remark) {
         //IGtPush push = new IGtPush(URL, config.getPushAppKey(), config.getPushMasterSecret());
         IGtPush push = new IGtPush(URL, key, secret);
@@ -55,21 +57,21 @@ public class PushUtil {
         message.setOfflineExpireTime(1000 * 3600 * 24 * 7);
         //添加要推送的终端
         Target target = new Target();
-       /* MstUserPo userPo = userDao.selectByPrimaryKey(userId);
+       *//* MstUserPo userPo = userDao.selectByPrimaryKey(userId);
         if (userPo.getPushId() != null) {
             target.setAppId(config.getPushAppId());
             target.setClientId(userPo.getPushId());
         }else {
             return null;
-        }*/
+        }*//*
 
         //MstUserPo userPo = userDao.selectByPrimaryKey(userId);
-        /*if (userPo.getPushId() != null) {
+        *//*if (userPo.getPushId() != null) {
             target.setAppId(config.getPushAppId());
             target.setClientId(userPo.getPushId());
         }else {
             return null;
-        }*/
+        }*//*
         String clientId = "";
         target.setAppId(pushAppId);
         target.setClientId(clientId);
@@ -86,6 +88,6 @@ public class PushUtil {
             response = result.getResponse();
         }
         return response;
-    }
+    }*/
 
 }

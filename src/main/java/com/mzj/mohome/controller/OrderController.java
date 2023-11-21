@@ -2,6 +2,7 @@ package com.mzj.mohome.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.mzj.mohome.entity.Order;
+import com.mzj.mohome.entity.PayRecord;
 import com.mzj.mohome.service.OrderService;
 import com.mzj.mohome.vo.OrderVo;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,23 @@ public class OrderController {
             }else{
                 resultMap.put("orderId",stringObjectMap.get("orderId"));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("success",false);
+            resultMap.put("msg","添加失败");
+            resultMap.put("orderId","");
+        }
+        return resultMap;
+    }
+    @ResponseBody
+    @RequestMapping(value = "/addUserOrderWx",method = RequestMethod.POST)
+    public Map<String,Object> addUserOrderWx(@RequestBody Map<String,Object> map){
+        Map<String,Object> resultMap = new HashMap<>();
+        try {
+            log.info("请求信息为：{}",JSON.toJSONString(map));
+            resultMap.put("success",true);
+            resultMap.put("msg","");
+            resultMap = orderService.addOrderInfoWx(map);
         } catch (Exception e) {
             e.printStackTrace();
             resultMap.put("success",false);
@@ -249,7 +267,23 @@ public class OrderController {
         }
         return resultMap;
     }
-
-
-
+    @ResponseBody
+    @RequestMapping(value = "/updOrderPayInfo",method = RequestMethod.POST)
+    public Map<String,Object> updOrderPayInfo(@RequestBody PayRecord payRecord){
+        Map<String,Object> resultMap = new HashMap<>();
+        try {
+            resultMap.put("success",true);
+            resultMap.put("msg","");
+            int count = orderService.updOrderInfo(payRecord);
+            if(count>0){
+                resultMap.put("success",true);
+                resultMap.put("msg","修改订单记录成功");
+            }
+        } catch (Exception e) {
+            resultMap.put("success",false);
+            resultMap.put("msg","修改订单记录失败");
+            log.error("该订单id：{}修改订单记录失败：{}",payRecord.getOrderId(),e);
+        }
+        return resultMap;
+    }
 }

@@ -1,5 +1,6 @@
 package com.mzj.mohome.serviceImp;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.mzj.mohome.entity.*;
 import com.mzj.mohome.mapper.OrderMapper;
@@ -97,7 +98,7 @@ public class UserServiceImp implements UserService {
     }
 
     //登录时判断用户是否存在
-    public List<User> getByUserExist(String phone,String sendCode,String openId,String appleData) throws Exception{
+    public List<User> getByUserExist(String phone,String sendCode,String openId,String appleData,String sourceType) throws Exception{
         //存在的话，则修改该用户的登陆时间
         List<User> userVoList = new ArrayList<>();
         if(StringUtils.isNotEmpty(phone)&&StringUtils.isNotEmpty(sendCode)) {
@@ -107,7 +108,7 @@ public class UserServiceImp implements UserService {
                 if(userVoList.size()<=0 || userVoList == null){
                     String userId = UUID.randomUUID().toString();
                     logger.info("首次登陆添加用户id:{},获取优惠券",userId);
-                    int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4));
+                    int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4),sourceType);
                     userMapper.addCouponUserId(userId,null);
                     if(num>0){
                         userVoList = userMapper.getByUserInfoByPhoneExist(phone);
@@ -146,13 +147,13 @@ public class UserServiceImp implements UserService {
         return userVoList;
     }
     //登录时判断用户是否存在
-    public List<User> getByUserExistPhone(String phone) throws Exception{
+    public List<User> getByUserExistPhone(String phone,String sourceType) throws Exception{
         //存在的话，则修改该用户的登陆时间
 
         List<User> userVoList = userMapper.getByUserInfoByPhoneExist(phone);
         if(userVoList.size()<=0 || userVoList == null){
             String userId = UUID.randomUUID().toString();
-            int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4));
+            int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4),sourceType);
             userMapper.addCouponUserId(userId,null);
             logger.info("首次登陆添加用户id:{},获取优惠券",userId);
             if(num>0){
@@ -201,10 +202,10 @@ public class UserServiceImp implements UserService {
 
     public String updUserInfo(Map<String,Object> map){
         String orderId = null;
+        PayRecord payRecord = new PayRecord();
         try{
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
             orderId = "C"+simpleDateFormat.format(new Date())+ToolsUtil.getFourRandom();
-            PayRecord payRecord = new PayRecord();
             String status = ToolsUtil.getString(map.get("status"));
             //status为1的话,则是会员套餐，反之的话则是充值返现
             if("1".equals(status)){
@@ -229,9 +230,58 @@ public class UserServiceImp implements UserService {
                   userMapper.addPayRecordInfoCard(payRecord);
             }
         }catch (Exception e){
-            System.out.println(e);
+            orderId = null;
+            logger.error("updUserInfo===充值失败，错误信息为：{}",e);
         }
         return orderId;
+    }
+
+    public Map<String,Object> updUserInfoWx(Map<String,Object> map){
+        Map<String,Object> map1 = new HashMap<>();
+        map1.put("success",true);
+        map1.put("msg","");
+        String orderId = null;
+        PayRecord payRecord = new PayRecord();
+        try{
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            orderId = "C"+simpleDateFormat.format(new Date())+ToolsUtil.getFourRandom();
+            String status = ToolsUtil.getString(map.get("status"));
+            //status为1的话,则是会员套餐，反之的话则是充值返现
+            if("1".equals(status)){
+                payRecord.setBuyType(2);
+                payRecord.setSubject("月卡");
+                payRecord.setMonth((map.get("month")!=null && map.get("month")!="")?Integer.parseInt(String.valueOf(map.get("month"))):null);
+                payRecord.setOrderId(orderId);
+                payRecord.setBody(String.valueOf(map.get("body")));
+                payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+                payRecord.setUserId(map.get("userId").toString());
+                userMapper.addPayRecordInfoVip(payRecord);
+            }else{
+                payRecord.setBuyType(3);
+                payRecord.setPayType(0);
+                payRecord.setUserMoney((map.get("surplusMoney")!=null && map.get("surplusMoney")!="")?Float.parseFloat(String.valueOf(map.get("surplusMoney"))):null);
+                payRecord.setSubject("余额充值");
+                orderId = "B"+simpleDateFormat.format(new Date())+ToolsUtil.getFourRandom();
+                payRecord.setOrderId(orderId);
+                payRecord.setBody(String.valueOf(map.get("body")));
+                payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+                payRecord.setUserId(map.get("userId").toString());
+                userMapper.addPayRecordInfoCard(payRecord);
+            }
+        }catch (Exception e){
+            map1.put("success",false);
+            map1.put("msg","获取订单号失败");
+            orderId = null;
+            logger.error("updUserInfo===充值失败，错误信息为：{}",e);
+        }
+        if(StringUtils.isNotEmpty(orderId)){
+            map1.put("subject",payRecord.getSubject());
+            map1.put("money",payRecord.getOnlinePay());
+            map1.put("orderId",orderId);
+            map1.put("image","");
+            map1.put("userMoney",userMapper.findUserMoney(payRecord.getUserId()));
+        }
+        return map1;
     }
 
     //补差价的信息
@@ -251,6 +301,38 @@ public class UserServiceImp implements UserService {
         payRecord.setUserId(map.get("userId").toString());
        userMapper.addPayRecordInfoCard(payRecord);
         return orderId;
+    }
+
+    //补差价的信息
+    public Map<String,Object> addPayRecordInfoWx(Map<String,Object> map){
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("success",true);
+        map1.put("msg","");
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            String orderId = "D"+simpleDateFormat.format(new Date())+ToolsUtil.getFourRandom();
+            PayRecord payRecord = new PayRecord();
+            payRecord.setBuyType(4);
+            payRecord.setPayType(0);
+            payRecord.setUserMoney(null);
+            payRecord.setSubject("补差价");
+            payRecord.setOrderId(orderId);
+            payRecord.setOrderId2(ToolsUtil.getString(map.get("orderId")));
+            payRecord.setBody(ToolsUtil.getString(map.get("body")));
+            payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+            payRecord.setUserId(ToolsUtil.getString(map.get("userId")));
+            map1.put("orderId",orderId);
+            map1.put("subject",payRecord.getSubject());
+            map1.put("money",payRecord.getOnlinePay());
+            map1.put("image",orderMapper.findProductImg(ToolsUtil.getString(map.get("orderId"))));
+            map1.put("userMoney",userMapper.findUserMoney(payRecord.getUserId()));
+            userMapper.addPayRecordInfoCard(payRecord);
+        }catch (Exception e){
+            logger.error("该订单：{}，补差价失败：错误信息为：{}",ToolsUtil.getString(map.get("orderId")),e);
+            map1.put("success",false);
+            map1.put("msg","补差价失败");
+        }
+        return map1;
     }
 
 
@@ -564,11 +646,16 @@ public class UserServiceImp implements UserService {
             String phone = ToolsUtil.getString(map.get("phone"));
             String appleData = ToolsUtil.getString(map.get("appleData"));
             int num;
+            String sourceType = "";
+            //来源类型
+            if(map.get("sourceType")!=null){
+                sourceType = String.valueOf(map.get("sourceType"));
+            }
             String userId = UUID.randomUUID().toString();
             if(StringUtils.isNotEmpty(appleData) && appleData != null){
-                num = userMapper.addAppleUserInfo(userId,appleData, RandomUtil.randomName(false,5));
+                num = userMapper.addAppleUserInfo(userId,appleData, RandomUtil.randomName(false,5),sourceType);
             }else{
-                num = userMapper.addWhatUserInfo(userId,phone,nickName,imgUrl,openId,sex);
+                num = userMapper.addWhatUserInfo(userId,phone,nickName,imgUrl,openId,sex,sourceType);
             }
             return num;
         }catch (Exception e){
@@ -647,7 +734,8 @@ public class UserServiceImp implements UserService {
             String sex = "";
             String phone = ToolsUtil.getString(map.get("phone"));
             String userId = UUID.randomUUID().toString();
-            int num = userMapper.addWhatUserInfo(userId,phone,nickName,imgUrl,openId,sex);
+            String sourceType = ToolsUtil.getString(map.get("sourceType"));
+            int num = userMapper.addWhatUserInfo(userId,phone,nickName,imgUrl,openId,sex,sourceType);
             return num;
         }catch (Exception e){
             System.out.println("添加错误："+e.getMessage());
@@ -670,10 +758,10 @@ public class UserServiceImp implements UserService {
     }
 
     //登录时判断用户是否存在
-    public String addUserPhone(String phone) throws Exception{
+    public String addUserPhone(String phone,String sourceType) throws Exception{
         //存在的话，则修改该用户的登陆时间
         String userId = UUID.randomUUID().toString();
-        int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4));
+        int num = userMapper.addUserInfo(userId,phone,RandomUtil.randomName(false,4),sourceType);
         logger.info("首次登陆添加用户id:{},获取优惠券",userId);
         userMapper.addCouponUserId(userId,null);
         if(num>0){
@@ -765,5 +853,36 @@ public class UserServiceImp implements UserService {
 
     public int getUserStatus(){
         return  userMapper.getUserStatus();
+    }
+
+    public int updUserOrderRecord(String orderId){
+        PayRecord payRecord = userMapper.findPayRecord(orderId);
+        logger.info("获取订单信息为：{}", JSON.toJSONString(payRecord));
+        User user = new User();
+        user.setUserId(payRecord.getUserId());
+        /**
+         * payType支付类型，1：余额支付，2：微信，3：支付宝，
+         * buyType：购买类型，1：下单，2：购买会员卡，3：充值余额，4：补差价
+         */
+        //购买类型为1或4，且支付类型为 1,则进行相减余额信息
+        if((payRecord.getBuyType()==1 || payRecord.getBuyType()==4)
+                && payRecord.getPayType() == 1){
+            user.setSurplusMoney(-payRecord.getOnlinePay());
+            return userMapper.updUser(user);
+        }else if(payRecord.getBuyType() == 2){
+            //购买类型为2，则进行更新用户的会员卡相关信息
+            Card card = userMapper.findCardInfo(payRecord.getSubject());
+            user.setCardId(card.getCardId());
+            user.setCardName(card.getCardName());
+            user.setMonth(card.getMonth());
+            user.setLevel(1);
+            return userMapper.updUser(user);
+        }else if(payRecord.getBuyType() == 3){
+            //购买类型为3，则进行相加余额信息
+            user.setSurplusMoney(payRecord.getUserMoney());
+            return userMapper.updUser(user);
+        }else{
+            return 1;
+        }
     }
 }

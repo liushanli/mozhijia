@@ -71,16 +71,7 @@ public class HttpsService  {
         }
         return resultString;
     }
-    /**
-     * 文件名：  ${file_name}
-     * 版权：    Copyright by ljm
-     * 描述：
-     * 修改人：  HuamingChen
-     * 修改时间：2018/10/24
-     * 跟踪单号：
-     * 修改单号：
-     * 修改内容：
-     */
+
         public static String httpGet(String url){
             RestTemplate restTemplate=new RestTemplate();
             String result=restTemplate.exchange(url, HttpMethod.GET,null,String.class).getBody();
