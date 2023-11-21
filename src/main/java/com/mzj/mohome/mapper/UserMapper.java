@@ -2,12 +2,13 @@ package com.mzj.mohome.mapper;
 
 import com.mzj.mohome.entity.*;
 import org.apache.ibatis.annotations.*;
-import org.apache.logging.log4j.core.config.plugins.PluginAliases;
-
-import javax.websocket.server.ServerEndpoint;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 用户信息
+ * @author admin
+ */
 @Mapper
 public interface UserMapper {
     //获取用户名单
