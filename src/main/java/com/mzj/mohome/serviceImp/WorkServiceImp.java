@@ -8,9 +8,11 @@ import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.mapper.OrderMapper;
 import com.mzj.mohome.mapper.ShopMapper;
 import com.mzj.mohome.mapper.WorkersMapper;
+import com.mzj.mohome.service.UserService;
 import com.mzj.mohome.service.WorkerService;
 import com.mzj.mohome.util.*;
 import com.mzj.mohome.vo.PageUtil;
+import com.mzj.mohome.vo.WorkerVo;
 import com.winnerlook.model.PrivacyBindBodyAxb;
 import com.winnerlook.model.PrivacyUnbindBody;
 import com.winnerlook.model.VoiceResponseResult;
@@ -24,6 +26,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,6 +38,9 @@ public class WorkServiceImp implements WorkerService {
     private WorkersMapper workersMapper;
     @Autowired
     private ShopServiceImp shopService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ShopMapper shopMapper;
@@ -226,10 +232,6 @@ public class WorkServiceImp implements WorkerService {
                         objectMap.put("success",true);
                         objectMap.put("shopStatus",2);
                     }else{
-                        /*objectMap.put("msg","该手机号没有注册");
-                        objectMap.put("success",false);
-                        objectMap.put("workVo",null);
-                        objectMap.put("shopStatus",1);*/
                         logger.info("添加用户");
                         shopMapper.addWorkInfo(phone);
                         objectMap.put("msg","添加用户");
@@ -248,6 +250,57 @@ public class WorkServiceImp implements WorkerService {
         }
     }
 
+    //根据用户手机号，验证码来判断用户是否存在
+    public Map<String,Object> findWorkerInfoWx(String phone,String sendCode,String openId){
+        Map<String,Object> objectMap = new HashMap<>();
+        try {
+            objectMap.put("success",true);
+            objectMap.put("msg","");
+            objectMap.put("workVo",null);
+            Map<String,Object> map1 =  shopMapper.findShopBySend(phone,sendCode);
+            if(map1 == null){
+                objectMap.put("success",false);
+                objectMap.put("msg","手机号/验证码错误");
+                objectMap.put("workVo",null);
+            }else{
+                //shopStatus为1的话，是店员登陆,为2时，是商家登录
+                List<Worker> workerList = workersMapper.findWorkInfoExist(phone);
+
+                if(workerList!=null && workerList.size()>0){
+                    Worker worker = workerList.get(0);
+                    logger.info("findWorkerInfoWx===获取到的技师信息为：{}",JSON.toJSONString(worker));
+                    workersMapper.updateLoginTime(worker.getWorkerId());
+                    objectMap.put("success",true);
+                    objectMap.put("msg","");
+                    objectMap.put("workVo",worker);
+                    objectMap.put("shopStatus",1);
+                    userService.addUserOpenInfo(worker.getWorkerId(),openId,"2");
+                }else{
+                    Map<String,Object> map2 = shopMapper.findShopByPhone(phone);
+                    if(map2 != null){
+                        logger.info("findWorkerInfoWx===获取到的商家信息为：{}",JSON.toJSONString(map2));
+                        objectMap.put("msg","");
+                        objectMap.put("workVo",map2);
+                        objectMap.put("success",true);
+                        objectMap.put("shopStatus",2);
+                        userService.addUserOpenInfo(map2.get("shopId").toString(),openId,"2");
+                    }else{
+                        objectMap.put("msg","该手机号没有注册");
+                        objectMap.put("success",false);
+                        objectMap.put("workVo",null);
+                        objectMap.put("shopStatus",1);
+                    }
+                }
+            }
+            return objectMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            objectMap.put("success",false);
+            objectMap.put("msg","服务异常");
+            objectMap.put("workVo",null);
+            return objectMap;
+        }
+    }
 
     //根据用户手机号，验证码来判断用户是否存在
     public Map<String,Object> findWorkerInfoBy(String phone,String version){
@@ -1039,9 +1092,37 @@ public class WorkServiceImp implements WorkerService {
         return distance;
     }
 
+    public int updWorkerInfoJW(Map<String,Object> paramMap){
+        WorkerVo workerVo = new WorkerVo();
+        workerVo.setJd(Double.parseDouble(ToolsUtil.getString(paramMap.get("jd"))));
+        workerVo.setWd(Double.parseDouble(ToolsUtil.getString(paramMap.get("wd"))));
+        workerVo.setWorkerId(ToolsUtil.getString(paramMap.get("workerId")));
+        workerVo.setProvince(ToolsUtil.getString(paramMap.get("province")));
+        workerVo.setCity(ToolsUtil.getString(paramMap.get("city")));
+        workerVo.setArea(ToolsUtil.getString(paramMap.get("area")));
+        //status为1的时候,根据姓名查询id,否则，不查询
+        if(ToolsUtil.getString(paramMap.get("status")).equals("1")){
+            String provinceId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("province")));
+            String cityId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("city")));
+            String areaId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("area")));
+            workerVo.setProvinceId(provinceId);
+            workerVo.setCityId(cityId);
+            workerVo.setAreaId(areaId);
+        }else{
+            workerVo.setProvinceId(ToolsUtil.getString(paramMap.get("provinceId")));
+            workerVo.setCityId(ToolsUtil.getString(paramMap.get("cityId")));
+            workerVo.setAreaId(ToolsUtil.getString(paramMap.get("areaId")));
+        }
+        logger.info("====updWorkerInfoJW===修改信息为：{}",JSON.toJSONString(workerVo));
+        return workersMapper.updWorkInfo(workerVo);
+    }
 
-    /*@Scheduled(cron = "0 0/5 * * * ?")
-    @Async*/
+    public WorkerVo findWorkLocation(String workerId){
+        return workersMapper.findWorkerLocation(workerId);
+    }
+
+    @Scheduled(cron = "0 0/5 * * * ?")
+    @Async
     public void updateWorkDateHHmm(){
         Long oldtime=System.currentTimeMillis();
         logger.info("updateWorkDateHHmm=====修改时间日期定时开始："+(new Date()));

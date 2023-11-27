@@ -446,7 +446,6 @@ public class OrderServiceImp implements OrderService {
                                 order.setOrderReviceId(ToolsUtil.getString(objectMap.get("workerId")));
                                 order.setOrderReviceName(ToolsUtil.getString(objectMap.get("userName")));
                             }
-
                             workersMapper.updateWorkTimeById(date,workerId,"1");
                         }
                          numer = orderMapper.updateOrderInfo(order);

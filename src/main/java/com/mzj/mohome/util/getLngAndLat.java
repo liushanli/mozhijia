@@ -63,6 +63,7 @@ public class getLngAndLat {
 
     }
 
+
     public static Map<String,Object> getAddressInfo(String location){
         Map<String,Object> map = new HashMap<>();
         String url = "http://api.map.baidu.com/reverse_geocoding/v3/?ak=zdv9i6SuZtRFCVfXey4u49xXRkBWl5FY&output=json&coordtype=wgs84ll&location=" +location;
@@ -80,7 +81,6 @@ public class getLngAndLat {
             return map;
         }
         JSONObject obj = JSONObject.fromObject(json);
-
         if (obj.get("status").toString().equals("0")) {
             map.put("formatted_address",obj.getJSONObject("result").get("formatted_address"));
             map.put("province",obj.getJSONObject("result").getJSONObject("addressComponent").get("province"));
@@ -115,9 +115,9 @@ public class getLngAndLat {
 
 
     public static void main(String[] args) {
-        LatitudeAndLongitude latAndLng = getLngAndLat.getLngAndLat("上海市 钦州路840号 钦州花苑|11");
-        System.out.println(JSON.toJSONString(latAndLng));
-        //System.out.println(JSON.toJSONString(getAddressInfo("39.900000,116.400000")));
+        //LatitudeAndLongitude latAndLng = getLngAndLat.getLngAndLat("上海市 钦州路840号 钦州花苑|11");
+        //System.out.println(JSON.toJSONString(latAndLng));
+        System.out.println(JSON.toJSONString(getAddressInfo("39.900000,116.400000")));
         /*LatitudeAndLongitude latAndLng = getLngAndLat.getLngAndLat("广东省广州市");
         LatitudeAndLongitude latAndLng2 = getLngAndLat.getLngAndLat("广西省南宁市");
 

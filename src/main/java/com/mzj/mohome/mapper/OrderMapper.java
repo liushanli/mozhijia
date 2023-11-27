@@ -243,4 +243,29 @@ public interface OrderMapper {
     @Select("select imgUrl from TB_Product where productId = (select productId from tb_order where orderId=#{orderId})")
     String findProductImg(String orderId);
 
+    /**
+     * 根据用户id来查询
+     * @return
+     */
+    @Select("<script> SELECT u.openId,o.aboutTime,o.productName,o.address,o.workerName,o.workerPhone,o.phone,o.orderId,o.sourceType,o.shopId " +
+            " FROM  TB_Order o  JOIN (  SELECT   *  FROM " +
+            " TB_UserAndOpenId WHERE " +
+            " createTime IN ( SELECT MAX ( createTime ) FROM TB_UserAndOpenId GROUP BY workerId )) u ON  o.workerId = u.workerId    " +
+            " WHERE  o.status = '1' and (sendType = '0' or sendType is null)" +
+            "<if test='orderId != null'> " +
+            " and o.orderId = #{orderId}" +
+            "</if>" +
+            "</script>")
+    List<OrderVo> findUserOpenId(String orderId);
+
+    @Select("select openId from TB_UserAndOpenId where workerId = #{shopId}")
+    String sendShop(String shopId);
+
+    /**
+     * 修改已发送
+     * @param orderId
+     * @return
+     */
+    @Update("update TB_Order set sendType = '1' where orderId = #{orderId}")
+    int updOpenId(String orderId);
 }

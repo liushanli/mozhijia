@@ -1,11 +1,13 @@
 package com.mzj.mohome.vo;
 
+import com.alipay.api.domain.DataEntry;
 import com.mzj.mohome.entity.Order;
 import lombok.Data;
 
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class OrderVo extends Order implements Serializable {
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -24,6 +26,28 @@ public class OrderVo extends Order implements Serializable {
 
     private String shopName;
     private String imgProductUrl;
+
+    private String openId;
+
+    private String sourceType;
+
+    @Override
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    @Override
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public String getOpenId() {
+        return openId;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
+    }
 
     public String getImgProductUrl() {
         return imgProductUrl;

@@ -16,9 +16,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 
 
+/**
+ * @author admin
+ */
 @Configuration
 @Data
-public class WxPayConfig {
+public class WxPayConfig{
 
     /**
      * 商户号

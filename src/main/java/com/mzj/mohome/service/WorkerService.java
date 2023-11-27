@@ -1,8 +1,12 @@
 package com.mzj.mohome.service;
 
+import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.vo.PageUtil;
+import com.mzj.mohome.vo.WorkerVo;
 import com.winnerlook.model.VoiceResponseResult;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +27,9 @@ public interface WorkerService {
 
     //根据用户手机号，验证码来判断用户是否存在
     Map<String,Object> findWorkerInfo(String phone,String sendCode);
+
+    //根据用户手机号，验证码来判断用户是否存在
+    Map<String,Object> findWorkerInfoWx(String phone,String sendCode,String openId);
 
     //查询员工工作时间
     List<Map<String,Object>> findWorkTime(Map<String,Object> map);
@@ -91,4 +98,18 @@ public interface WorkerService {
      * @return
      */
     Map<String,Object> queryWorkerInfo(Map<String,Object> map);
+
+    /**
+     * 修改技师的所在区域信息
+     * @param map
+     * @return
+     */
+    int updWorkerInfoJW(Map<String,Object> map);
+
+    /**
+     * 根据用户id进行查询信息
+     * @param workerId
+     * @return
+     */
+    WorkerVo findWorkLocation(String workerId);
 }

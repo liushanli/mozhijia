@@ -9,6 +9,7 @@ import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.mzj.mohome.entity.*;
+import com.mzj.mohome.mapper.UserMapper;
 import com.mzj.mohome.service.UserService;
 
 import com.mzj.mohome.service.WxTemplateService;
@@ -18,8 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -35,6 +37,11 @@ public class UserController {
     private RequestApi requestApi;
     @Autowired
     private WxTemplateService wxTemplateService;
+
+    @Resource
+    private WxPayConfig wxPayConfig;
+    @Autowired
+    private UserMapper userMapper;
 
     @ResponseBody
     @RequestMapping("/findAllUser")
@@ -57,16 +64,42 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/findUserByPhone")
-    public Map<String,Object> findUserByPhone(String phone,String sendCode,String openId,String appleData,String sourceType){
+    public Map<String,Object> findUserByPhone(String phone,String sendCode,String openId,String appleData){
         Map<String,Object> map = new HashMap<>();
         try{
             logger.info("=====findUserByPhone====");
             map.put("success",true);
             map.put("msg","");
-            List<User> userList = userService.getByUserExist(phone,sendCode,openId,appleData,sourceType);
+            List<User> userList = userService.getByUserExist(phone,sendCode,openId,appleData,"");
            if(userList != null && userList.size()>0){
                 User userVo = userList.get(0);
                 map.put("userVo",userVo);
+            }else{
+                map.put("userVo","");
+            }
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("userVo","");
+            logger.error("findUserByPhone=="+e.getMessage());
+        }
+
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping("/findUserByPhoneWx")
+    public Map<String,Object> findUserByPhoneWx(String phone,String sendCode,String openId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("=====findUserByPhone====phone:{}，sendCode:{},openId：{}",phone,sendCode,openId);
+            map.put("success",true);
+            map.put("msg","");
+            List<User> userList = userService.getByUserExist(phone,sendCode,openId,null,"1");
+            if(userList != null && userList.size()>0){
+                User userVo = userList.get(0);
+                map.put("userVo",userVo);
+                //userMapper.updUserOpenInfo(userVo.getUserId(),openId);
             }else{
                 map.put("userVo","");
             }
@@ -846,13 +879,13 @@ public class UserController {
     }
     @ResponseBody
     @GetMapping("/addPhoneUserInfo")
-    public Map<String,Object> addPhoneUserInfo(String phone,String sourceType){
+    public Map<String,Object> addPhoneUserInfo(String phone){
         Map<String,Object> map = new HashMap<>();
         try{
             logger.info("=====findUserByPhone====");
             map.put("success",true);
             map.put("msg","");
-            List<User> userList = userService.getByUserExistPhone(phone,sourceType);
+            List<User> userList = userService.getByUserExistPhone(phone,"");
             if(userList != null && userList.size()>0){
                 User userVo = userList.get(0);
                 map.put("userVo",userVo);
@@ -866,6 +899,30 @@ public class UserController {
             logger.error("findUserByPhone=="+e.getMessage());
         }
 
+        return map;
+    }
+    @ResponseBody
+    @GetMapping("/addPhoneUserInfoWx")
+    public Map<String,Object> addPhoneUserInfoWx(String phone,String openId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("=====addPhoneUserInfoWx====");
+            map.put("success",true);
+            map.put("msg","");
+            List<User> userList = userService.getByUserExistPhone(phone,"1");
+            if(userList != null && userList.size()>0){
+                User userVo = userList.get(0);
+                map.put("userVo",userVo);
+                userMapper.updUserOpenInfo(userVo.getUserId(),openId);
+            }else{
+                map.put("userVo","");
+            }
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("userVo","");
+            logger.error("addPhoneUserInfoWx=="+e.getMessage());
+        }
         return map;
     }
 
@@ -1240,6 +1297,7 @@ public class UserController {
             if (count > 0) {
                 List<User> userList = userService.getByUserExist(null,null,openId,null,null);
                 User userVo = userList.get(0);
+                userMapper.updUserOpenInfo(userVo.getUserId(),openId);
                 logger.info("获取到的用户信息为：{}",JSON.toJSONString(userVo));
                 map.put("userVo",userVo);
                 map.put("msg", "");
@@ -1299,14 +1357,13 @@ public class UserController {
             return null;
         }
     }
-
     @ResponseBody
-    @PostMapping("/sendMsg")
-    public Map<String,Object> sendMsg(){
+    @GetMapping("/sendMsg")
+    public Map<String,Object> sendMsg(String orderId){
         Map<String,Object> map = new HashMap<>();
         try {
             logger.info("sendMsg==发送用户信息");
-            map = wxTemplateService.getUserList();
+            map = wxTemplateService.sendMessage(orderId);
             return map;
         }catch (Exception e){
             logger.info("错误信息为：{}",e);
@@ -1315,5 +1372,76 @@ public class UserController {
             return map;
         }
     }
+
+    @CrossOrigin
+    @ResponseBody
+    @PostMapping("/getWxJSSDK")
+    public Map<String,Object> getWxJSSDK(String url){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("getWxJSSDK==获取微信信息配置信息:"+url);
+            //wxTemplateService.getAccessToken();
+            map = wxTemplateService.fn_GetShareData(url);
+            return map;
+        }catch (Exception e){
+            logger.info("错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg",e);
+            return map;
+        }
+    }
+    @ResponseBody
+    @GetMapping("/getWxUserOpenInfo")
+    public Map<String,Object> getWxUserOpenInfo(String code) {
+        Map<String, Object> map = new HashMap<>();
+        try {
+            logger.info("getWxUserOpenInfo===获取公众号openId:" + code);
+            String appId = wxPayConfig.getWeChatAppId();
+            String secret = wxPayConfig.getWeChatAppsecret();
+            Map<String, String> map_1 = new HashMap<>();
+            map_1.put("appid", appId);
+            map_1.put("secret", secret);
+            map_1.put("code", code);
+            map_1.put("grant_type", "authorization_code");
+            String url = "https://api.weixin.qq.com/sns/oauth2/access_token";
+            JSONObject jsonObject = requestApi.getApi(url, map_1);
+            logger.info("getWxUserOpenInfo=====微信获取token信息======" + jsonObject.toJSONString());
+            if (jsonObject.getString("openid") != null) {
+                String openId = jsonObject.getString("openid");
+                map.put("openId", openId);
+                logger.info("getWxUserOpenInfo=====获取openId为：{}",openId);
+                userService.addUserOpenInfo(null,openId,"1");
+            } else {
+                map.put("success", false);
+                map.put("msg", jsonObject.get("errmsg"));
+                logger.info("getWxUserOpenInfo=====获取openId失败");
+            }
+        }catch (Exception e){
+            map.put("success", false);
+            map.put("msg","获取异常");
+            logger.info("getWxUserOpenInfo=====获取openId失败,错误信息为：{}",e);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @PostMapping("/updateWxUserOpenId")
+    public Map<String,Object> updateWxUserOpenId(@RequestBody Map<String,Object> paramMap) {
+        Map<String, Object> map = new HashMap<>();
+        try {
+            map.put("success", true);
+            map.put("msg","");
+            logger.info("updateWxUserOpenId==修改用户userId=请求参数为:" + paramMap);
+            String userId = ToolsUtil.getString(paramMap.get("userId"));
+            String openId = ToolsUtil.getString(paramMap.get("openId"));
+            userService.addUserOpenInfo(userId,openId,"2");
+        }catch (Exception e){
+            map.put("success", false);
+            map.put("msg","获取异常");
+            logger.info("updateWxUserOpenId=====修改用户信息失败,错误信息为：{}",e);
+        }
+        return map;
+    }
+
 
 }

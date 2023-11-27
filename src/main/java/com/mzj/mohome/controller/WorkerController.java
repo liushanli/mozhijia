@@ -11,6 +11,7 @@ import com.mzj.mohome.util.RequestApi;
 import com.mzj.mohome.util.ToolVideo;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.vo.PageUtil;
+import com.mzj.mohome.vo.WorkerVo;
 import com.winnerlook.model.VoiceResponseResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -735,6 +736,55 @@ public class WorkerController {
        return workerService.queryWorkerInfo(map_1);
     }
 
+    @ResponseBody
+    @PostMapping(value = "/findWorkByPhoneWx")
+    public Map<String,Object> findWorkByPhoneWx(@RequestBody Map<String,Object> map_1){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            String phone = String.valueOf(map_1.get("phone"));
+            String sendCode = String.valueOf(map_1.get("sendCode"));
+            String openId = String.valueOf(map_1.get("openId"));
+            map = workerService.findWorkerInfoWx(phone,sendCode,openId);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("workVo",null);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/updWorkerInfo")
+    public Map<String,Object> updWorkerInfo(@RequestBody Map<String,Object> stringObjectMap){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            workerService.updWorkerInfoJW(stringObjectMap);
+            map.put("success",true);
+            map.put("msg","");
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("workVo",null);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/findWorkLocation")
+    public Map<String,Object> findWorkLocation(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            WorkerVo workerVo = workerService.findWorkLocation(workerId);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("workerVo",workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("workVo",null);
+        }
+        return map;
+    }
 
 }
 

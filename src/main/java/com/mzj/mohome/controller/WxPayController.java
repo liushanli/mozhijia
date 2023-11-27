@@ -3,7 +3,6 @@ package com.mzj.mohome.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
 import com.mzj.mohome.service.WxPayService;
 import com.mzj.mohome.util.RequestApi;
 import com.mzj.mohome.util.WxPayConfig;

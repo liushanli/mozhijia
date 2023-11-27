@@ -1,9 +1,7 @@
 package com.mzj.mohome.mapper;
 
 import com.mzj.mohome.entity.Shop;
-import com.mzj.mohome.entity.Worker;
 import org.apache.ibatis.annotations.*;
-import org.apache.logging.log4j.core.config.plugins.PluginAliases;
 
 import java.util.List;
 import java.util.Map;

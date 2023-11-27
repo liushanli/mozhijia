@@ -391,4 +391,47 @@ public interface UserMapper {
 
     @Update("update tb_wxTokenInfo set startTime = GETDATE(),endTime = DATEADD(HH,2, GETDATE()),token = #{token} where wxAppid = #{wxAppid}")
     int updTokenInfo(@Param("wxAppid") String wxAppid,@Param("token")String token);
+
+    /**
+     * 添加关注微信公众号信息
+     * @param openId
+     * @return
+     */
+    @Insert("insert into tb_wxopenId values(#{openId},GETDATE())")
+    int addWxOpenInfo(String openId);
+
+    /**
+     *全部删除信息
+     * @return
+     */
+    @Delete("delete from tb_wxopenId")
+    int delWxOpenInfo();
+
+    /**
+     * 查询openId是否存在
+     * @param openId
+     * @return
+     */
+    @Insert("select openId from tb_wxopenId where openId = #{openId} order by createTime desc")
+    List<String> findWxOpenInfo(String openId);
+
+    @Select("<script> " +
+            "select openId from TB_UserAndOpenId where 1=1 "+
+            "<if test='workerId != null'> and workerId = #{workerId} </if>" +
+            "<if test='openId != null'> and openId = #{openId} </if>" +
+            " </script>")
+    String findUserOpenInfo(@Param("workerId")String workerId,@Param("openId")String openId);
+
+    @Update("update TB_UserAndOpenId set workerId = #{workerId},updateTime=getdate() where openId = #{openId}")
+    int updUserOpenInfo(@Param("workerId")String workerId,@Param("openId")String openId);
+
+    @Insert("insert into TB_UserAndOpenId(openId,createTime,updateTime)" +
+            " VALUES(#{openId},GETDATE(),GETDATE())")
+    int addUserOpenInfo(@Param("openId")String openId);
+
+    @Select("select jsTicket from TB_WxTicketInfo where wxAppid = #{wxAppid} and  GETDATE() BETWEEN startTime and endTime")
+    String getJsTicket(String wxAppid);
+
+    @Update("update TB_WxTicketInfo set startTime = GETDATE(),endTime = DATEADD(HH,2, GETDATE()),jsTicket = #{jsTicket} where wxAppid = #{wxAppid}")
+    int updJsTicket(@Param("wxAppid") String wxAppid,@Param("jsTicket")String jsTicket);
 }

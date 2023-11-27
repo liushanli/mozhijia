@@ -2,6 +2,7 @@ package com.mzj.mohome.mapper;
 
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
+import com.mzj.mohome.vo.WorkerVo;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -512,4 +513,18 @@ public interface WorkersMapper {
                     ,@Param("evalStatus_three") String evalStatus_three);
 
 
+    //修改技师的经纬度和地区
+    @Update("update TB_WorkerPoint set provinceId = #{provinceId},province = #{province}," +
+            "cityId = #{cityId},city = #{city},areaId =#{areaId},area=#{area}," +
+            "jd=${jd},wd=${wd} where workerId = #{workerId}")
+    int updWorkInfo(WorkerVo workerVo);
+
+    //查看省份地区的id
+    @Select("select id from TB_ProvinceCityArea where name = #{name}")
+    String findProvinceInfo(@Param("name") String name);
+
+    @Select("select id,shopId,shopName,workerId,workerName,orderNum,productId,province," +
+            " city,cityId,area,areaId,jd,wd,radius,addTime from" +
+            " TB_WorkerPoint where workerId = #{workerId}")
+    WorkerVo findWorkerLocation(@Param("workerId") String workerId);
 }
