@@ -66,11 +66,11 @@ public class getLngAndLat {
 
     public static Map<String,Object> getAddressInfo(String location){
         Map<String,Object> map = new HashMap<>();
-        String url = "http://api.map.baidu.com/reverse_geocoding/v3/?ak=zdv9i6SuZtRFCVfXey4u49xXRkBWl5FY&output=json&coordtype=wgs84ll&location=" +location;
-        LatitudeAndLongitude latAndLng = new LatitudeAndLongitude();
+        String url = "http://api.map.baidu.com/reverse_geocoding/v3/?ak=Dw4VqR2Z5ygmDxfEVlaz0j2cI3wx9DGn&output=json&coordtype=wgs84ll&location=" +location;
         //GET请求
-        String json = loadJSON(url);
-        log.info("===="+json);
+        /*String json = loadJSON(url);*/
+        String json = HttpsService.httpGet(url);
+        log.info("==getAddressInfo=="+json);
         if (StringUtils.isEmpty(json))
         {
             return map;

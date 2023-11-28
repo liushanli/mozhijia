@@ -53,7 +53,9 @@ public class WorkerController {
         try{
             String phone = String.valueOf(map_1.get("phone"));
             String sendCode = String.valueOf(map_1.get("sendCode"));
-            map = workerService.findWorkerInfo(phone,sendCode);
+            if(StringUtils.isNotEmpty(phone) && StringUtils.isNotEmpty(sendCode)){
+                map = workerService.findWorkerInfo(phone,sendCode);
+            }
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
@@ -72,7 +74,9 @@ public class WorkerController {
             if(map_1.get("version")!=null){
                 version = String.valueOf(map_1.get("version"));
             }
-            map = workerService.findWorkerInfoBy(phone,version);
+            if(StringUtils.isNotEmpty(phone)){
+                map = workerService.findWorkerInfoBy(phone,version);
+            }
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");

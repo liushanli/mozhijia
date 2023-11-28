@@ -331,10 +331,6 @@ public class WorkServiceImp implements WorkerService {
                     objectMap.put("success", true);
                     objectMap.put("shopStatus", 2);
                 } else {
-                    /*objectMap.put("msg","该手机号没有注册");
-                    objectMap.put("success",false);
-                    objectMap.put("workVo",null);
-                    objectMap.put("shopStatus",1);*/
                     logger.info("添加用户");
                     shopMapper.addWorkInfo(phone);
                     objectMap.put("msg", "添加用户");

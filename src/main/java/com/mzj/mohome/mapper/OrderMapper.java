@@ -45,6 +45,7 @@ public interface OrderMapper {
             "</if> " +
             "<if test='shopId!=null'> and shop.shopId = #{shopId} </if>  " +
             "<if test='userId!=null'> and orders.userId = #{userId} </if>  " +
+            "<if test='sourceType!=null'> and orders.sourceType = #{sourceType} </if>  " +
             "<if test='workerId!=null'> and orders.workerId = #{workerId} and  orders.status != 0 </if>" +
             "<if test='orderId!=null'> and orders.id = #{orderId} </if>" +
             ") t where rownumber &gt; ${page} </script>")

@@ -1346,7 +1346,7 @@ public class UserController {
     }
 
     @ResponseBody
-    @PostMapping("/getAddressInfo")
+    @RequestMapping(value = "/getAddressInfo", produces = {"application/json;charset=UTF-8"})
     public Map<String,Object> getAddressInfo(String address){
         try {
             logger.info("getAddressInfo==请求的经纬度为：{}",address);
