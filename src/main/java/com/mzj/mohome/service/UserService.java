@@ -177,7 +177,7 @@ public interface UserService {
      * @param orderId
      * @return
      */
-    int updUserOrderRecord(String orderId);
+    int updUserOrderRecord(String orderId,String payType);
 
     /**
      * //status为1，添加，2修改

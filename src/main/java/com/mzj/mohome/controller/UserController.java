@@ -1320,7 +1320,7 @@ public class UserController {
         map_1.put("msg","");
         try {
             logger.info("=========updUserOrderInfo======请求信息为：{}",JSON.toJSONString(map));
-            userService.updUserOrderRecord(ToolsUtil.getString(map.get("orderId")));
+            userService.updUserOrderRecord(ToolsUtil.getString(map.get("orderId")),ToolsUtil.getString(map.get("orderPayType")));
             logger.info("=========updUserOrderInfo======返回信息为：{}",JSON.toJSONString(map_1));
         }catch (Exception e){
             map_1.put("success",false);
@@ -1362,8 +1362,9 @@ public class UserController {
     public Map<String,Object> sendMsg(String orderId){
         Map<String,Object> map = new HashMap<>();
         try {
-            logger.info("sendMsg==发送用户信息");
+            logger.info("sendMsg==发送用户信息:{}",orderId);
             map = wxTemplateService.sendMessage(orderId);
+
             return map;
         }catch (Exception e){
             logger.info("错误信息为：{}",e);

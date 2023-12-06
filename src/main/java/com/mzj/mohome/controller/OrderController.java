@@ -84,6 +84,7 @@ public class OrderController {
     public Map<String,Object> updaSerOrder(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.info("updaSerOrder====请求参数：{}",JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             int result = orderService.updateOrderInfo(map);
@@ -283,6 +284,24 @@ public class OrderController {
             resultMap.put("success",false);
             resultMap.put("msg","修改订单记录失败");
             log.error("该订单id：{}修改订单记录失败：{}",payRecord.getOrderId(),e);
+        }
+        return resultMap;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/findOrderDetailInfo",method = RequestMethod.POST)
+    public Map<String,Object> findOrderDetailInfo(String orderId){
+        Map<String,Object> resultMap = new HashMap<>();
+        try {
+            OrderVo orderVo = orderService.findOrderDetail(orderId);
+            resultMap.put("success",true);
+            resultMap.put("msg","");
+            resultMap.put("result",orderVo);
+        } catch (Exception e) {
+            resultMap.put("success",false);
+            resultMap.put("msg","查询订单失败");
+            log.error("该订单id：{}失败，错误信息为：{}",orderId,e);
         }
         return resultMap;
     }

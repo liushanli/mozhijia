@@ -3,6 +3,7 @@ package com.mzj.mohome.mapper;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.vo.WorkerVo;
+import com.mzj.mohome.vo.WorkerWxInfo;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -527,4 +528,46 @@ public interface WorkersMapper {
             " city,cityId,area,areaId,jd,wd,radius,addTime from" +
             " TB_WorkerPoint where workerId = #{workerId}")
     WorkerVo findWorkerLocation(@Param("workerId") String workerId);
+
+    /**
+     * 添加技师绑定微信
+     * @param workerWxInfo
+     * @return
+     */
+    @Insert("insert into TB_UserAndOpenId " +
+            "VALUES(#{workerId},#{openId},GETDATE(),GETDATE(),#{nickName},#{avatarUrl},#{sex})")
+    int addWorkerOpenInfo(WorkerWxInfo workerWxInfo);
+
+    /**
+     * 查询是否已经绑定
+     * @param openId
+     * @param workerId
+     * @return
+     */
+    @Select("<script>" +
+            "select count(1) from TB_UserAndOpenId where 1=1" +
+            "<if test='workerId!=null'> or workerId = #{workerId} </if>" +
+            "<if test='openId!=null'> and openId = #{openId} </if>" +
+            "</script>")
+    int findWorkerOpenInfo(@Param("workerId") String workerId,@Param("openId") String openId);
+
+    /**
+     * 修改绑定
+     * @param workerWxInfo
+     * @return
+     */
+    @Update("update TB_UserAndOpenId set openId = #{openId},nickName=#{nickName},avatarUrl=#{avatarUrl},sex=#{sex},updateTime=GETDATE() where workerId = #{workerId}")
+    int updWorkerOpenInfo(WorkerWxInfo workerWxInfo);
+
+    /**
+     * 解除绑定微信
+     * @param workerId
+     * @return
+     */
+    @Update("delete from TB_UserAndOpenId where workerId = #{workerId}")
+    int delWorkerOpenInfo(String workerId);
+
+    @Insert("insert into TB_UserAndOpenId(workerId,openId,createTime,updateTime)" +
+            " VALUES(#{workerId},#{openId},GETDATE(),GETDATE())")
+    int addWorkerOpenInfos(@Param("openId")String openId,@Param("workerId")String workerId);
 }

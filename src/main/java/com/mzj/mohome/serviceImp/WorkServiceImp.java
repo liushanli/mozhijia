@@ -13,6 +13,7 @@ import com.mzj.mohome.service.WorkerService;
 import com.mzj.mohome.util.*;
 import com.mzj.mohome.vo.PageUtil;
 import com.mzj.mohome.vo.WorkerVo;
+import com.mzj.mohome.vo.WorkerWxInfo;
 import com.winnerlook.model.PrivacyBindBodyAxb;
 import com.winnerlook.model.PrivacyUnbindBody;
 import com.winnerlook.model.VoiceResponseResult;
@@ -274,7 +275,9 @@ public class WorkServiceImp implements WorkerService {
                     objectMap.put("msg","");
                     objectMap.put("workVo",worker);
                     objectMap.put("shopStatus",1);
-                    userService.addUserOpenInfo(worker.getWorkerId(),openId,"2");
+                    if(StringUtils.isNotBlank(openId)){
+                        workersMapper.addWorkerOpenInfos(openId,worker.getWorkerId());
+                    }
                 }else{
                     Map<String,Object> map2 = shopMapper.findShopByPhone(phone);
                     if(map2 != null){
@@ -283,7 +286,9 @@ public class WorkServiceImp implements WorkerService {
                         objectMap.put("workVo",map2);
                         objectMap.put("success",true);
                         objectMap.put("shopStatus",2);
-                        userService.addUserOpenInfo(map2.get("shopId").toString(),openId,"2");
+                        if(StringUtils.isNotBlank(openId)){
+                            workersMapper.addWorkerOpenInfos(openId,map2.get("shopId").toString());
+                        }
                     }else{
                         objectMap.put("msg","该手机号没有注册");
                         objectMap.put("success",false);
@@ -1117,6 +1122,49 @@ public class WorkServiceImp implements WorkerService {
         return workersMapper.findWorkerLocation(workerId);
     }
 
+
+    /**
+     * 添加技师绑定微信
+     * @param workerWxInfo
+     * @return
+     */
+    public int addWorkerWxInfo(WorkerWxInfo workerWxInfo){
+        //查询是否已经绑定，如果已经绑定，则不进行绑定，或者说该微信号，已经绑定到其他用户，则不能再进行绑定
+        if(workersMapper.findWorkerOpenInfo(workerWxInfo.getWorkerId(),null)==0
+         && workersMapper.findWorkerOpenInfo(null,workerWxInfo.getOpenId())==0) {
+            return workersMapper.addWorkerOpenInfo(workerWxInfo);
+        }
+        return 1;
+
+    }
+
+    /**
+     * 修改绑定
+     * @param workerWxInfo
+     * @return
+     */
+    public int updWorkerWxInfo(WorkerWxInfo workerWxInfo){
+        //查询是否已经绑定，如果已经绑定，则不进行绑定，或者说该微信号，已经绑定到其他用户，则不能再进行绑定
+        if(workersMapper.findWorkerOpenInfo(workerWxInfo.getWorkerId(),null)==0
+        && workersMapper.findWorkerOpenInfo(null,workerWxInfo.getOpenId())==0){
+            return workersMapper.updWorkerOpenInfo(workerWxInfo);
+        }
+        return 1;
+
+    }
+
+    /**
+     * 解除绑定
+     * @param workerId
+     * @return
+     */
+    public int delWorkerWxInfo(String workerId){
+        return workersMapper.delWorkerOpenInfo(workerId);
+    }
+
+    public  int findWorkerWxInfo(String workerId){
+        return workersMapper.findWorkerOpenInfo(workerId,null);
+    }
     @Scheduled(cron = "0 0/5 * * * ?")
     @Async
     public void updateWorkDateHHmm(){

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body,html {width: 100%;height: 100%; margin: 0;font-family: "微软雅黑";}
+        #allmap {height: 50rem; width: 100%;overflow: hidden;}
+        /*#result {height: calc(100% - 610px);width: 100%;font-size: 12px;}*/
+        /*#resultText { height: 70px;font-size: 18px;padding: 6px;}*/
+        #r-result {height: 40px;width: 100%;display: flex;align-items: center;justify-content: center;
+            border-bottom: #A9A9A9 1px solid;margin-bottom: 2px;margin-top: 3px;}
+        .btn {width: 100px;height: 34px;border: 1px solid #999;border-radius: 5px;margin: 0 auto;
+            font-size: 18px;text-align: center;line-height: 34px;color: #333;background: #E8E7E3;}
+    </style>
+    <!-- 引入百度地图api 携带 AK -->
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=oMtATpWYherlIHOlxpttCHUCNvhwMfMQ"></script>
+        <!-- 引入搜索功能 -->
+    <script type="text/javascript" src="../js/SearchInfoWindow_min.js"></script>
+
+    <link rel="stylesheet" href="../css/SearchInfoWindow_min.css" />
+    <!-- 引入 uni-app 的 SDK -->
+    <script type="text/javascript" src="../js/uni.webview.1.5.2.js"></script>
+    <script ype="text/javascript" src="../js/jquery.min.js"></script>
+    <title>选择地址</title>
+</head>
+ 
+<body>
+    <!-- 顶部搜索栏 -->
+    <div id="search">
+        <div id="r-result"><input type="text" id="suggestId" size="20" placeholder="位置搜索" value="百度"
+                style="width:100%;height:40px;" /></div>
+        <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
+
+    </div>
+    <!-- 地图 -->
+    <div id="allmap"></div>
+    <script type="text/javascript">
+        //确定地址 将数据传输到 uniapp 的 webview内
+        document.addEventListener('UniAppJSBridgeReady', function () {
+            uni.postMessage({
+                data: {
+                    action: 'message'
+                }
+            });
+        });
+      document.write('<script type="text/javascript" src="../js/jweixin-1.3.2.js"><\/script>');
+        var map = new BMap.Map('allmap');
+        var poi = new BMap.Point(116.307852, 40.057031); //罗马的坐标
+ 
+        var addressPost; //存储附近信息数据
+        var CURRENT_LNG; //记录坐标
+        var CURRENT_LAT; //记录坐标
+        var province; //省份
+        var city;     //城市
+        var area;     //地区
+        var lng, lat; //记录坐标
+
+        map.centerAndZoom(poi, 18); //设置地图中心点 和 缩放等级
+        map.enableScrollWheelZoom();//开启鼠标滚轮
+ 
+        function G(id) {
+            return document.getElementById(id);
+        }
+        //获取当前位置附近地址信息 --- geoc.getLocation
+        var geoc = new BMap.Geocoder();
+        var getCurrentLocation = function (lg, lt) {
+            //geoc.getLocation 获取到 坐标 以及 包含附近地址信息的数组
+            geoc.getLocation(new BMap.Point(lg, lt), function (rs) {
+                //取数组第一个地址信息为选中的位置，也可现为地址列表
+                let addressComponents = rs.addressComponents;
+                province = addressComponents.province;
+                city = addressComponents.city;
+                area = addressComponents.district;
+                var nearbyAddeessArr = rs.surroundingPois[0];
+                console.log(JSON.stringify(rs));
+                addressPost = rs.address;
+                CURRENT_LNG = lg;
+                CURRENT_LAT = lt;
+                //postMsg();
+                var pp = rs.point;
+                var myIcon = new BMap.Icon("../map_2.png", new BMap.Size(50, 50), {
+                    anchor: new BMap.Size(40, 40),
+                    imageOffset: new BMap.Size(0, 0)
+                });
+                // 创建Marker标注，使用图标
+                var marker = new BMap.Marker(pp, {
+                    icon: myIcon
+                });
+                // 创建文本标注对象
+                var labelopts = {
+                    position: pp, // 指定文本标注所在的地理位置
+                    offset: new BMap.Size(-100,-60) // 设置文本偏移量
+                };
+                var label = new BMap.Label(addressPost, labelopts);
+                //文本标注样式，transform为X轴平移，即文本居中显示
+                label.setStyle({
+                    color: "#fff",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    borderRadius: "10px",
+                    padding: "0 10px",
+                    fontSize: "14px",
+                    lineHeight: "20px",
+                    border :"0"
+                });
+                //添加marker及文本标注
+                map.addOverlay(label);
+                map.addOverlay(marker);
+                postMsg();
+            });
+        }
+        //通过浏览器获取当前定位的坐标
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function (r) {
+            if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+                let pp = r.point;
+                var mk = new BMap.Marker(r.point);
+                map.addOverlay(mk);
+                map.panTo(r.point);
+                lng = pp.lng
+                lat = pp.lat
+                console.log(JSON.stringify(pp));
+
+
+                getCurrentLocation(lng, lat);
+            }
+            else {
+                alert('failed' + this.getStatus());
+            }
+        }, { enableHighAccuracy: true })
+ 
+         //给地图添加点击事件 标记 marker
+        map.addEventListener("touchstart", function (e) {
+            map.clearOverlays();//清除地图上所有覆盖物 marker
+            //获取坐标
+            var lng = e.point.lng;
+            var lat = e.point.lat;
+            getCurrentLocation(lng, lat)
+  });
+
+  // 以下是地点检索功能
+
+  //创建一个search实例
+  var ac = new BMap.Autocomplete(
+      {
+          "input": "suggestId",
+          "location": map
+      });
+
+
+  var myValue;//存储地址检索结果
+  ac.addEventListener("onconfirm", function (e) {    //鼠标点击下拉列表后的事件
+      var _value = e.item.value;
+      myValue = _value.province + _value.city + _value.district + _value.street + _value.business;
+      G("searchResultPanel").innerHTML = "onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+      setPlace();
+  });
+
+  // 地图移动到检索的位置，并且标记
+  function setPlace() {
+      map.clearOverlays();    //清除地图上所有覆盖物
+      function myFun() {
+          var pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+          map.centerAndZoom(pp, 18);
+          map.addOverlay(new BMap.Marker(pp));    //添加标注
+          getCurrentLocation(pp.lng, pp.lat);
+      }
+      var local = new BMap.LocalSearch(map, { //智能搜索
+          onSearchComplete: myFun
+      });
+      local.search(myValue);
+  }
+    function postMsg(){
+        //uniapp 挂载完毕，在内部可以使用uniapp 部分 api,具体看 官方文档 webview
+        uni.postMessage({
+            data: {
+                info: {
+                    addressPost,
+                    CURRENT_LNG,
+                    CURRENT_LAT,
+                    province,
+                    city,
+                    area
+                }
+            }
+        });
+
+        console.log(addressPost+"=="+
+            CURRENT_LNG+"=="+
+            CURRENT_LAT+"=="+
+            province+"=="+
+            city+"=="+
+            area);
+    }
+</script>
+</body>
+ 
+</html>

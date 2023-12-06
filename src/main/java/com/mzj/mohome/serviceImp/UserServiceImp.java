@@ -858,7 +858,7 @@ public class UserServiceImp implements UserService {
         return userMapper.getUserStatus();
     }
 
-    public int updUserOrderRecord(String orderId) {
+    public int updUserOrderRecord(String orderId,String payType) {
         PayRecord payRecord = userMapper.findPayRecord(orderId);
         logger.info("获取订单信息为：{}", JSON.toJSONString(payRecord));
         User user = new User();
@@ -869,10 +869,12 @@ public class UserServiceImp implements UserService {
          */
         //购买类型为1或4，且支付类型为 1,则进行相减余额信息
         if ((payRecord.getBuyType() == 1 || payRecord.getBuyType() == 4)
-                && payRecord.getPayType() == 1) {
+                && payType.equals("1")) {
+            logger.info("购买类型为1或4，且支付类型为 1,则进行相减余额信息");
             user.setSurplusMoney(-payRecord.getOnlinePay());
             return userMapper.updUser(user);
         } else if (payRecord.getBuyType() == 2) {
+            logger.info("购买类型为2，则进行更新用户的会员卡相关信息");
             //购买类型为2，则进行更新用户的会员卡相关信息
             Card card = userMapper.findCardInfo(payRecord.getSubject());
             user.setCardId(card.getCardId());
@@ -881,6 +883,7 @@ public class UserServiceImp implements UserService {
             user.setLevel(1);
             return userMapper.updUser(user);
         } else if (payRecord.getBuyType() == 3) {
+            logger.info("购买类型为3，则进行相加余额信息");
             //购买类型为3，则进行相加余额信息
             user.setSurplusMoney(payRecord.getUserMoney());
             return userMapper.updUser(user);

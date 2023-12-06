@@ -140,6 +140,8 @@ public class WxTemplateServiceImp implements WxTemplateService {
     @Async*/
     public Map<String,Object> sendMessage(String orderId){
         Map<String,Object> resultMap = new HashMap<>();
+        Map<String, Object> mapperPayRecordById = userMapper.findPayRecordById(orderId);
+
         resultMap.put("success",false);
         resultMap.put("msg","发送失败，请稍后重试");
         log.info("=sendMessage=开始发送接单通知===:{}",orderId);
@@ -155,28 +157,35 @@ public class WxTemplateServiceImp implements WxTemplateService {
             log.info("sendMessage====token为空，获取用户token失败");
             return resultMap;
         }
+        List<OrderVo> list = new ArrayList<>();
         List<OrderVo> orderVoList = orderMapper.findUserOpenId(orderId);
         if(orderVoList == null || orderVoList.size()==0){
-            log.info("sendMessage====获取不到发送模板消息，则不能进行发送接单成功消息");
-            return resultMap;
+            log.info("sendMessage==技师==获取不到发送模板消息，则不能进行发送接单成功消息");
+        }else{
+            list.addAll(orderVoList);
         }
-
-        OrderVo orderVoInfo = orderVoList.get(0);
-        String openId = orderMapper.sendShop(orderVoInfo.getShopId());
-        if(StringUtils.isNotEmpty(openId)){
+        List<OrderVo> shopList = orderMapper.sendShop(orderId);
+        if(shopList == null || shopList.size()==0){
+            log.info("sendMessage==商家==获取不到发送商家模板消息，则不能进行发送接单成功消息");
+            return resultMap;
+        }else{
+            list.addAll(shopList);
+        }
+        log.info("发送消息为：{}",JSON.toJSONString(shopList));
+        /*if(StringUtils.isNotEmpty(openId)){
             //判断商家是否有信息，如果有，则进行添加
             log.info("openId=={}",openId);
             orderVoInfo.setOpenId(openId);
             orderVoList.add(orderVoInfo);
             log.info("sendMessage======商家信息为：{}",JSON.toJSONString(orderVoInfo));
-        }
+        }*/
         // 公众号的模板id(也有相应的接口可以查询到)
         String templateId = "GkJihpsGXUYsvaMytBwndX2TngVZBOEppY9zY7BdBWg";
         //List<OrderVo>  orderVoList1 = new ArrayList<>();
         // 微信的基础accessToken
         String requestUrl = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + accessToken;
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            for (OrderVo orderVo : orderVoList) {
+            for (OrderVo orderVo : list) {
                 // 模板参数
                 Map<String, WeChatTemplateMsg> sendMag = new HashMap<>();
 
@@ -221,6 +230,7 @@ public class WxTemplateServiceImp implements WxTemplateService {
                 log.info("sendMessage==该订单orderId：{}====推送模板结果是: {}", orderVo.getOrderId(), JSON.toJSONString(result));
                 JSONObject body = result.getBody();
                 if (body.get("errcode").equals(0)) {
+                    orderMapper.updateInfoNew(orderVo.getWorkerId());
                     resultMap.put("success", true);
                     resultMap.put("msg", "发送成功");
                     //推送成功，则进行修改数据库的消息，已发送
@@ -228,6 +238,10 @@ public class WxTemplateServiceImp implements WxTemplateService {
                 }
             }
         log.info("=sendMessage=结束发送接单通知===");
+        resultMap.put("success",true);
+        resultMap.put("status",mapperPayRecordById.get("status"));
+        resultMap.put("payTime",mapperPayRecordById.get("payTime"));
+        resultMap.put("surplusMoney",mapperPayRecordById.get("surplusMoney"));
         return resultMap;
     }
 

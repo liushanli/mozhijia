@@ -14,5 +14,5 @@ public class OrderDto implements Serializable {
     private String shopId;
     private Integer size;
     private Integer page;
-    private String sourceType;
+    private Integer sourceType;
 }

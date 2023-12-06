@@ -740,6 +740,33 @@ public class WorkerController {
        return workerService.queryWorkerInfo(map_1);
     }
 
+    /**
+     * 根据两个经纬度获取相距几公里
+     * @param map_1
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/queryWorkDisInfo")
+    public Map<String,Object> queryWorkDisInfo(@RequestBody Map<String,Object> map_1){
+
+        logger.info("请求信息为：{}",JSON.toJSONString(map_1));
+        String start = ToolsUtil.getString(map_1.get("start"));
+        String end = ToolsUtil.getString(map_1.get("end"));
+        Map<String,Object> map = new HashMap<>();
+        try {
+            Integer dis = workerService.getDistances(start,end);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("distinct",dis);
+        }catch (Exception e){
+            logger.error("获取经纬度之间的距离失败：{}",e);
+            map.put("success",false);
+            map.put("msg","获取位置失败");
+            map.put("distinct",0);
+        }
+        return map;
+    }
+
     @ResponseBody
     @PostMapping(value = "/findWorkByPhoneWx")
     public Map<String,Object> findWorkByPhoneWx(@RequestBody Map<String,Object> map_1){
@@ -790,5 +817,72 @@ public class WorkerController {
         return map;
     }
 
+    @ResponseBody
+    @GetMapping(value = "/addWorkWxInfo")
+    public Map<String,Object> addWorkWxInfo(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            WorkerVo workerVo = workerService.findWorkLocation(workerId);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("workerVo",workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("workVo",null);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/updWorkWxInfo")
+    public Map<String,Object> updWorkWxInfo(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            WorkerVo workerVo = workerService.findWorkLocation(workerId);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("workerVo",workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("workVo",null);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/delWorkWxInfo")
+    public Map<String,Object> delWorkWxInfo(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            WorkerVo workerVo = workerService.findWorkLocation(workerId);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("workerVo",workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("workVo",null);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/findWorkWxInfo")
+    public Map<String,Object> findWorkWxInfo(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            WorkerVo workerVo = workerService.findWorkLocation(workerId);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("workerVo",workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+            map.put("workVo",null);
+        }
+        return map;
+    }
 }
 

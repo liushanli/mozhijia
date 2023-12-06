@@ -45,7 +45,8 @@ public interface OrderMapper {
             "</if> " +
             "<if test='shopId!=null'> and shop.shopId = #{shopId} </if>  " +
             "<if test='userId!=null'> and orders.userId = #{userId} </if>  " +
-            "<if test='sourceType!=null'> and orders.sourceType = #{sourceType} </if>  " +
+            "<if test='sourceType==1'> and orders.sourceType = '1' </if>  " +
+            "<if test='sourceType==2'> and orders.sourceType = '0' or orders.sourceType is null </if>  " +
             "<if test='workerId!=null'> and orders.workerId = #{workerId} and  orders.status != 0 </if>" +
             "<if test='orderId!=null'> and orders.id = #{orderId} </if>" +
             ") t where rownumber &gt; ${page} </script>")
@@ -90,6 +91,24 @@ public interface OrderMapper {
     List<Map<String,Object>> findOrerListInfo(@Param("page") Integer page, @Param("statusDesc")String statusDesc,
                                               @Param("userId")String userId,@Param("orderId")String orderId,
                                               @Param("workerId")String workerId);
+
+
+    /**
+     * 根据订单ID查询信息
+     * @param orderId
+     * @return
+     */
+    @Select("select orders.id,orders.orderId,orders.shopId,orders.productId,orders.userId,orders.workerId,orders.productName," +
+            "orders.payOnline,orders.status,orders.userName,orders.province,orders.city,orders.area,orders.address," +
+            "orders.phone,orders.jd,orders.wd,orders.detail,orders.trafficPrice,orders.remarks,orders.serviceNumber," +
+            "orders.aboutTime,orders.orderPayTime,orders.shopReceiveTime,orders.serviceCompleteTime,orders.workconfirmTime," +
+            "orders.orderReviceId,orderReviceName,orders.workerName,orders.workerPhone,orders.shopRemarks,orders.returnType," +
+            "orders.returnMoney,orders.addTime,orders.returnReason,fillMoney,fillReason,tradeNo,payType," +
+            "orders.orderPayType,orders.status_js,orders.status_tx,orders.bargainPrice,orders.orderSMSFlag,orders.updateTime," +
+            "orders.isDel,orders.isDelTime,orders.sourceType,orders.sendType,p.productTime,p.imgUrl productImgUrl " +
+            " from TB_Order orders left join TB_Product p on orders.productId = p.productId " +
+            " where orders.orderId=#{orderId}")
+    OrderVo findOrderDetail(String orderId);
 
     //查询订单列表信息进行中的
     @Select("<script> select * from(\n" +
@@ -175,7 +194,8 @@ public interface OrderMapper {
     @Update("update TB_Order set status = #{status},workconfirmTime = GETDATE(),updateTime = GETDATE()  where orderId =#{orderId} ")
     int updateOrderStatusTime(Order order);
 
-    @Update("UPDATE TB_WorkerTime set isBusy=0 where id in (select top 5 id from TB_WorkerTime where [date]>=  (select aboutTime from TB_Order where orderId = #{orderId}) " +
+    @Update("UPDATE TB_WorkerTime set isBusy=0 where id in (select top 5 id from TB_WorkerTime where [date]" +
+            " >=  (select aboutTime from TB_Order where orderId = #{orderId}) " +
             "and workerId = #{workerId} " +
             ")")
     int updateOrdersTimes(@Param("workerId") String workerId,@Param("orderId") String orderId);
@@ -248,7 +268,7 @@ public interface OrderMapper {
      * 根据用户id来查询
      * @return
      */
-    @Select("<script> SELECT u.openId,o.aboutTime,o.productName,o.address,o.workerName,o.workerPhone,o.phone,o.orderId,o.sourceType,o.shopId " +
+    @Select("<script> SELECT u.openId,o.aboutTime,o.productName,o.address,o.workerName,o.workerPhone,o.phone,o.orderId,o.sourceType,o.shopId,o.workerId " +
             " FROM  TB_Order o  JOIN (  SELECT   *  FROM " +
             " TB_UserAndOpenId WHERE " +
             " createTime IN ( SELECT MAX ( createTime ) FROM TB_UserAndOpenId GROUP BY workerId )) u ON  o.workerId = u.workerId    " +
@@ -259,8 +279,16 @@ public interface OrderMapper {
             "</script>")
     List<OrderVo> findUserOpenId(String orderId);
 
-    @Select("select openId from TB_UserAndOpenId where workerId = #{shopId}")
-    String sendShop(String shopId);
+    @Select("<script> SELECT u.openId,o.aboutTime,o.productName,o.address,o.workerName,o.workerPhone,o.phone,o.orderId,o.sourceType,o.shopId,o.workerId " +
+            " FROM  TB_Order o  JOIN (  SELECT   *  FROM " +
+            " TB_UserAndOpenId WHERE " +
+            " createTime IN ( SELECT MAX ( createTime ) FROM TB_UserAndOpenId GROUP BY workerId )) u ON  o.shopId = u.workerId    " +
+            " WHERE  o.status = '1' and (sendType = '0' or sendType is null)" +
+            "<if test='orderId != null'> " +
+            " and o.orderId = #{orderId}" +
+            "</if>" +
+            "</script>")
+    List<OrderVo> sendShop(String orderId);
 
     /**
      * 修改已发送

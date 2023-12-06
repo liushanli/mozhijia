@@ -12,6 +12,7 @@ import com.mzj.mohome.mapper.WorkersMapper;
 import com.mzj.mohome.service.OrderService;
 import com.mzj.mohome.service.ProductService;
 import com.mzj.mohome.service.WorkerService;
+import com.mzj.mohome.util.DateUtils;
 import com.mzj.mohome.util.SmsSendUtil;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.vo.OrderDto;
@@ -59,6 +60,7 @@ public class OrderServiceImp implements OrderService {
         String workerId = ToolsUtil.getString(map.get("workerId"));
         String shopId = ToolsUtil.getString(map.get("shopId"));
         String pageStr = ToolsUtil.getString(map.get("page"));
+        String sourceType = ToolsUtil.getString(map.get("sourceType"));
         Integer page = StringUtils.isNotEmpty(pageStr)?Integer.parseInt(pageStr):1;
         List<OrderVo> orderList = null;
         OrderDto orderDto = new OrderDto();
@@ -68,9 +70,13 @@ public class OrderServiceImp implements OrderService {
         orderDto.setWorkerId(workerId);
         orderDto.setShopId(shopId);
         orderDto.setPage((page-1)*10);
+        orderDto.setSourceType(sourceType!=null?Integer.parseInt(sourceType):0);
         orderList = orderMapper.findOrerList_1(orderDto);
         if(orderList != null && orderList.size()>0){
             for(OrderVo orderVo : orderList){
+                if(StringUtils.isEmpty(orderVo.getSourceType()) || orderVo.getSourceType().equals("0")){
+                    orderVo.setSourceType("2");
+                }
                 orderVo.setAddTimeStr("");
                 /**
                  * 0：待付款，1：已付款，2：付款失败，3：已接单，
@@ -463,12 +469,10 @@ public class OrderServiceImp implements OrderService {
                     logger.info("该订单"+order.getOrderId()+"，已被技师或者商家修改状态");
                 }
             }
-
-
             logger.info("修改成功");
             return numer;
         }catch (Exception e){
-            logger.info("修改失败："+e.getMessage());
+            logger.info("修改失败："+e);
             return 0;
         }
     }
@@ -757,6 +761,20 @@ public class OrderServiceImp implements OrderService {
                userMapper.updateTbCoupon("0",id,"");
            }
         }
+    }
+
+
+    public OrderVo findOrderDetail(String orderId){
+        OrderVo orderVo = orderMapper.findOrderDetail(orderId);
+        orderVo.setAddTimeStr(DateUtils.getYYYY_MM_DD(orderVo.getAddTime()));
+        orderVo.setAboutTimeStr(DateUtils.getYYYY_MM_DD(orderVo.getAboutTime()));
+        orderVo.setOrderPayTimeStr(DateUtils.getYYYY_MM_DD(orderVo.getOrderPayTime()));
+        orderVo.setShopReceiveTimeStr(DateUtils.getYYYY_MM_DD(orderVo.getShopReceiveTime()));
+        orderVo.setWorkconfirmTimeStr(DateUtils.getYYYY_MM_DD(orderVo.getWorkconfirmTime()));
+        orderVo.setServiceCompleteTimeStr(DateUtils.getYYYY_MM_DD(orderVo.getServiceCompleteTime()));
+        int count = orderMapper.findCouponId(orderId);
+        orderVo.setCoupon(count);
+        return orderVo;
     }
 
 

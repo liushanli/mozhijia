@@ -4,6 +4,7 @@ import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.vo.PageUtil;
 import com.mzj.mohome.vo.WorkerVo;
+import com.mzj.mohome.vo.WorkerWxInfo;
 import com.winnerlook.model.VoiceResponseResult;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -100,6 +101,14 @@ public interface WorkerService {
     Map<String,Object> queryWorkerInfo(Map<String,Object> map);
 
     /**
+     * 根据经纬度获取距离
+     * @param start
+     * @param end
+     * @return
+     */
+    Integer getDistances(String start,String end);
+
+    /**
      * 修改技师的所在区域信息
      * @param map
      * @return
@@ -112,4 +121,32 @@ public interface WorkerService {
      * @return
      */
     WorkerVo findWorkLocation(String workerId);
+
+    /**
+     * 添加技师绑定微信
+     * @param workerWxInfo
+     * @return
+     */
+    int addWorkerWxInfo(WorkerWxInfo workerWxInfo);
+
+    /**
+     * 修改绑定
+     * @param workerWxInfo
+     * @return
+     */
+    int updWorkerWxInfo(WorkerWxInfo workerWxInfo);
+
+    /**
+     * 解除绑定
+     * @param workerId
+     * @return
+     */
+    int delWorkerWxInfo(String workerId);
+
+    /**
+     * 查询技师是否已经绑定
+     * @param workerId
+     * @return
+     */
+    int findWorkerWxInfo(String workerId);
 }

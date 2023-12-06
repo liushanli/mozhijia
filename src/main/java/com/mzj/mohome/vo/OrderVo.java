@@ -1,17 +1,15 @@
 package com.mzj.mohome.vo;
 
-import com.alipay.api.domain.DataEntry;
 import com.mzj.mohome.entity.Order;
-import lombok.Data;
 
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class OrderVo extends Order implements Serializable {
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     //预约时间字符串格式（yyyy-MM-dd HH:mm）
+    private String aboutTimeStr;
+
+    //下单时间字符串格式（yyyy-MM-dd HH:mm）
     private String addTimeStr;
     //支付时间字符串格式（yyyy-MM-dd HH:mm）
     private String orderPayTimeStr;
@@ -30,6 +28,33 @@ public class OrderVo extends Order implements Serializable {
     private String openId;
 
     private String sourceType;
+    private int coupon;
+
+    private Integer productTime;
+
+    public Integer getProductTime() {
+        return productTime;
+    }
+
+    public void setProductTime(Integer productTime) {
+        this.productTime = productTime;
+    }
+
+    public int getCoupon() {
+        return coupon;
+    }
+
+    public void setCoupon(int coupon) {
+        this.coupon = coupon;
+    }
+
+    public String getAboutTimeStr() {
+        return aboutTimeStr;
+    }
+
+    public void setAboutTimeStr(String aboutTimeStr) {
+            this.aboutTimeStr = aboutTimeStr;
+    }
 
     @Override
     public String getSourceType() {
@@ -78,9 +103,6 @@ public class OrderVo extends Order implements Serializable {
     }
 
     public void setAddTimeStr(String addTimeStr) {
-        if(this.getAddTime()!=null)
-            this.addTimeStr = simpleDateFormat.format(this.getAddTime());
-        else
             this.addTimeStr = addTimeStr;
     }
 
@@ -89,9 +111,6 @@ public class OrderVo extends Order implements Serializable {
     }
 
     public void setOrderPayTimeStr(String orderPayTimeStr) {
-        if(this.getOrderPayTime()!=null)
-            this.orderPayTimeStr = simpleDateFormat.format(this.getOrderPayTime());
-        else
             this.orderPayTimeStr = orderPayTimeStr;
     }
 
@@ -100,9 +119,6 @@ public class OrderVo extends Order implements Serializable {
     }
 
     public void setShopReceiveTimeStr(String shopReceiveTimeStr) {
-        if(this.getShopReceiveTime()!=null)
-            this.shopReceiveTimeStr = simpleDateFormat.format(this.getShopReceiveTime());
-        else
             this.shopReceiveTimeStr = shopReceiveTimeStr;
     }
 
@@ -111,9 +127,6 @@ public class OrderVo extends Order implements Serializable {
     }
 
     public void setServiceCompleteTimeStr(String serviceCompleteTimeStr) {
-        if(this.getServiceCompleteTime()!=null)
-            this.serviceCompleteTimeStr = simpleDateFormat.format(this.getServiceCompleteTime());
-        else
             this.serviceCompleteTimeStr = serviceCompleteTimeStr;
     }
 
@@ -122,9 +135,6 @@ public class OrderVo extends Order implements Serializable {
     }
 
     public void setWorkconfirmTimeStr(String workconfirmTimeStr) {
-        if(this.getWorkconfirmTime()!=null)
-            this.workconfirmTimeStr = simpleDateFormat.format(this.getWorkconfirmTime());
-        else
             this.workconfirmTimeStr = workconfirmTimeStr;
     }
     public OrderVo() {

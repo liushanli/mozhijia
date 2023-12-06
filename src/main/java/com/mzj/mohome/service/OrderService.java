@@ -61,4 +61,11 @@ public interface OrderService {
      * @return
      */
     int updOrderInfo(PayRecord payRecord);
+
+    /**
+     * 根据订单ID，来查询相关信息
+     * @param orderId
+     * @return
+     */
+    OrderVo findOrderDetail(String orderId);
 }
