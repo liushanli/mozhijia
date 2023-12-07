@@ -232,12 +232,25 @@ public class WorkServiceImp implements WorkerService {
                         objectMap.put("workVo",map2);
                         objectMap.put("success",true);
                         objectMap.put("shopStatus",2);
-                    }else{
+                    }else if(StringUtils.isNotEmpty(phone)){
                         logger.info("添加用户");
-                        shopMapper.addWorkInfo(phone);
-                        objectMap.put("msg","添加用户");
-                        objectMap.put("success",false);
-                        objectMap.put("workVo",null);
+                        String uuid = UUID.randomUUID().toString();
+                        String workerId = uuid.replaceAll("-","").toUpperCase();
+                        shopMapper.addWorkInfo(workerId,phone);
+                        Map<String, Object> map_3 = new HashMap<>();
+                        map_3.put("shopStatus","1");
+                        map_3.put("userName",phone);
+                        map_3.put("phone",phone);
+                        map_3.put("workerId",workerId);
+                        map_3.put("imgUrl","");
+                        objectMap.put("msg", "添加用户");
+                        objectMap.put("success", true);
+                        objectMap.put("workVo", map_3);
+                    }else{
+                        objectMap.put("msg", "不存在该账号");
+                        objectMap.put("workVo", null);
+                        objectMap.put("success", false);
+                        objectMap.put("shopStatus", 1);
                     }
                 }
             }
@@ -276,7 +289,13 @@ public class WorkServiceImp implements WorkerService {
                     objectMap.put("workVo",worker);
                     objectMap.put("shopStatus",1);
                     if(StringUtils.isNotBlank(openId)){
-                        workersMapper.addWorkerOpenInfos(openId,worker.getWorkerId());
+                        int count = workersMapper.findWorkerOpenInfo(worker.getWorkerId(),openId);
+                        if(count>0){
+                            objectMap.put("success",false);
+                            objectMap.put("msg","微信已绑定："+worker.getUserName()+",请确认后重新绑定");
+                        }else{
+                            workersMapper.addWorkerOpenInfos(openId,worker.getWorkerId());
+                        }
                     }
                 }else{
                     Map<String,Object> map2 = shopMapper.findShopByPhone(phone);
@@ -287,7 +306,14 @@ public class WorkServiceImp implements WorkerService {
                         objectMap.put("success",true);
                         objectMap.put("shopStatus",2);
                         if(StringUtils.isNotBlank(openId)){
-                            workersMapper.addWorkerOpenInfos(openId,map2.get("shopId").toString());
+                            int count = workersMapper.findWorkerOpenInfo(map2.get("shopId").toString(),openId);
+                            if(count>0){
+                                objectMap.put("success",false);
+                                objectMap.put("msg","微信已绑定："+map2.get("shopName").toString()+",请确认后重新绑定");
+                            }else{
+                                workersMapper.addWorkerOpenInfos(openId,map2.get("shopId").toString());
+                            }
+
                         }
                     }else{
                         objectMap.put("msg","该手机号没有注册");
@@ -324,6 +350,11 @@ public class WorkServiceImp implements WorkerService {
             if(workerList!=null && workerList.size()>0){
                 Worker worker = workerList.get(0);
                 workersMapper.updateLoginTime(worker.getWorkerId());
+                objectMap.put("bangFlag",false);
+                int count = workersMapper.findOpenIdCount(worker.getWorkerId());
+                if(count>0){
+                    objectMap.put("bangFlag",true);
+                }
                 objectMap.put("success",true);
                 objectMap.put("msg","");
                 objectMap.put("workVo",worker);
@@ -331,16 +362,21 @@ public class WorkServiceImp implements WorkerService {
             }else {
                 Map<String, Object> map2 = shopMapper.findShopByPhone(phone);
                 if (map2 != null) {
+                    objectMap.put("bangFlag",false);
+                    int count = workersMapper.findOpenIdCount(map2.get("shopId").toString());
+                    if(count>0){
+                        objectMap.put("bangFlag",true);
+                    }
                     objectMap.put("msg", "");
                     objectMap.put("workVo", map2);
                     objectMap.put("success", true);
                     objectMap.put("shopStatus", 2);
-                } else {
-                    logger.info("添加用户");
-                    shopMapper.addWorkInfo(phone);
-                    objectMap.put("msg", "添加用户");
-                    objectMap.put("success", false);
+                } else{
+                    objectMap.put("bangFlag",false);
+                    objectMap.put("msg", "不存在该账号");
                     objectMap.put("workVo", null);
+                    objectMap.put("success", false);
+                    objectMap.put("shopStatus", 1);
                 }
             }
             return objectMap;
@@ -1165,8 +1201,8 @@ public class WorkServiceImp implements WorkerService {
     public  int findWorkerWxInfo(String workerId){
         return workersMapper.findWorkerOpenInfo(workerId,null);
     }
-    @Scheduled(cron = "0 0/5 * * * ?")
-    @Async
+    /*@Scheduled(cron = "0 0/5 * * * ?")
+    @Async*/
     public void updateWorkDateHHmm(){
         Long oldtime=System.currentTimeMillis();
         logger.info("updateWorkDateHHmm=====修改时间日期定时开始："+(new Date()));

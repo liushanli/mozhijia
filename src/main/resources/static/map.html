@@ -6,12 +6,8 @@
     <style type="text/css">
         body,html {width: 100%;height: 100%; margin: 0;font-family: "微软雅黑";}
         #allmap {height: 50rem; width: 100%;overflow: hidden;}
-        /*#result {height: calc(100% - 610px);width: 100%;font-size: 12px;}*/
-        /*#resultText { height: 70px;font-size: 18px;padding: 6px;}*/
         #r-result {height: 40px;width: 100%;display: flex;align-items: center;justify-content: center;
-            border-bottom: #A9A9A9 1px solid;margin-bottom: 2px;margin-top: 3px;}
-        .btn {width: 100px;height: 34px;border: 1px solid #999;border-radius: 5px;margin: 0 auto;
-            font-size: 18px;text-align: center;line-height: 34px;color: #333;background: #E8E7E3;}
+            border-bottom: #A9A9A9 1px solid;margin-bottom: 2px;margin-top: 0.5rem;}
     </style>
     <!-- 引入百度地图api 携带 AK -->
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=oMtATpWYherlIHOlxpttCHUCNvhwMfMQ"></script>
@@ -29,21 +25,19 @@
     <!-- 顶部搜索栏 -->
     <div id="search">
         <div id="r-result"><input type="text" id="suggestId" size="20" placeholder="位置搜索" value="百度"
-                style="width:100%;height:40px;" /></div>
+                style="width: 70%;height: 2rem;border: 1px solid white;" />
+            <button onclick="postMsg()" style="background-color: #3daafc;
+            color: white;
+            height: 2rem;
+            width: 6rem;
+            border: 1px solid white;
+            border-radius: 1.4rem;">确认变更</button>
+        </div>
         <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
-
     </div>
     <!-- 地图 -->
     <div id="allmap"></div>
     <script type="text/javascript">
-        //确定地址 将数据传输到 uniapp 的 webview内
-        document.addEventListener('UniAppJSBridgeReady', function () {
-            uni.postMessage({
-                data: {
-                    action: 'message'
-                }
-            });
-        });
       document.write('<script type="text/javascript" src="js/jweixin-1.3.2.js"><\/script>');
         var map = new BMap.Map('allmap');
         var poi = new BMap.Point(116.307852, 40.057031); //罗马的坐标
@@ -76,7 +70,6 @@
                 addressPost = rs.address;
                 CURRENT_LNG = lg;
                 CURRENT_LAT = lt;
-                //postMsg();
                 var pp = rs.point;
                 var myIcon = new BMap.Icon("map_2.png", new BMap.Size(50, 50), {
                     anchor: new BMap.Size(40, 40),
@@ -105,7 +98,7 @@
                 //添加marker及文本标注
                 map.addOverlay(label);
                 map.addOverlay(marker);
-                postMsg();
+                //postMsg();
             });
         }
         //通过浏览器获取当前定位的坐标
@@ -190,27 +183,29 @@
       local.search(myValue);
   }
     function postMsg(){
-        //uniapp 挂载完毕，在内部可以使用uniapp 部分 api,具体看 官方文档 webview
-        uni.postMessage({
-            data: {
-                info: {
-                    addressPost,
-                    CURRENT_LNG,
-                    CURRENT_LAT,
-                    province,
-                    city,
-                    area
-                }
-            }
-        });
-
         console.log(addressPost+"=="+
             CURRENT_LNG+"=="+
             CURRENT_LAT+"=="+
             province+"=="+
             city+"=="+
             area);
+        document.addEventListener('UniAppJSBridgeReady', function () {
+             //uniapp 挂载完毕，在内部可以使用uniapp 部分 api,具体看 官方文档 webview
+            uni.postMessage({
+                data: {
+                    info: {
+                        addressPost,
+                        CURRENT_LNG,
+                        CURRENT_LAT,
+                        province,
+                        city,
+                        area
+                    }
+                }
+            });
+        });
     }
+
 </script>
 </body>
  

@@ -570,4 +570,7 @@ public interface WorkersMapper {
     @Insert("insert into TB_UserAndOpenId(workerId,openId,createTime,updateTime)" +
             " VALUES(#{workerId},#{openId},GETDATE(),GETDATE())")
     int addWorkerOpenInfos(@Param("openId")String openId,@Param("workerId")String workerId);
+
+    @Select("select count(1) from TB_UserAndOpenId where workerId = #{workerId}")
+    int findOpenIdCount(String workerId);
 }

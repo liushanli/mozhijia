@@ -117,7 +117,8 @@ public class getLngAndLat {
     public static void main(String[] args) {
         //LatitudeAndLongitude latAndLng = getLngAndLat.getLngAndLat("上海市 钦州路840号 钦州花苑|11");
         //System.out.println(JSON.toJSONString(latAndLng));
-        System.out.println(JSON.toJSONString(getAddressInfo("39.900000,116.400000")));
+
+        JSON.toJSONString(getAddressInfo("39.900000,116.400000"));
         /*LatitudeAndLongitude latAndLng = getLngAndLat.getLngAndLat("广东省广州市");
         LatitudeAndLongitude latAndLng2 = getLngAndLat.getLngAndLat("广西省南宁市");
 

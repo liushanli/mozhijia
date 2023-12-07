@@ -51,8 +51,8 @@ public class WxTemplateServiceImp implements WxTemplateService {
     /**
      * 每两个小时获取token一次
      */
-    @Scheduled(cron = "0 0 0/2 * * ?")
-    @Async
+    /*@Scheduled(cron = "0 0 0/2 * * ?")
+    @Async*/
     public Map<String,String> getAccessToken(){
         Map<String,String> map = new HashMap<>();
         String accessToken = "";
@@ -83,8 +83,8 @@ public class WxTemplateServiceImp implements WxTemplateService {
      * 每天晚上十一点获取一次公众号
      * @return
      */
-    @Scheduled(cron = "0 0 23 * * ?")
-    @Async
+    /*@Scheduled(cron = "0 0 23 * * ?")
+    @Async*/
     public void getUserList(){
         log.info("getUserList====获取公众号用户信息===start");
         Map<String,Object> map = new HashMap<>();

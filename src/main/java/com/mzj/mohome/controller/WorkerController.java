@@ -51,6 +51,7 @@ public class WorkerController {
     public Map<String,Object> findWorkByPhone(@RequestBody Map<String,Object> map_1){
         Map<String,Object> map = new HashMap<>();
         try{
+            logger.info("WorkerController.findWorkByPhone====请求信息为：{}",JSON.toJSONString(map_1));
             String phone = String.valueOf(map_1.get("phone"));
             String sendCode = String.valueOf(map_1.get("sendCode"));
             if(StringUtils.isNotEmpty(phone) && StringUtils.isNotEmpty(sendCode)){

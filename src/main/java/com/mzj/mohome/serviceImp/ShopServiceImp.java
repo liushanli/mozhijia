@@ -1,11 +1,15 @@
 package com.mzj.mohome.serviceImp;
 
+import com.alibaba.fastjson.JSON;
 import com.mzj.mohome.entity.Shop;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.mapper.ShopMapper;
 import com.mzj.mohome.mapper.WorkersMapper;
 import com.mzj.mohome.service.ShopService;
+import com.mzj.mohome.service.WorkerService;
 import com.mzj.mohome.util.ToolsUtil;
+import com.mzj.mohome.util.getLngAndLat;
+import com.mzj.mohome.vo.WorkerVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,8 @@ public class ShopServiceImp implements ShopService {
 
     @Autowired
     private ShopMapper shopMapper;
+    @Autowired
+    private WorkerService workerService;
     @Override
     public List<Shop> findShopList(Map<String,Object> map) {
 
@@ -205,7 +211,16 @@ public class ShopServiceImp implements ShopService {
         String wd = ToolsUtil.getString(map.get("wd"));
         String workerId = ToolsUtil.getString(map.get("workerId"));
         logger.info("jd=="+jd+"==wd=="+wd+"==workerId==="+workerId);
-        int num = shopMapper.updWorkerPoint(jd,wd,workerId);
+        Map<String,Object> addressMap = getLngAndLat.getAddressInfo(wd+","+jd);
+        addressMap.put("status","1");
+        addressMap.put("area",addressMap.get("district").toString());
+        addressMap.put("jd",jd);
+        addressMap.put("wd",wd);
+        addressMap.put("workerId",workerId);
+        logger.info("updateWorkerJd===请求信息为：{}", JSON.toJSONString(addressMap));
+        int num = workerService.updWorkerInfoJW(addressMap);
+
+        //int num = shopMapper.updWorkerPoint(jd,wd,workerId);
         return num;
     }
 }

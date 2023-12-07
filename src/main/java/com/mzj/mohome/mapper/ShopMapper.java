@@ -105,7 +105,7 @@ public interface ShopMapper {
 
 
     @Insert("insert into TB_Worker(workerId,userName,phone,isOnline,loginTime,sellSum,is_del)\n" +
-            "values(REPLACE(NEWID(),'-',''),#{phoneDesc},#{phoneDesc},0,GETDATE(),15,1)")
-    int addWorkInfo(String phoneDesc);
+            "values(#{workerId},#{phoneDesc},#{phoneDesc},0,GETDATE(),15,1)")
+    int addWorkInfo(@Param("workerId") String workerId,@Param("phoneDesc")String phoneDesc);
 
 }
