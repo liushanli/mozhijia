@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.entity.PayRecord;
 import com.mzj.mohome.service.OrderService;
+import com.mzj.mohome.service.UserService;
+import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.vo.OrderVo;
+import com.mzj.mohome.vo.ReturnOrderStatusVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +27,8 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private UserService userService;
 
     @ResponseBody
     @PostMapping("/findOrderInfo")
@@ -150,14 +155,48 @@ public class OrderController {
     public Map<String,Object> updReturnOrder(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.info("请求参数为：{}",JSON.toJSONString(map));
+
+            //添加记录
+            String orderId = ToolsUtil.getString(map.get("orderId"));
+            OrderVo order = orderService.findOrderDetail(orderId);
+            userService.addReturnOrderHistory(orderId,order.getStatus());
+
             resultMap.put("success",true);
             resultMap.put("msg","");
+            map.put("status",10);
+            map.put("returnType","0");
             int result = orderService.updateReturnOrder(map);
             if(result<=0){
                 resultMap.put("success",false);
                 resultMap.put("msg","修改失败");
             }
         } catch (Exception e) {
+            log.error("updReturnOrder===修改状态失败，错误信息为：{}",e);
+            e.printStackTrace();
+        }
+        return resultMap;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/updReturnOrderBeforeStatus",method = RequestMethod.POST)
+    public Map<String,Object> updReturnOrderBeforeStatus(@RequestBody Map<String,Object> map){
+        Map<String,Object> resultMap = new HashMap<>();
+        try {
+            log.info("请求参数为：{}",JSON.toJSONString(map));
+            resultMap.put("success",true);
+            resultMap.put("msg","");
+            String orderId = ToolsUtil.getString(map.get("orderId"));
+            List<ReturnOrderStatusVo> returnOrderStatusVos = userService.queryReturnInfoList(orderId);
+            map.put("status",returnOrderStatusVos.get(0).getStatus());
+
+            int result = orderService.updateReturnOrder(map);
+            if(result<=0){
+                resultMap.put("success",false);
+                resultMap.put("msg","修改失败");
+            }
+        } catch (Exception e) {
+            log.error("updReturnOrderBeforeStatus===修改状态失败，错误信息为：{}",e);
             e.printStackTrace();
         }
         return resultMap;

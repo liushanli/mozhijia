@@ -201,7 +201,7 @@ public interface OrderMapper {
     int updateOrdersTimes(@Param("workerId") String workerId,@Param("orderId") String orderId);
 
     //修改订单退款
-    @Update("update TB_Order set status = 10,returnReason=#{returnReason},returnMoney=#{returnMoney},returnType=0,updateTime = GETDATE()  where orderId =#{orderId}")
+    @Update("update TB_Order set status = #{status},returnReason=#{returnReason},returnMoney=#{returnMoney},returnType=#{returnType},updateTime = GETDATE()  where orderId =#{orderId}")
     int updateReturnOrder(Order order);
 
     @Update("update TB_Order set status=#{status},orderPayType=#{orderPayType}, updateTime = GETDATE()  where orderId =#{orderId}")

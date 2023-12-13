@@ -10,6 +10,7 @@ import com.mzj.mohome.service.UserService;
 import com.mzj.mohome.util.RandomUtil;
 import com.mzj.mohome.util.SmsSendUtil;
 import com.mzj.mohome.util.ToolsUtil;
+import com.mzj.mohome.vo.ReturnOrderStatusVo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -594,6 +595,15 @@ public class UserServiceImp implements UserService {
         }
     }
 
+    public List<Map<String,Object>> findEvaluateListByUserIdNew(String userId,String shopId,Integer pageNum,Integer size){
+        try {
+            return userMapper.findEvaluateListByUserIdNew(userId, shopId,pageNum,size);
+        } catch (Exception e) {
+            System.out.println("查询评价列表信息报错：" + e.getMessage());
+            return null;
+        }
+    }
+
     public List<Map<String, Object>> findEvaluateListByUserIdCon(Map<String, Object> map) {
         try {
 
@@ -903,6 +913,14 @@ public class UserServiceImp implements UserService {
             count =  userMapper.updUserOpenInfo(userId,openId);
         }
             return count;
+    }
+
+    public List<ReturnOrderStatusVo> queryReturnInfoList(String orderId){
+        return userMapper.queryReturnOrderInfo(orderId);
+    }
+
+    public int addReturnOrderHistory(String orderId,Integer status){
+        return userMapper.addReturnOrderInfo(orderId,status);
     }
 
 

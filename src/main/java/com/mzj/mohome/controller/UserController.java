@@ -558,10 +558,22 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/findEvalListInfo",method = RequestMethod.POST)
     public Map<String,Object> findEvalListInfo(@RequestBody Map<String,Object> map){
-        Map<String,Object> result_map = new HashMap<String,Object>();
+        Map<String,Object> result_map = new HashMap<>();
         try {
-            String userId = String.valueOf(map.get("userId"));
-            List<Map<String,Object>> resultList = userService.findEvaluateListByUserId(userId);
+            logger.info("findEvalListInfo==请求参数为：{}",JSON.toJSONString(map));
+            String userId = ToolsUtil.getString(map.get("userId"));
+            String shopId = ToolsUtil.getString(map.get("shopId"));
+            String page = ToolsUtil.getString(map.get("page"));
+            List<Map<String,Object>> resultList;
+            Integer pageNum;
+            if(StringUtils.isNotEmpty(page)){
+                int size = 6;
+                pageNum = (Integer.parseInt(page)-1)*size;
+                resultList = userService.findEvaluateListByUserIdNew(userId,shopId,pageNum,size);
+            }else{
+                resultList = userService.findEvaluateListByUserId(userId);
+            }
+
             if (resultList.size() > 0) {
                 result_map.put("success", true);
                 result_map.put("resultList",resultList);

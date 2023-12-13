@@ -1,6 +1,7 @@
 package com.mzj.mohome.service;
 
 import com.mzj.mohome.entity.*;
+import com.mzj.mohome.vo.ReturnOrderStatusVo;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,8 @@ public interface UserService {
 
     //根据用户id来查询评价列表信息
     List<Map<String,Object>> findEvaluateListByUserId(String userId);
+
+    List<Map<String,Object>> findEvaluateListByUserIdNew(String userId,String shopId,Integer pageNum,Integer size);
 
     //根据条件来查询评价列表信息
     List<Map<String,Object>> findEvaluateListByUserIdCon(Map<String, Object> map);
@@ -187,5 +190,14 @@ public interface UserService {
      * @return
      */
     int addUserOpenInfo(String userId, String openId, String status);
+
+    /**
+     * 根据orderId，查询退款信息状态
+     * @param orderId
+     * @return
+     */
+    List<ReturnOrderStatusVo> queryReturnInfoList(String orderId);
+
+    int addReturnOrderHistory(String orderId,Integer status);
 
 }

@@ -3,6 +3,7 @@ package com.mzj.mohome.serviceImp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.mapper.OrderMapper;
@@ -818,6 +819,14 @@ public class WorkServiceImp implements WorkerService {
             workersMapper.updateWorkBusy(1,null,map1.get("id").toString(),null);
         }
         return 0;
+    }
+
+    public Order findOrderInfo(String orderId){
+        Map<String,Object> orderInfo = orderMapper.findOrder(orderId);
+        Order order = new Order();
+        order.setOrderId(ToolsUtil.getString(orderInfo.get("orderId")));
+        order.setStatus(Integer.parseInt(ToolsUtil.getString(orderInfo.get("status"))));
+        return order;
     }
 
     public Map<String,Object> findShopByCode(Map<String,Object> map){

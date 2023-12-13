@@ -555,8 +555,10 @@ public class OrderServiceImp implements OrderService {
             Order order = new Order();
             order.setOrderId(ToolsUtil.getString(map.get("orderId")));
             order.setReturnReason(ToolsUtil.getString(map.get("returnReason")));
+            order.setReturnType(ToolsUtil.getString(map.get("returnType"))!=null?Integer.parseInt(ToolsUtil.getString(map.get("returnType"))):null);
+            order.setStatus(ToolsUtil.getString(map.get("status"))!=null?Integer.parseInt(ToolsUtil.getString(map.get("status"))):null);
             order.setReturnMoney(ToolsUtil.getString(map.get("returnMoney"))!=null?Double.parseDouble(ToolsUtil.getString(map.get("returnMoney"))):0);
-            logger.info("该订单："+order.getOrderId()+"修改为10");
+            logger.info("该订单："+order.getOrderId()+"修改为"+order.getStatus());
             int numer = orderMapper.updateReturnOrder(order);
             System.out.println("修改成功");
             return numer;
