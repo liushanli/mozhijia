@@ -86,6 +86,8 @@ public class getLngAndLat {
             map.put("province",obj.getJSONObject("result").getJSONObject("addressComponent").get("province"));
             map.put("city",obj.getJSONObject("result").getJSONObject("addressComponent").get("city"));
             map.put("district",obj.getJSONObject("result").getJSONObject("addressComponent").get("district"));
+            map.put("lng",obj.getJSONObject("result").getJSONObject("location").get("lng"));
+            map.put("lat",obj.getJSONObject("result").getJSONObject("location").get("lat"));
         }
         return map;
 

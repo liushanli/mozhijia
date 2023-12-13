@@ -33,7 +33,7 @@ public interface OrderMapper {
 
 
     //查询订单列表信息
-    @Select("<script> select top 10 * from (" +
+    @Select("<script> select top 5 * from (" +
             "select row_number() over(order by orders.id desc) as rownumber, " +
             "orders.*,shop.shopName,shop.servicePhone, p.imgUrl as imgProductUrl from TB_Order orders join TB_Shop shop on orders.shopId = shop.shopId join\n" +
             " TB_Product p on orders.productId = p.productId  where orders.isDel = '2' and orders.status not in(0,2) " +

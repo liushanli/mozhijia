@@ -69,7 +69,7 @@ public class OrderServiceImp implements OrderService {
         orderDto.setUserId(userId);
         orderDto.setWorkerId(workerId);
         orderDto.setShopId(shopId);
-        orderDto.setPage((page-1)*10);
+        orderDto.setPage((page-1)*5);
         orderDto.setSourceType(sourceType!=null?Integer.parseInt(sourceType):0);
         orderList = orderMapper.findOrerList_1(orderDto);
         if(orderList != null && orderList.size()>0){

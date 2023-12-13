@@ -313,7 +313,6 @@ public class WorkServiceImp implements WorkerService {
                             }else{
                                 workersMapper.addWorkerOpenInfos(openId,map2.get("shopId").toString());
                             }
-
                         }
                     }else{
                         objectMap.put("msg","该手机号没有注册");
