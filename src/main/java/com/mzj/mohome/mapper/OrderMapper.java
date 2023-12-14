@@ -27,7 +27,7 @@ public interface OrderMapper {
             "<if test='workerId!=null'> and orders.workerId = #{workerId} and  orders.status != 0 </if>" +
             "<if test='orderId!=null'> and orders.id = #{orderId} </if>" +
             "order by orders.id desc </script>")
-    List<OrderVo> findOrerList(@Param("statusDesc") String statusDesc, @Param("userId")String userId,
+    List<OrderVo> findOrerList(@Param("statusDesc") String statusDesc, @Param("userId") String userId,
                                @Param("orderId") String orderId, @Param("workerId") String workerId,
                                @Param("shopId") String shopId);
 
@@ -37,7 +37,7 @@ public interface OrderMapper {
             "select row_number() over(order by orders.id desc) as rownumber, " +
             "orders.*,shop.shopName,shop.servicePhone, p.imgUrl as imgProductUrl from TB_Order orders join TB_Shop shop on orders.shopId = shop.shopId join\n" +
             " TB_Product p on orders.productId = p.productId  where orders.isDel = '2' and orders.status not in(0,2) " +
-            " and orders.workerId = #{workerId} and  orders.status != 0 " +
+            " and  orders.status != 0 " +
             "<if test='statusDesc != null'> " +
             "<if test='statusDesc==3'> and orders.status &gt;= 3 and orders.status &lt; 7 </if>" +
             "<if test='statusDesc==4'> and orders.status &gt;= 7 and orders.status &lt;= 9 </if>" +
@@ -88,9 +88,9 @@ public interface OrderMapper {
             "<if test='orderId!=null'> and t.orderId = #{orderId}</if> " +
             "<if test='workerId!=null'> and t.workerId = #{workerId}</if> "+
             "order by t.id desc  </script>")
-    List<Map<String,Object>> findOrerListInfo(@Param("page") Integer page, @Param("statusDesc")String statusDesc,
-                                              @Param("userId")String userId,@Param("orderId")String orderId,
-                                              @Param("workerId")String workerId);
+    List<Map<String,Object>> findOrerListInfo(@Param("page") Integer page, @Param("statusDesc") String statusDesc,
+                                              @Param("userId") String userId, @Param("orderId") String orderId,
+                                              @Param("workerId") String workerId);
 
 
     /**
@@ -138,9 +138,9 @@ public interface OrderMapper {
             "<if test='orderId!=null'> and t.orderId = #{orderId}</if> " +
             "<if test='workerId!=null'> and t.workerId = #{workerId}</if> "+
             "order by t.id desc </script>")
-    List<Map<String,Object>> findOrerListInfoByOn(@Param("page") Integer page, @Param("statusDesc")String statusDesc,
-                                                  @Param("userId")String userId, @Param("orderId")String orderId,
-                                                  @Param("workerId")String workerId);
+    List<Map<String,Object>> findOrerListInfoByOn(@Param("page") Integer page, @Param("statusDesc") String statusDesc,
+                                                  @Param("userId") String userId, @Param("orderId") String orderId,
+                                                  @Param("workerId") String workerId);
 
 
 
@@ -182,11 +182,19 @@ public interface OrderMapper {
             " select workerId from TB_Order where orderId = #{orderId} and isDel = '2' " +
             ")")
     Map<String,Object> findWorkerInfo(@Param("orderId") String orderId);
+    /**
+     * 根据订单id修改技师id
+     * @param orderId
+     * @param workerId
+     * @return
+     */
+    @Update("update TB_Order set workerId = #{workerId} where orderId = #{orderId}")
+    int updWorkerOrderById(@Param("orderId") String orderId,@Param("workerId")String workerId);
 
 
 
     @Select("select * from TB_Order where orderId = #{orderId} and status >= #{statusDesc}")
-    List<Map<String,Object>> findWorkerOrderList(@Param("orderId") String orderId,@Param("statusDesc")String statusDesc);
+    List<Map<String,Object>> findWorkerOrderList(@Param("orderId") String orderId, @Param("statusDesc") String statusDesc);
 
     @Select("select * from TB_Order where orderId = #{orderId} and isDel = '2'")
     List<Map<String,Object>> findWorkerOrderListById(String orderId);
@@ -198,7 +206,7 @@ public interface OrderMapper {
             " >=  (select aboutTime from TB_Order where orderId = #{orderId}) " +
             "and workerId = #{workerId} " +
             ")")
-    int updateOrdersTimes(@Param("workerId") String workerId,@Param("orderId") String orderId);
+    int updateOrdersTimes(@Param("workerId") String workerId, @Param("orderId") String orderId);
 
     //修改订单退款
     @Update("update TB_Order set status = #{status},returnReason=#{returnReason},returnMoney=#{returnMoney},returnType=#{returnType},updateTime = GETDATE()  where orderId =#{orderId}")
@@ -226,7 +234,7 @@ public interface OrderMapper {
 
     //根据状态A和小号进行查询是否正在使用
     @Select("select * from TB_Trump_Phone where phone = #{phone} and phoneA = #{phoneA} and status=1 ")
-    List<Map<String,Object>> findPhoneAAndB(@Param("phone") String phone,@Param("phoneA")String phoneA);
+    List<Map<String,Object>> findPhoneAAndB(@Param("phone") String phone, @Param("phoneA") String phoneA);
 
     //修改小号的状态
     @Update("update TB_Trump_Phone set status = 0 where id = #{id}")
@@ -235,7 +243,7 @@ public interface OrderMapper {
     //添加小号的关联表
     @Insert("insert into TB_Trump_Phone(phone,phoneA,phoneB,status,addTime)\n" +
             "VALUES(#{phone},#{phoneA},#{phoneB},1,getdate())")
-    int addPhoneInfo(@Param("phone")String phone,@Param("phoneA")String phoneA,@Param("phoneB")String phoneB);
+    int addPhoneInfo(@Param("phone") String phone, @Param("phoneA") String phoneA, @Param("phoneB") String phoneB);
 
 
     //查询钱包明细

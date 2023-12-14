@@ -151,10 +151,6 @@ public class WorkerController {
         try {
             List<Map<String,Object>>  workerList = workerService.findWorkerList_2(pageUtil);
             map.put("workerList",workerList);
-            if(StringUtils.isNotBlank(pageUtil.getWorkerId())){
-                List<WorkerPic>  workerPicList = workerService.findWorkerPicById(pageUtil);
-                map.put("workePicrList",workerPicList);
-            }
         } catch (Exception e) {
             e.printStackTrace();
             map.put("success",false);
@@ -890,5 +886,51 @@ public class WorkerController {
         }
         return map;
     }
+    /**
+     * 注销信息
+     * @param workerId
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/delWorkerInfo",method = RequestMethod.GET)
+    public Map<String,Object> delWorkerInfo(String workerId){
+        Map<String,Object> result_map = new HashMap<>();
+        try {
+            result_map.put("success", false);
+            result_map.put("msg", null);
+            int re = workerService.delWorkerInfoById(workerId);
+            if(re>0){
+                result_map.put("success", true);
+                result_map.put("msg", "修改成功");
+            }
+            result_map.put("delNum",re);
+        }catch (Exception e){
+            result_map.put("success", false);
+            result_map.put("msg", null);
+            result_map.put("delNum",0);
+        }
+        return result_map;
+    }
+    @ResponseBody
+    @RequestMapping(value = "/updWorkerOrderById",method = RequestMethod.POST)
+    public Map<String,Object> updWorkerOrderById(@RequestBody Map<String,Object> map){
+        Map<String,Object> result_map = new HashMap<>();
+        try {
+            logger.info("updWorkerOrderById==请求参数为:{}",JSON.toJSONString(map));
+            result_map.put("success", false);
+            result_map.put("msg", null);
+            int re = workerService.updWorkerOrderById(map);
+            if(re>0){
+                result_map.put("success", true);
+                result_map.put("msg", "修改成功");
+            }
+        }catch (Exception e){
+            result_map.put("success", false);
+            result_map.put("msg", null);
+            logger.error("updWorkerOrderById=修改错误信息为：={}",e);
+        }
+        return result_map;
+    }
+
 }
 

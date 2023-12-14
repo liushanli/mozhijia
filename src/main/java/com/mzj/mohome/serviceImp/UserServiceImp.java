@@ -594,6 +594,7 @@ public class UserServiceImp implements UserService {
             return null;
         }
     }
+
     public List<Map<String,Object>> findEvaluateListByUserIdNew(String userId,String shopId,Integer pageNum,Integer size){
         try {
             return userMapper.findEvaluateListByUserIdNew(userId, shopId,pageNum,size);
@@ -914,11 +915,9 @@ public class UserServiceImp implements UserService {
             return count;
     }
 
-
     public String findServicePhone(){
         return userMapper.findServicePhone();
     }
-
     public List<ReturnOrderStatusVo> queryReturnInfoList(String orderId){
         return userMapper.queryReturnOrderInfo(orderId);
     }

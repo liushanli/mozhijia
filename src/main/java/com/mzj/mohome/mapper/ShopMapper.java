@@ -89,15 +89,26 @@ public interface ShopMapper {
 
 
     //根绝店铺来查询员工的信息
-    @Select("<script>select top 10 * from (" +
+    @Select("<script> select top 10 * from (\n" +
             " select " +
-            " row_number() over(order by t.orderNum desc) as rownumber,\n" +
+            " row_number() over(order by t.orderNum desc) as rownumber," +
             " t.userName,t.imgUrl,t.phone,t.introduce,t.serviceArea,t.workerTitle,t.isOnline,CONVERT(varchar(100)," +
-            " loginTime, 120) loginTime,t.orderNum,t.workerId,shop.shopName,t.jd,t.wd," +
-            "             t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId  and t.is_del = 1 " +
+            " loginTime, 120) loginTime,t.orderNum,t.workerId,shop.shopName,tp.jd,tp.wd," +
+            " t.gender,tp.province,tp.city,tp.area,tp.address," +
+            "t.evalStatus_one,t.evalStatus_two,t.evalStatus_three,t.percentage,t.quality," +
+            "(select COUNT(1) from TB_Order where workerId = t.workerId AND status IN (7,8,9)) AS sellSum," +
+            "t.dateHHmm " +
+            " from TB_Worker t \n" +
+            " join TB_WorkerPoint tp on t.workerId = tp.workerId" +
+            " INNER JOIN TB_Shop shop on t.shopId = shop.shopId  and t.is_del = 1" +
+            "<if test='onLine != null'> and t.isOnline = #{onLine} </if>" +
+            "<if test='shopId != null'> and t.shopId = #{shopId} </if>" +
+            "<if test='workerId != null'> and t.workerId = #{workerId} </if>" +
+            "<if test='workerName != null'> and t.userName like concat('%',#{workerName},'%') </if>" +
             ") t where rownumber &gt; ${page} </script>")
     List<Map<String,Object>> findWorkerListByShopId(@Param("city") String city,@Param("shopId")String shopId,
-                                                    @Param("onLine")String onLine,@Param("page")Integer page);
+                                                    @Param("onLine")String onLine,@Param("page")Integer page,
+                                                    @Param("workerName")String workerName,@Param("workerId")String workerId);
 
 
     @Update("update TB_Worker set isOnline = #{isOnline}  where workerId = #{workerId}")
@@ -105,7 +116,8 @@ public interface ShopMapper {
 
 
     @Insert("insert into TB_Worker(workerId,userName,phone,isOnline,loginTime,sellSum,is_del)\n" +
-            "values(#{workerId},#{phoneDesc},#{phoneDesc},0,GETDATE(),15,1)")
-    int addWorkInfo(@Param("workerId") String workerId,@Param("phoneDesc")String phoneDesc);
+            "values(#{workerId},#{phoneDesc},#{phoneDesc},0,GETDATE(),#{nums},1)")
+    int addWorkInfo(@Param("workerId") String workerId,@Param("phoneDesc")String phoneDesc,
+                    @Param("nums") Integer nums);
 
 }
