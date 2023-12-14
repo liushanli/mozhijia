@@ -39,7 +39,7 @@ public class getLngAndLat {
         LatitudeAndLongitude latAndLng = new LatitudeAndLongitude();
         System.out.println(address);
         //GET请求
-        String url = "http://api.map.baidu.com/geocoding/v3/?address="+address+"&output=json&ak=zdv9i6SuZtRFCVfXey4u49xXRkBWl5FY";
+        String url = "http://api.map.baidu.com/geocoding/v3/?address="+address+"&output=json&ak=Dw4VqR2Z5ygmDxfEVlaz0j2cI3wx9DGn";
         String json = loadJSON(url);
         System.out.println(json);
         if (StringUtils.isEmpty(json))
@@ -204,7 +204,7 @@ public class getLngAndLat {
      */
     public static Integer getDistances(String origin,String destination){
 
-        String URL1 = "https://api.map.baidu.com/directionlite/v1/driving?origin="+origin+"&destination="+destination+"&ak=zdv9i6SuZtRFCVfXey4u49xXRkBWl5FY";
+        String URL1 = "https://api.map.baidu.com/directionlite/v1/driving?origin="+origin+"&destination="+destination+"&ak=Dw4VqR2Z5ygmDxfEVlaz0j2cI3wx9DGn";
         String json1 = loadJSON(URL1);
         log.info("json1==="+json1);
         JSONObject jsonObject = JSONObject.fromObject(JSON.parseObject(json1));

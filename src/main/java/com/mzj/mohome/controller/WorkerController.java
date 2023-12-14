@@ -151,6 +151,10 @@ public class WorkerController {
         try {
             List<Map<String,Object>>  workerList = workerService.findWorkerList_2(pageUtil);
             map.put("workerList",workerList);
+            if(StringUtils.isNotBlank(pageUtil.getWorkerId())){
+                List<WorkerPic>  workerPicList = workerService.findWorkerPicById(pageUtil);
+                map.put("workePicrList",workerPicList);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             map.put("success",false);
@@ -773,6 +777,7 @@ public class WorkerController {
     public Map<String,Object> findWorkByPhoneWx(@RequestBody Map<String,Object> map_1){
         Map<String,Object> map = new HashMap<>();
         try{
+            logger.info("findWorkByPhoneWx===:请求参数为：{}",JSON.toJSONString(map_1));
             String phone = String.valueOf(map_1.get("phone"));
             String sendCode = String.valueOf(map_1.get("sendCode"));
             String openId = String.valueOf(map_1.get("openId"));

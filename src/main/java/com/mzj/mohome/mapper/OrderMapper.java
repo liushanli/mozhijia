@@ -279,11 +279,9 @@ public interface OrderMapper {
             "</script>")
     List<OrderVo> findUserOpenId(String orderId);
 
-    @Select("<script> SELECT u.openId,o.aboutTime,o.productName,o.address,o.workerName,o.workerPhone,o.phone,o.orderId,o.sourceType,o.shopId,o.workerId " +
-            " FROM  TB_Order o  JOIN (  SELECT   *  FROM " +
-            " TB_UserAndOpenId WHERE " +
-            " createTime IN ( SELECT MAX ( createTime ) FROM TB_UserAndOpenId GROUP BY workerId )) u ON  o.shopId = u.workerId    " +
-            " WHERE  o.status = '1' and (sendType = '0' or sendType is null)" +
+    @Select("<script> SELECT u.openId,o.aboutTime,o.productName,o.address,o.workerName,o.workerPhone,o.phone,o.orderId,o.sourceType,o.shopId,o.workerId \n" +
+            " FROM  TB_Order o  JOIN TB_UserAndOpenId u ON  o.shopId = u.workerId   " +
+            " WHERE  o.status = '1' and (sendType = '0' or sendType is null) " +
             "<if test='orderId != null'> " +
             " and o.orderId = #{orderId}" +
             "</if>" +

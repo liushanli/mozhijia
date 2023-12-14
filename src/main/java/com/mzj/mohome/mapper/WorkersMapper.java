@@ -243,7 +243,7 @@ public interface WorkersMapper {
     String getDateHHM(String workerId);
 
     //根据工作人员的工号，来查询员工的照片信息
-    @Select("<script> select * from TB_WorkerPic where 1=1  <if test='workerId != null'> and  workerId = #{workerId} </if> order by orderNum </script>")
+    @Select("<script> select * from TB_WorkerPic where isCheck = 1  <if test='workerId != null'> and  workerId = #{workerId} </if> order by orderNum </script>")
     List<WorkerPic> findWorkerPicById(String workerId);
 
     //登录时判断员工是否存在
@@ -550,6 +550,13 @@ public interface WorkersMapper {
             "<if test='openId!=null'> and openId = #{openId} </if>" +
             "</script>")
     int findWorkerOpenInfo(@Param("workerId") String workerId,@Param("openId") String openId);
+
+    @Select("<script>" +
+            "select count(1) from TB_UserAndOpenId where 1=1" +
+            "<if test='workerId!=null'> and workerId = #{workerId} </if>" +
+            "<if test='openId!=null'> and openId = #{openId} </if>" +
+            "</script>")
+    int findWorkerOpenInfoWx(@Param("workerId") String workerId,@Param("openId") String openId);
 
     /**
      * 修改绑定

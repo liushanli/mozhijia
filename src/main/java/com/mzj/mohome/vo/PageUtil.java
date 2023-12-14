@@ -21,4 +21,5 @@ public class PageUtil implements Serializable {
     private String genderDesc;
     private String jd;
     private String wd;
+    private String picStatus;
 }

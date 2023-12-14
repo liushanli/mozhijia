@@ -71,7 +71,7 @@ public class UserController {
             map.put("success",true);
             map.put("msg","");
             List<User> userList = userService.getByUserExist(phone,sendCode,openId,appleData,"");
-           if(userList != null && userList.size()>0){
+            if(userList != null && userList.size()>0){
                 User userVo = userList.get(0);
                 map.put("userVo",userVo);
             }else{
@@ -257,7 +257,7 @@ public class UserController {
         }catch (Exception e){
             logger.error("====findBannerList="+e.getMessage());
         }
-       return objectMap;
+        return objectMap;
     }
     @ResponseBody
     @RequestMapping("findRepayList")
@@ -670,7 +670,7 @@ public class UserController {
     }
 
     @ResponseBody
-        @PostMapping("/getUserInfo")
+    @PostMapping("/getUserInfo")
     public Map<String,Object> getUserInfo(@RequestBody Map<String,Object> map){
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
@@ -776,16 +776,16 @@ public class UserController {
     public Map<String,Object> findAccountInfoRecord(@RequestBody Map<String,Object> map){
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
-        List<Map<String,Object>> list = userService.findAccountInfoRecord(map);
-        if (list.size() > 0 && list != null) {
-            result_map.put("success", true);
-            result_map.put("message", "");
-            result_map.put("list",list);
-        } else {
-            result_map.put("list",null);
-            result_map.put("success", false);
-            result_map.put("message", "查询失败");
-        }
+            List<Map<String,Object>> list = userService.findAccountInfoRecord(map);
+            if (list.size() > 0 && list != null) {
+                result_map.put("success", true);
+                result_map.put("message", "");
+                result_map.put("list",list);
+            } else {
+                result_map.put("list",null);
+                result_map.put("success", false);
+                result_map.put("message", "查询失败");
+            }
         }catch (Exception e){
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
@@ -1157,7 +1157,7 @@ public class UserController {
             logger.info("=====findVersionNew====type:{},userId=={}",type,userId);
             map.put("success",true);
             map.put("msg","");
-             map = userService.findVersionListNew(userId,type,version);
+            map = userService.findVersionListNew(userId,type,version);
             logger.info("findVersionNew==获取到的返回信息为：{}",JSON.toJSONString(map));
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
@@ -1321,7 +1321,7 @@ public class UserController {
                 return map;
             }
         }
-      return map;
+        return map;
     }
 
     @ResponseBody
@@ -1447,13 +1447,35 @@ public class UserController {
             logger.info("updateWxUserOpenId==修改用户userId=请求参数为:" + paramMap);
             String userId = ToolsUtil.getString(paramMap.get("userId"));
             String openId = ToolsUtil.getString(paramMap.get("openId"));
-            userService.addUserOpenInfo(userId,openId,"2");
+            //userService.addUserOpenInfo(userId,openId,"2");
         }catch (Exception e){
             map.put("success", false);
             map.put("msg","获取异常");
             logger.info("updateWxUserOpenId=====修改用户信息失败,错误信息为：{}",e);
         }
         return map;
+    }
+
+    @ResponseBody
+    @PostMapping("/findServiePhone")
+    public Map<String,Object> findServiePhone(){
+        Map<String,Object> map = new HashMap<>();
+        String phone = "13641153016";
+        try {
+            logger.info("findServiePhone====获取客服服务手机号");
+            String strPhone= userService.findServicePhone();
+            if(StringUtils.isNotEmpty(strPhone)){
+                phone = strPhone;
+            }
+            map.put("phone",phone);
+            map.put("success",true);
+            return map;
+        }catch (Exception e){
+            logger.error("findServiePhone====获取客服服务手机号失败，错误信息为：{}",e);
+            map.put("phone",phone);
+            map.put("success",true);
+            return map;
+        }
     }
 
 

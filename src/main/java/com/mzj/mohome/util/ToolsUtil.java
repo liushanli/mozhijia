@@ -85,7 +85,7 @@ public class ToolsUtil {
     public static List<String> processImg(String veido_path,String ffmpeg_path) {
 
         File file = new File(veido_path);
-        List<String> commands = new java.util.ArrayList<String>();
+        List<String> commands = new ArrayList<String>();
 
         if (!file.exists()) {
 

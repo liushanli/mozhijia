@@ -212,20 +212,6 @@ public interface UserMapper {
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             " order by e.updateTime desc </script>")
     List<Map<String,Object>> findEvaluateListByUserId(@Param("userId") String userId, @Param("shopId")String shopId);
-
-    @Select("<script> select e.id,e.orderId,e.userId,o.workerId workId,e.content,e.star,e.imgUrl,CONVERT(varchar(100), " +
-            " e.updateTime, 23) updateTime,o.province+' '+o.city+' '+o.area as address,o.serviceNumber,o.payOnline,p.productName," +
-            " o.workerName,u.nickName userName,u.imgUrl userImgUrl,sp.shopName,sp.shopId,e.returnContent from TB_Evaluate e " +
-            " join TB_Order o on e.orderId = o.orderId join TB_Product p on o.productId = p.productId \n" +
-            " join TB_User u on e.userId = u.userId " +
-            " join TB_Shop sp on o.shopId = sp.shopId " +
-            " where  1=1 and u.is_del = 1 " +
-            " <if test='userId!=null'> and e.userId = #{userId} </if> " +
-            "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
-            " order by e.updateTime desc offset #{pageNum} rows fetch next #{size} rows only </script>")
-    List<Map<String,Object>> findEvaluateListByUserIdNew(@Param("userId") String userId,@Param("shopId") String shopId,
-                                                         @Param("pageNum")Integer pageNum,
-                                                         @Param("size")Integer size);
     //查询评价根据id
     @Select("select e.*,w.userName from TB_Evaluate e join TB_Worker w on e.workId = w.id  where e.id = #{id}")
     Map<String,Object> findEvalById(String id);
@@ -450,6 +436,9 @@ public interface UserMapper {
     @Update("update TB_WxTicketInfo set startTime = GETDATE(),endTime = DATEADD(HH,2, GETDATE()),jsTicket = #{jsTicket} where wxAppid = #{wxAppid}")
     int updJsTicket(@Param("wxAppid") String wxAppid,@Param("jsTicket")String jsTicket);
 
+    @Select("select servicePhone from tb_servicePhone where serviceType = '1'")
+    String findServicePhone();
+
     /**
      * 添加退款返回历史表
      * @param orderId
@@ -467,4 +456,18 @@ public interface UserMapper {
      */
     @Select("select orderId,status from TB_REturnOrderHistory where orderId = #{orderId} order by createdTime desc")
     List<ReturnOrderStatusVo> queryReturnOrderInfo(String orderId);
+
+    @Select("<script> select e.id,e.orderId,e.userId,o.workerId workId,e.content,e.star,e.imgUrl,CONVERT(varchar(100), " +
+            " e.updateTime, 23) updateTime,o.province+' '+o.city+' '+o.area as address,o.serviceNumber,o.payOnline,p.productName," +
+            " o.workerName,u.nickName userName,u.imgUrl userImgUrl,sp.shopName,sp.shopId,e.returnContent from TB_Evaluate e " +
+            " join TB_Order o on e.orderId = o.orderId join TB_Product p on o.productId = p.productId \n" +
+            " join TB_User u on e.userId = u.userId " +
+            " join TB_Shop sp on o.shopId = sp.shopId " +
+            " where  1=1 and u.is_del = 1 " +
+            " <if test='userId!=null'> and e.userId = #{userId} </if> " +
+            "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
+            " order by e.updateTime desc offset #{pageNum} rows fetch next #{size} rows only </script>")
+    List<Map<String,Object>> findEvaluateListByUserIdNew(@Param("userId") String userId,@Param("shopId") String shopId,
+                                                         @Param("pageNum")Integer pageNum,
+                                                         @Param("size")Integer size);
 }

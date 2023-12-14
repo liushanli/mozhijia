@@ -55,7 +55,6 @@ public interface UserService {
     List<Map<String,Object>> findEvaluateListByUserId(String userId);
 
     List<Map<String,Object>> findEvaluateListByUserIdNew(String userId,String shopId,Integer pageNum,Integer size);
-
     //根据条件来查询评价列表信息
     List<Map<String,Object>> findEvaluateListByUserIdCon(Map<String, Object> map);
 
@@ -190,6 +189,12 @@ public interface UserService {
      * @return
      */
     int addUserOpenInfo(String userId, String openId, String status);
+
+    /**
+     * 查询服务手机号
+     * @return
+     */
+    String findServicePhone();
 
     /**
      * 根据orderId，查询退款信息状态

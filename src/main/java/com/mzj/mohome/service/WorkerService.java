@@ -1,6 +1,5 @@
 package com.mzj.mohome.service;
 
-import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.vo.PageUtil;
@@ -84,8 +83,6 @@ public interface WorkerService {
     //支付成功后，进行修改技师的忙时状态，根据订单id
     int findUpdateOrder(Map<String,Object> map);
 
-    Order findOrderInfo(String orderId);
-
     Map<String,Object> findShopByCode(Map<String,Object> map);
 
     Map<String,Object> updShopByCode(Map<String,Object> map);
@@ -124,32 +121,4 @@ public interface WorkerService {
      * @return
      */
     WorkerVo findWorkLocation(String workerId);
-
-    /**
-     * 添加技师绑定微信
-     * @param workerWxInfo
-     * @return
-     */
-    int addWorkerWxInfo(WorkerWxInfo workerWxInfo);
-
-    /**
-     * 修改绑定
-     * @param workerWxInfo
-     * @return
-     */
-    int updWorkerWxInfo(WorkerWxInfo workerWxInfo);
-
-    /**
-     * 解除绑定
-     * @param workerId
-     * @return
-     */
-    int delWorkerWxInfo(String workerId);
-
-    /**
-     * 查询技师是否已经绑定
-     * @param workerId
-     * @return
-     */
-    int findWorkerWxInfo(String workerId);
 }

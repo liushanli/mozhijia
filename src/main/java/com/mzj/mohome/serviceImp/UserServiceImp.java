@@ -594,7 +594,6 @@ public class UserServiceImp implements UserService {
             return null;
         }
     }
-
     public List<Map<String,Object>> findEvaluateListByUserIdNew(String userId,String shopId,Integer pageNum,Integer size){
         try {
             return userMapper.findEvaluateListByUserIdNew(userId, shopId,pageNum,size);
@@ -656,7 +655,7 @@ public class UserServiceImp implements UserService {
             String phone = ToolsUtil.getString(map.get("phone"));
             String appleData = ToolsUtil.getString(map.get("appleData"));
             List<User>  userVoList = userMapper.getByUserInfoExistWhat(openId);
-            if(userVoList == null || userVoList.size() == 0){
+            if(userVoList != null && userVoList.size() > 0){
                 logger.info("已存在该用户，直接返回成功");
                 return 1;
             }
@@ -913,6 +912,11 @@ public class UserServiceImp implements UserService {
             count =  userMapper.updUserOpenInfo(userId,openId);
         }
             return count;
+    }
+
+
+    public String findServicePhone(){
+        return userMapper.findServicePhone();
     }
 
     public List<ReturnOrderStatusVo> queryReturnInfoList(String orderId){

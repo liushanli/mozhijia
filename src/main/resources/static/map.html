@@ -38,6 +38,14 @@
     <!-- 地图 -->
     <div id="allmap"></div>
     <script type="text/javascript">
+        //确定地址 将数据传输到 uniapp 的 webview内
+        document.addEventListener('UniAppJSBridgeReady', function () {
+            uni.postMessage({
+                data: {
+                    action: 'message'
+                }
+            });
+        });
       document.write('<script type="text/javascript" src="js/jweixin-1.3.2.js"><\/script>');
         var map = new BMap.Map('allmap');
         var poi = new BMap.Point(116.307852, 40.057031); //罗马的坐标
@@ -182,15 +190,8 @@
       });
       local.search(myValue);
   }
-    function postMsg(){
-        console.log(addressPost+"=="+
-            CURRENT_LNG+"=="+
-            CURRENT_LAT+"=="+
-            province+"=="+
-            city+"=="+
-            area);
-        document.addEventListener('UniAppJSBridgeReady', function () {
-             //uniapp 挂载完毕，在内部可以使用uniapp 部分 api,具体看 官方文档 webview
+        function postMsg(){
+            //uniapp 挂载完毕，在内部可以使用uniapp 部分 api,具体看 官方文档 webview
             uni.postMessage({
                 data: {
                     info: {
@@ -203,8 +204,14 @@
                     }
                 }
             });
-        });
-    }
+
+            console.log(addressPost+"=="+
+                CURRENT_LNG+"=="+
+                CURRENT_LAT+"=="+
+                province+"=="+
+                city+"=="+
+                area);
+        }
 
 </script>
 </body>

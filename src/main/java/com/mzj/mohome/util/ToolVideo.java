@@ -194,6 +194,6 @@ public class ToolVideo {
         int len_dalta_height = (int) (len * Math.cos(Math.PI - angel_alpha - angel_dalta_height));
         int des_width = src.width + len_dalta_width * 2;
         int des_height = src.height + len_dalta_height * 2;
-        return new java.awt.Rectangle(new Dimension(des_width, des_height));
+        return new Rectangle(new Dimension(des_width, des_height));
     }
 }
