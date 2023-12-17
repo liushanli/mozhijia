@@ -71,7 +71,7 @@ public class UserController {
             map.put("success",true);
             map.put("msg","");
             List<User> userList = userService.getByUserExist(phone,sendCode,openId,appleData,"");
-           if(userList != null && userList.size()>0){
+            if(userList != null && userList.size()>0){
                 User userVo = userList.get(0);
                 map.put("userVo",userVo);
             }else{
@@ -257,7 +257,7 @@ public class UserController {
         }catch (Exception e){
             logger.error("====findBannerList="+e.getMessage());
         }
-       return objectMap;
+        return objectMap;
     }
     @ResponseBody
     @RequestMapping("findRepayList")
@@ -670,7 +670,7 @@ public class UserController {
     }
 
     @ResponseBody
-        @PostMapping("/getUserInfo")
+    @PostMapping("/getUserInfo")
     public Map<String,Object> getUserInfo(@RequestBody Map<String,Object> map){
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
@@ -776,16 +776,16 @@ public class UserController {
     public Map<String,Object> findAccountInfoRecord(@RequestBody Map<String,Object> map){
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
-        List<Map<String,Object>> list = userService.findAccountInfoRecord(map);
-        if (list.size() > 0 && list != null) {
-            result_map.put("success", true);
-            result_map.put("message", "");
-            result_map.put("list",list);
-        } else {
-            result_map.put("list",null);
-            result_map.put("success", false);
-            result_map.put("message", "查询失败");
-        }
+            List<Map<String,Object>> list = userService.findAccountInfoRecord(map);
+            if (list.size() > 0 && list != null) {
+                result_map.put("success", true);
+                result_map.put("message", "");
+                result_map.put("list",list);
+            } else {
+                result_map.put("list",null);
+                result_map.put("success", false);
+                result_map.put("message", "查询失败");
+            }
         }catch (Exception e){
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
@@ -925,7 +925,7 @@ public class UserController {
             if(userList != null && userList.size()>0){
                 User userVo = userList.get(0);
                 map.put("userVo",userVo);
-                //userMapper.updUserOpenInfo(userVo.getUserId(),openId);
+                userMapper.updUserOpenInfo(userVo.getUserId(),openId);
             }else{
                 map.put("userVo","");
             }
@@ -1157,7 +1157,7 @@ public class UserController {
             logger.info("=====findVersionNew====type:{},userId=={}",type,userId);
             map.put("success",true);
             map.put("msg","");
-             map = userService.findVersionListNew(userId,type,version);
+            map = userService.findVersionListNew(userId,type,version);
             logger.info("findVersionNew==获取到的返回信息为：{}",JSON.toJSONString(map));
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
@@ -1309,7 +1309,7 @@ public class UserController {
             if (count > 0) {
                 List<User> userList = userService.getByUserExist(null,null,openId,null,null);
                 User userVo = userList.get(0);
-                //userMapper.updUserOpenInfo(userVo.getUserId(),openId);
+                userMapper.updUserOpenInfo(userVo.getUserId(),openId);
                 logger.info("获取到的用户信息为：{}",JSON.toJSONString(userVo));
                 map.put("userVo",userVo);
                 map.put("msg", "");
@@ -1321,7 +1321,7 @@ public class UserController {
                 return map;
             }
         }
-      return map;
+        return map;
     }
 
     @ResponseBody
@@ -1423,7 +1423,7 @@ public class UserController {
                 String openId = jsonObject.getString("openid");
                 map.put("openId", openId);
                 logger.info("getWxUserOpenInfo=====获取openId为：{}",openId);
-                //userService.addUserOpenInfo(null,openId,"1");
+                userService.addUserOpenInfo(null,openId,"1");
             } else {
                 map.put("success", false);
                 map.put("msg", jsonObject.get("errmsg"));
@@ -1456,7 +1456,6 @@ public class UserController {
         return map;
     }
 
-
     @ResponseBody
     @PostMapping("/findServiePhone")
     public Map<String,Object> findServiePhone(){
@@ -1478,5 +1477,6 @@ public class UserController {
             return map;
         }
     }
+
 
 }

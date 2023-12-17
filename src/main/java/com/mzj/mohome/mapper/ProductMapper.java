@@ -93,9 +93,7 @@ public interface ProductMapper {
     " left join (select * from TB_Coupon where GETDATE() BETWEEN startTime and endTime and status = 1 and couponType = 1) \n" +
     " tp on t.productId = tp.productId \n" +
     " left join TB_WorkerSerProduct tpl on t.productId = tpl.productId \n" +
-    " where 1=1" +
-            "<if test='shopId!=null'> and t.shopId = #{shopId} </if> " +
-            "<if test='workerId!=null'> and tpl.workerId = #{workerId} </if> " +
+    " where t.shopId = #{shopId} and tpl.workerId = #{workerId} \n" +
     " order by t.orderNum </script>")
     List<Map<String,Object>> findProductListInfoWorkId(@Param("shopId") String shopId,@Param("workerId") String workerId);
 

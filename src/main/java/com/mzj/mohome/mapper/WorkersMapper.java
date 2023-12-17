@@ -28,7 +28,7 @@ public interface WorkersMapper {
             " TB_Shop shop on t.shopId = shop.shopId" +
             " INNER JOIN TB_ShopPoint tp ON t.shopId = tp.shopId " +
             " left join (select COUNT(1) sellNum,t.workerId from TB_Order t left join TB_Product p on t.productId =  p.productId" +
-            " where  t.is_del = 1 and t.status = 1  or (t.status &gt;= 3 and t.status &lt;= 9) group by t.workerId) t1" +
+            " where  t.status = 1 or (t.status &gt;= 3 and t.status &lt;= 9) group by t.workerId) t1" +
             " on t.workerId = t1.workerId" +
             " <if test='productId != null'> left JOIN TB_WorkerSerProduct tbP on t.workerId = tbP.workerId </if> " +
             " where 1=1 and t.isOnline = '1' and t.is_del = 1 and shop.isOnline = 1  " +
@@ -116,7 +116,6 @@ public interface WorkersMapper {
             "INNER JOIN TB_ShopPoint tp ON w.shopId = tp.shopId and tp.city = #{city} \n" +
             "<if test='productId != null'> JOIN TB_WorkerSerProduct tbP on w.workerId = tbP.workerId </if> " +
             " where  wp.city = #{city} and w.is_del = 1 " +
-            " where wp.city = #{city} and w.is_del = 1 " +
             " <if test='productId != null'> and tbP.productId = #{productId} </if> "+
             " <if test='shopId != null'> and w.shopId = #{shopId} </if> " +
             " <if test='onLine != null'> and w.isOnline = #{onLine} </if> " +
@@ -159,15 +158,20 @@ public interface WorkersMapper {
     @Select("<script>" +
             "SELECT w1.*" +
             " FROM tb_workInfo_new(#{city},#{jd},#{wd}) w1 " +
+            " <if test='productId != null'> left JOIN TB_WorkerSerProduct tbP on w1.workerId = tbP.workerId </if> " +
             "WHERE 1=1 " +
-            " <if test='shopId != null'> and shopId = #{shopId} </if>" +
+            " <if test='shopId != null'> and w1.shopId = #{shopId} </if>" +
             " <if test='productId != null'> and tbP.productId = #{productId} </if>" +
-            " <if test='onLine != null'> and isOnline = #{onLine} </if>" +
-            " <if test='shopName != null'> and shopName = #{shopName} </if>" +
-            " <if test='workerId!=null'> and workerId = #{workerId} </if> " +
-            " <if test='userName!=null'> and (userName like concat('%',#{userName},'%') or (nickName like concat('%',#{userName},'%'))) </if>"+
-            "<if test='genderDesc != null '> and gender= #{genderDesc} </if>" +
-            " order by distance " +
+            " <if test='onLine != null'> and w1.isOnline = #{onLine} </if>" +
+            " <if test='shopName != null'> and w1.shopName = #{shopName} </if>" +
+            " <if test='workerId!=null'> and w1.workerId = #{workerId} </if> " +
+            " <if test='userName!=null'> and (w1.userName like concat('%',#{userName},'%') or (w1.nickName like concat('%',#{userName},'%'))) </if>"+
+            "<if test='genderDesc != null '> and w1.gender= #{genderDesc} </if>" +
+            " order by w1.distance asc " +
+            " <if test='evalNmsDesc != null'>" +
+            " <if test='evalNmsDesc == 1 '> ,w1.quality asc</if>" +
+            " <if test='evalNmsDesc == 2 '> ,w1.quality desc</if>" +
+            " </if>"+
             " offset ${pages} rows fetch next ${sizeNum} rows only"+
             "  </script>")
     List<Map<String,Object>> findWorkerList_4(@Param("jd") String jd,@Param("wd") String wd,
@@ -175,7 +179,8 @@ public interface WorkersMapper {
                                               @Param("userName")String userName,@Param("workerId") String workerId,
                                               @Param("shopId")String shopId, @Param("pages")Integer pages,
                                               @Param("sizeNum")Integer sizeNum,@Param("genderDesc") String genderDesc,
-                                              @Param("onLine")String onLine,@Param("productId")String productId);
+                                              @Param("onLine")String onLine,@Param("productId")String productId,
+                                              @Param("evalNmsDesc")String evalNmsDesc);
 
 
     /**
@@ -244,7 +249,7 @@ public interface WorkersMapper {
     String getDateHHM(String workerId);
 
     //根据工作人员的工号，来查询员工的照片信息
-    @Select("<script> select * from TB_WorkerPic where 1=1  <if test='workerId != null'> and  workerId = #{workerId} </if> order by orderNum </script>")
+    @Select("<script> select * from TB_WorkerPic where isCheck = 1  <if test='workerId != null'> and  workerId = #{workerId} </if> order by orderNum </script>")
     List<WorkerPic> findWorkerPicById(String workerId);
 
     //登录时判断员工是否存在
@@ -468,7 +473,6 @@ public interface WorkersMapper {
             "                         join TB_Worker w on o.workerId = w.workerId\n" +
             "                         left join TB_User u on e.userId = u.userId \n" +
             "                         where  w.isOnline = '1'  and w.is_del = 1  group by w.workerId\n" +
-            "                         where  w.isOnline = '1' and w.is_del = 1 group by w.workerId\n" +
             "             union all\n" +
             "             select 0 maxNum,count(1) minNum,w.workerId from TB_Evaluate e join TB_Order o on e.orderId = o.orderId \n" +
             "                         join TB_Worker w on o.workerId = w.workerId\n" +
@@ -519,20 +523,12 @@ public interface WorkersMapper {
     //修改技师的经纬度和地区
     @Update("update TB_WorkerPoint set provinceId = #{provinceId},province = #{province}," +
             "cityId = #{cityId},city = #{city},areaId =#{areaId},area=#{area}," +
-            "jd=${jd},wd=${wd},address=#{address},updateTime=getdate() where workerId = #{workerId}")
+            "jd=${jd},wd=${wd} where workerId = #{workerId}")
     int updWorkInfo(WorkerVo workerVo);
 
     //查看省份地区的id
     @Select("select id from TB_ProvinceCityArea where name = #{name}")
     String findProvinceInfo(@Param("name") String name);
-    /**
-     * 注销技师
-     * @param workerId
-     * @return
-     */
-    @Delete("update TB_Worker set is_del = 2 where workerId = #{workerId}")
-    int delWorkerInfoById(@Param("workerId") String workerId);
-
 
     @Select("select id,shopId,shopName,workerId,workerName,orderNum,productId,province," +
             " city,cityId,area,areaId,jd,wd,radius,addTime from" +

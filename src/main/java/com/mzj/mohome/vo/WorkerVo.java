@@ -26,5 +26,4 @@ public class WorkerVo implements Serializable {
     private Double radius;
     private Date addTime;
     private String status;
-    private String address;
 }

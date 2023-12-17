@@ -3,7 +3,6 @@ package com.mzj.mohome.serviceImp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.mapper.OrderMapper;
@@ -29,6 +28,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -237,9 +237,7 @@ public class WorkServiceImp implements WorkerService {
                         logger.info("添加用户");
                         String uuid = UUID.randomUUID().toString();
                         String workerId = uuid.replaceAll("-","").toUpperCase();
-                        Random random = new Random();
-                        int nums = random.nextInt(20)+10;
-                        shopMapper.addWorkInfo(workerId,phone,nums);
+                        shopMapper.addWorkInfo(workerId,phone);
                         Map<String, Object> map_3 = new HashMap<>();
                         map_3.put("shopStatus","1");
                         map_3.put("userName",phone);
@@ -250,7 +248,7 @@ public class WorkServiceImp implements WorkerService {
                         objectMap.put("success", true);
                         objectMap.put("workVo", map_3);
                     }else{
-                        objectMap.put("msg", "请确认手机号是否正常");
+                        objectMap.put("msg", "不存在该账号");
                         objectMap.put("workVo", null);
                         objectMap.put("success", false);
                         objectMap.put("shopStatus", 1);
@@ -823,14 +821,6 @@ public class WorkServiceImp implements WorkerService {
         return 0;
     }
 
-    public Order findOrderInfo(String orderId){
-        Map<String,Object> orderInfo = orderMapper.findOrder(orderId);
-        Order order = new Order();
-        order.setOrderId(ToolsUtil.getString(orderInfo.get("orderId")));
-        order.setStatus(Integer.parseInt(ToolsUtil.getString(orderInfo.get("status"))));
-        return order;
-    }
-
     public Map<String,Object> findShopByCode(Map<String,Object> map){
         String code = ToolsUtil.getString(map.get("code"));
         String shopId = ToolsUtil.getString(map.get("shopId"));
@@ -997,7 +987,7 @@ public class WorkServiceImp implements WorkerService {
 
     @Override
     public List<Map<String,Object>> findWorkerList_2(PageUtil pageUtil) {
-        logger.info("===================findWorkerList_2====start===============");
+        logger.info("===================findWorkerList_2====start===============请求参数为：{}",JSON.toJSONString(pageUtil));
         if(pageUtil!=null){
             String shopId = ToolsUtil.getString(pageUtil.getShopId());
             Integer page = (pageUtil.getPage()-1)*4;
@@ -1007,6 +997,10 @@ public class WorkServiceImp implements WorkerService {
             String shopName = ToolsUtil.getString(pageUtil.getShopName());
             String genderDesc = ToolsUtil.getString(pageUtil.getGenderDesc());
 
+            String evalNmsDesc = ToolsUtil.getString(pageUtil.getEvalNmsDesc());
+            if(StringUtils.isNotEmpty(evalNmsDesc)){
+                evalNmsDesc = evalNmsDesc.equals("asc")?"1":"2";
+            }
             String onLine = ToolsUtil.getString(pageUtil.getOnLine());
             String city = ToolsUtil.getString(pageUtil.getCity());
             String productId = ToolsUtil.getString(pageUtil.getProductId());
@@ -1018,7 +1012,7 @@ public class WorkServiceImp implements WorkerService {
             String jd = ToolsUtil.getString(pageUtil.getJd());
             String wd = ToolsUtil.getString(pageUtil.getWd());
             logger.info("findWorkerList_2==经纬度：jd={},wd={}",jd,wd);
-            List<Map<String,Object>> workerList  = workersMapper.findWorkerList_4(jd,wd,city,shopName,userName,workId,shopId,page,size,genderDesc,onLine,productId);
+            List<Map<String,Object>> workerList  = workersMapper.findWorkerList_4(jd,wd,city,shopName,userName,workId,shopId,page,size,genderDesc,onLine,productId,evalNmsDesc);
             List<Map<String,Object>> workerList_1  = new ArrayList<>();
             logger.info("====ToolsUtil.getCityFlag(city)=="+ToolsUtil.getCityFlag(city));
             logger.info("findWorkerList===workerList==="+workerList.size());
@@ -1034,13 +1028,17 @@ public class WorkServiceImp implements WorkerService {
                     Integer distance = getDistances(wd+","+jd,worker.get("wd")+","+worker.get("jd"));
                    
                     if(radius_1<distance){
-                        continue;
-                    }
-                    if(distance<1000){
-                        worker.put("distance", distance + "m");
+                        worker.put("distance", "超出范围");
                     }else{
-                        worker.put("distance", distance/1000 + "km");
+                        if(distance<1000){
+                            worker.put("distance", distance + "m");
+                        }else{
+                            BigDecimal bd = new BigDecimal(distance);
+                            BigDecimal distanceLen = bd.divide(new BigDecimal(1000), 2, BigDecimal.ROUND_HALF_UP);
+                            worker.put("distance", distanceLen + "km");
+                        }
                     }
+
                     //好评百分比
                     worker.put("evaluateNumLv",worker.get("evaluateNumLv").toString()+"%");
 
@@ -1120,7 +1118,7 @@ public class WorkServiceImp implements WorkerService {
     }
 
     //获取两者之间的距离
-    public Integer getDistances(String start,String end){
+    public Integer getDistances(String start, String end){
         Map<String,String> map_1 = new HashMap<>();
         map_1.put("origin",start);
         map_1.put("destination",end);
@@ -1139,6 +1137,8 @@ public class WorkServiceImp implements WorkerService {
         return distance;
     }
 
+
+
     public int updWorkerInfoJW(Map<String,Object> paramMap){
         WorkerVo workerVo = new WorkerVo();
         workerVo.setJd(Double.parseDouble(ToolsUtil.getString(paramMap.get("jd"))));
@@ -1147,7 +1147,6 @@ public class WorkServiceImp implements WorkerService {
         workerVo.setProvince(ToolsUtil.getString(paramMap.get("province")));
         workerVo.setCity(ToolsUtil.getString(paramMap.get("city")));
         workerVo.setArea(ToolsUtil.getString(paramMap.get("area")));
-        workerVo.setAddress(ToolsUtil.getString(paramMap.get("address")));
         //status为1的时候,根据姓名查询id,否则，不查询
         if(ToolsUtil.getString(paramMap.get("status")).equals("1")){
             String provinceId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("province")));
@@ -1170,48 +1169,7 @@ public class WorkServiceImp implements WorkerService {
     }
 
 
-    /**
-     * 添加技师绑定微信
-     * @param workerWxInfo
-     * @return
-     */
-    public int addWorkerWxInfo(WorkerWxInfo workerWxInfo){
-        //查询是否已经绑定，如果已经绑定，则不进行绑定，或者说该微信号，已经绑定到其他用户，则不能再进行绑定
-        if(workersMapper.findWorkerOpenInfo(workerWxInfo.getWorkerId(),null)==0
-         && workersMapper.findWorkerOpenInfo(null,workerWxInfo.getOpenId())==0) {
-            return workersMapper.addWorkerOpenInfo(workerWxInfo);
-        }
-        return 1;
 
-    }
-
-    /**
-     * 修改绑定
-     * @param workerWxInfo
-     * @return
-     */
-    public int updWorkerWxInfo(WorkerWxInfo workerWxInfo){
-        //查询是否已经绑定，如果已经绑定，则不进行绑定，或者说该微信号，已经绑定到其他用户，则不能再进行绑定
-        if(workersMapper.findWorkerOpenInfo(workerWxInfo.getWorkerId(),null)==0
-        && workersMapper.findWorkerOpenInfo(null,workerWxInfo.getOpenId())==0){
-            return workersMapper.updWorkerOpenInfo(workerWxInfo);
-        }
-        return 1;
-
-    }
-
-    /**
-     * 解除绑定
-     * @param workerId
-     * @return
-     */
-    public int delWorkerWxInfo(String workerId){
-        return workersMapper.delWorkerOpenInfo(workerId);
-    }
-
-    public  int findWorkerWxInfo(String workerId){
-        return workersMapper.findWorkerOpenInfo(workerId,null);
-    }
     /*@Scheduled(cron = "0 0/5 * * * ?")
     @Async*/
     public void updateWorkDateHHmm(){
@@ -1265,16 +1223,5 @@ public class WorkServiceImp implements WorkerService {
         Long time = systime - oldtime;
         logger.info("updateWorkerInfoLabel===end==技师标签修改==结束的毫秒为：{}",time);
         logger.info("updateWorkerInfoLabel===end==技师标签修改："+(new Date()));
-    }
-
-    public int delWorkerInfoById(String workerId){
-        logger.info("技师的workerId:{}",workerId);
-        return workersMapper.delWorkerInfoById(workerId);
-    }
-
-    public int updWorkerOrderById(Map<String,Object> map){
-        String orderId = ToolsUtil.getString(map.get("orderId"));
-        String workerId = ToolsUtil.getString(map.get("workerId"));
-        return orderMapper.updWorkerOrderById(orderId,workerId);
     }
 }

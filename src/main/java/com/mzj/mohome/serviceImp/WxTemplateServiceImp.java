@@ -203,9 +203,10 @@ public class WxTemplateServiceImp implements WxTemplateService {
                 //{{thing12.DATA}}
                 sendMag.put("thing12", new WeChatTemplateMsg(sourceType));
 
+                String phone = orderVo.getPhone().substring(0,3)+"****"+orderVo.getPhone().substring(7,11);
                 //客户电话
                 //{{phone_number3.DATA}}
-                sendMag.put("phone_number3", new WeChatTemplateMsg(orderVo.getPhone()));
+                sendMag.put("phone_number3", new WeChatTemplateMsg(phone));
                 String address = orderVo.getAddress().replace(" ", "");
                 if (address.length() >= 20) {
                     address = address.substring(0, 15) + "...";
@@ -244,7 +245,6 @@ public class WxTemplateServiceImp implements WxTemplateService {
         resultMap.put("surplusMoney",mapperPayRecordById.get("surplusMoney"));
         return resultMap;
     }
-
 
     //第二步获取JsapiTicket
     public String getJsapiTicket(String accessToken) {

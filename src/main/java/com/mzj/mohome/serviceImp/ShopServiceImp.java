@@ -10,7 +10,6 @@ import com.mzj.mohome.service.WorkerService;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.util.getLngAndLat;
 import com.mzj.mohome.vo.WorkerVo;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,35 +132,15 @@ public class ShopServiceImp implements ShopService {
         String shopId = ToolsUtil.getString(map.get("shopId"));
         String city = ToolsUtil.getString(map.get("city"));
         String onLine = ToolsUtil.getString(map.get("onLine"));
-        String workerName = ToolsUtil.getString(map.get("workerName"));
         Integer page = ToolsUtil.getString(map.get("page"))!=null?(Integer)map.get("page"):1;
-        String workerId = ToolsUtil.getString(map.get("workerId"));
         page = (page-1)*10;
-        List<Map<String,Object>> mapList_1 = shopMapper.findWorkerListByShopId(city,shopId,onLine,page,workerName,workerId);
+        List<Map<String,Object>> mapList_1 = shopMapper.findWorkerListByShopId(city,shopId,onLine,page);
         DecimalFormat df = new DecimalFormat("0%");
         if(mapList_1!=null){
             logger.info("==========start=======");
             Long oldtime=new Date().getTime();
            for(Map<String,Object> worker : mapList_1) {
-               if(StringUtils.isBlank(ToolsUtil.getString(worker.get("address")))){
-                   worker.put("address",ToolsUtil.getString(worker.get("province"))
-                           +ToolsUtil.getString(worker.get("city"))+ToolsUtil.getString(worker.get("area")));
-               }
-               //好评百分比
-               worker.put("evaluateNumLv",
-                       StringUtils.isNotEmpty(ToolsUtil.getString(worker.get("percentage")))?worker.get("percentage").toString()+"%":"100%");
-               //标签
-               if(worker.get("evalStatus_one")!=null) {
-                   worker.put("evalStatus_1", worker.get("evalStatus_one").toString());
-               }
-               if(worker.get("evalStatus_two")!=null) {
-                   worker.put("evalStatus_2", worker.get("evalStatus_two").toString());
-               }
-               if(worker.get("evalStatus_three")!=null){
-                   worker.put("evalStatus_3", worker.get("evalStatus_three").toString());
-               }
-               worker.put("star",(StringUtils.isNotEmpty(ToolsUtil.getString(worker.get("quality"))))?Integer.parseInt(worker.get("quality").toString()):5);
-                   /*List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(worker.get("workerId").toString());
+                   List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(worker.get("workerId").toString());
                    if (mapList != null && mapList.size() > 0) {
                        for (int i = 0; i < mapList.size(); i++) {
                            Map<String, Object> map5 = mapList.get(i);
@@ -172,10 +151,12 @@ public class ShopServiceImp implements ShopService {
                            else if (i == 2)
                                worker.put("evalStatus_3", map5.get("name").toString());
                        }
-                   }*/
+                   }
+               /*String dateMM = workersMapper.getDateMM(worker.get("workerId").toString());
+               worker.put("dateHHmm",dateMM);*/
                worker.put("evaluateNum",0);
-              /* worker.put("sellSum", worker.get("SellSum") != null ? worker.get("SellSum") : 0);*/
-              /* List<Map<String, Object>> list = workersMapper.findEvaluate(worker.get("workerId").toString());
+               worker.put("sellSum", worker.get("SellSum") != null ? worker.get("SellSum") : 0);
+               List<Map<String, Object>> list = workersMapper.findEvaluate(worker.get("workerId").toString());
                if (list != null && list.size() > 0) {
                    Map<String,Object> map1 = list.get(0);
                    int maxNum = Integer.parseInt(map1.get("maxNum").toString());
@@ -201,8 +182,7 @@ public class ShopServiceImp implements ShopService {
                    worker.put("evaluateNum",0);
                    worker.put("evaluateNumLv", "100%");
                    worker.put("star", 5);
-               }*/
-
+               }
            }
             Long systime=new Date().getTime();
             Long time = (systime - oldtime);//相差毫秒数
