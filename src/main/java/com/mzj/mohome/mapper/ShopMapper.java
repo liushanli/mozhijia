@@ -33,14 +33,14 @@ public interface ShopMapper {
             " <if test='workerId!=null'> and t.workerId = #{workerId} </if> " +
             " and w.date &gt;= #{startTime} and w.date &lt; #{endTime}  " +
             "  order by w.[date] </script>")
-    List<Map<String,Object>> findShopTime(@Param("startTime") String startTime, @Param("endTime")String endTime,
-                                          @Param("shopId") String shopId, @Param("workerId")String workerId);
+    List<Map<String,Object>> findShopTime(@Param("startTime") String startTime, @Param("endTime") String endTime,
+                                          @Param("shopId") String shopId, @Param("workerId") String workerId);
 
     @Select("<script> select w.* from TB_ShopTime w " +
             " where  1=1 <if test='shopId!=null'> and w.shopId=#{shopId} </if> " +
             " and w.date &gt;= #{startTime} and w.date &lt; #{endTime}  " +
             "  order by w.[date] </script>")
-    List<Map<String,Object>> findShopTimeByShopId(@Param("startTime") String startTime, @Param("endTime")String endTime, @Param("shopId")String shopId);
+    List<Map<String,Object>> findShopTimeByShopId(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("shopId") String shopId);
 
 
 
@@ -65,15 +65,15 @@ public interface ShopMapper {
 
     //查询店员的工作时间
     @Select("select * from TB_ShopTime  w where w.date >= #{startTime} and w.date < #{endTime} and shopId=#{shopId} order by [date]")
-    List<Map<String,Object>> findShopTimeCon(@Param("startTime") String startTime, @Param("endTime")String endTime, @Param("shopId")String shopId);
+    List<Map<String,Object>> findShopTimeCon(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("shopId") String shopId);
 
 
     //根据技师的id/时间来修改是否繁忙
     @Update("<script> update TB_ShopTime set isBusy = #{isBusy} where " +
             "<if test='dateStr!=null'> dateStr = #{dateStr} and shopId = #{shopId} </if>" +
             "<if test='id!=null'> id = #{id} </if> </script>")
-    int updateShopBusy(@Param("isBusy") Integer isBusy, @Param("dateStr")String dateStr,
-                       @Param("id")String id, @Param("shopId")String shopId);
+    int updateShopBusy(@Param("isBusy") Integer isBusy, @Param("dateStr") String dateStr,
+                       @Param("id") String id, @Param("shopId") String shopId);
 
 
 
@@ -83,7 +83,7 @@ public interface ShopMapper {
     List<Map<String,Object>> findShopTimeConByWorkId(String workerId);
 
     @Update("update TB_WorkerPoint set jd = #{jd},wd = #{wd}  where workerId = #{workerId}")
-    int updWorkerPoint(@Param("jd") String jd,@Param("wd")String wd,@Param("workerId")String workerId);
+    int updWorkerPoint(@Param("jd") String jd, @Param("wd") String wd, @Param("workerId") String workerId);
 
 
 
@@ -96,16 +96,16 @@ public interface ShopMapper {
             " loginTime, 120) loginTime,t.orderNum,t.workerId,shop.shopName,t.jd,t.wd," +
             "             t.gender from TB_Worker t INNER JOIN TB_Shop shop on t.shopId = shop.shopId  and t.is_del = 1 " +
             ") t where rownumber &gt; ${page} </script>")
-    List<Map<String,Object>> findWorkerListByShopId(@Param("city") String city,@Param("shopId")String shopId,
-                                                    @Param("onLine")String onLine,@Param("page")Integer page);
+    List<Map<String,Object>> findWorkerListByShopId(@Param("city") String city, @Param("shopId") String shopId,
+                                                    @Param("onLine") String onLine, @Param("page") Integer page);
 
 
     @Update("update TB_Worker set isOnline = #{isOnline}  where workerId = #{workerId}")
-    int updateJishiOnline(@Param("workerId") String workerId,@Param("isOnline")String isOnline);
+    int updateJishiOnline(@Param("workerId") String workerId, @Param("isOnline") String isOnline);
 
 
     @Insert("insert into TB_Worker(workerId,userName,phone,isOnline,loginTime,sellSum,is_del)\n" +
             "values(#{workerId},#{phoneDesc},#{phoneDesc},0,GETDATE(),15,1)")
-    int addWorkInfo(@Param("workerId") String workerId,@Param("phoneDesc")String phoneDesc);
+    int addWorkInfo(@Param("workerId") String workerId, @Param("phoneDesc") String phoneDesc);
 
 }

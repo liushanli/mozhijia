@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -413,20 +414,52 @@ public class UserServiceImp implements UserService {
     }
 
 
-
-/*    public static void main(String[] args){
-        UserServiceImp userServiceImp = new UserServiceImp();
-        userServiceImp.SmsSendCodeJishi("13621883997");
-    }*/
-
     //获取城市信息，根据等级
+    public List<Map<String,Object>> findProvinceList() {
+
+
+        List<Map<String,Object>> provinceList = new ArrayList<>();
+
+        //获取省份数据
+        List<Map<String,Object>> provinceCityAreaList = userMapper.findProvinceInfoList(1,null);
+        /**=====================第一步：获取省份=========================*/
+        if(!CollectionUtils.isEmpty(provinceCityAreaList) && provinceCityAreaList.size()>0){
+            //获取城市数据
+            for(Map<String,Object> province : provinceCityAreaList){
+                Map<String, Object> listMap = new HashMap<>();
+                List<Map<String,Object>> cityList = new ArrayList<>();
+                listMap.put("value",ToolsUtil.getString(province.get("value")));
+                listMap.put("text",ToolsUtil.getString(province.get("text")));
+        /**=====================第二步：根据省份获取市=========================*/
+                List<Map<String,Object>> cityAreaList = userMapper.findProvinceInfoList(2,Integer.parseInt(ToolsUtil.getString(province.get("value"))));
+                if(!CollectionUtils.isEmpty(cityAreaList) && cityAreaList.size()>0){
+                    for(Map<String,Object> city : cityAreaList){
+                        //获取区级数据
+                        Map<String, Object> cityMap = new HashMap<>();
+                        cityMap.put("value",ToolsUtil.getString(city.get("value")));
+                        cityMap.put("text",ToolsUtil.getString(city.get("text")));
+                        /**=====================第三步：根据市获取区=========================*/
+                        List<Map<String,Object>> areAreaList = userMapper.findProvinceInfoList(3,Integer.parseInt(ToolsUtil.getString(city.get("value"))));
+                        cityMap.put("children",areAreaList);
+                        cityList.add(cityMap);
+                    }
+                }
+                //城市
+                listMap.put("children",cityList);
+                provinceList.add(listMap);
+            }
+        }
+        return provinceList;
+    }
+
+
     @Cacheable(value = "users")
     public Map<String, Object> findProvinceInfo(String level, String pid) {
 
         Integer level_1 = StringUtils.isEmpty(level) ? null : Integer.parseInt(level);
         Integer pid_1 = StringUtils.isEmpty(pid) ? null : Integer.parseInt(pid);
         Map<String, Object> listMap = new HashMap<String, Object>();
-        List<ProvinceCityArea> provinceCityAreaList = userMapper.findProvinceInfo(level_1, pid_1);
+        List<ProvinceCityArea> provinceCityAreaList = userMapper.findProvinceInfo(level_1, pid_1,null);
         listMap.put("provinceList", provinceCityAreaList);
         return listMap;
     }

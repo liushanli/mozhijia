@@ -3,10 +3,12 @@ package com.mzj.mohome.serviceImp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.mzj.mohome.entity.ProvinceCityArea;
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.mapper.OrderMapper;
 import com.mzj.mohome.mapper.ShopMapper;
+import com.mzj.mohome.mapper.UserMapper;
 import com.mzj.mohome.mapper.WorkersMapper;
 import com.mzj.mohome.service.UserService;
 import com.mzj.mohome.service.WorkerService;
@@ -38,6 +40,8 @@ public class WorkServiceImp implements WorkerService {
     private final static Logger logger = LoggerFactory.getLogger(WorkServiceImp.class);
     @Autowired
     private WorkersMapper workersMapper;
+    @Autowired
+    private UserMapper userMapper;
     @Autowired
     private ShopServiceImp shopService;
 
@@ -595,6 +599,24 @@ public class WorkServiceImp implements WorkerService {
         return workersMapper.updateWorkInfo(worker);
     }
 
+    public int addWorkInfo(Map<String,Object> map){
+        String userName = ToolsUtil.getString(map.get("userName"));
+        String nickName = ToolsUtil.getString(map.get("nickName"));
+        String gender = ToolsUtil.getString(map.get("gender"));
+        String imgUrl = ToolsUtil.getString(map.get("imgUrl"));
+        String introduce = ToolsUtil.getString(map.get("introduce"));
+        String workerId = ToolsUtil.getString(map.get("workerId"));
+        String idCard = ToolsUtil.getString(map.get("idcard"));
+        Worker worker = new Worker();
+        worker.setUserName(userName);
+        worker.setNickName(nickName);
+        worker.setGender(gender);
+        worker.setImgUrl(imgUrl);
+        worker.setIntroduce(introduce);
+        worker.setWorkerId(workerId);
+        worker.setIdcard(idCard);
+        return workersMapper.updateWorkInfo(worker);
+    }
     public int updateWorkBusy(Map<String,Object> map){
         String id = ToolsUtil.getString(map.get("id"));
         Integer isBusy = (Integer)map.get("isBusy");
@@ -1138,11 +1160,10 @@ public class WorkServiceImp implements WorkerService {
     }
 
 
-
     public int updWorkerInfoJW(Map<String,Object> paramMap){
         WorkerVo workerVo = new WorkerVo();
-        workerVo.setJd(Double.parseDouble(ToolsUtil.getString(paramMap.get("jd"))));
-        workerVo.setWd(Double.parseDouble(ToolsUtil.getString(paramMap.get("wd"))));
+        workerVo.setJd(new BigDecimal(ToolsUtil.getString(paramMap.get("jd"))).setScale(6,BigDecimal.ROUND_HALF_UP));
+        workerVo.setWd(new BigDecimal(ToolsUtil.getString(paramMap.get("wd"))).setScale(6,BigDecimal.ROUND_HALF_UP));
         workerVo.setWorkerId(ToolsUtil.getString(paramMap.get("workerId")));
         workerVo.setProvince(ToolsUtil.getString(paramMap.get("province")));
         workerVo.setCity(ToolsUtil.getString(paramMap.get("city")));
@@ -1152,13 +1173,13 @@ public class WorkServiceImp implements WorkerService {
             String provinceId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("province")));
             String cityId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("city")));
             String areaId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("area")));
-            workerVo.setProvinceId(provinceId);
-            workerVo.setCityId(cityId);
-            workerVo.setAreaId(areaId);
+            workerVo.setProvinceId(Integer.parseInt(provinceId));
+            workerVo.setCityId(Integer.parseInt(cityId));
+            workerVo.setAreaId(Integer.parseInt(areaId));
         }else{
-            workerVo.setProvinceId(ToolsUtil.getString(paramMap.get("provinceId")));
-            workerVo.setCityId(ToolsUtil.getString(paramMap.get("cityId")));
-            workerVo.setAreaId(ToolsUtil.getString(paramMap.get("areaId")));
+            workerVo.setProvinceId(Integer.parseInt(ToolsUtil.getString(paramMap.get("provinceId"))));
+            workerVo.setCityId(Integer.parseInt(ToolsUtil.getString(paramMap.get("cityId"))));
+            workerVo.setAreaId(Integer.parseInt(ToolsUtil.getString(paramMap.get("areaId"))));
         }
         logger.info("====updWorkerInfoJW===修改信息为：{}",JSON.toJSONString(workerVo));
         return workersMapper.updWorkInfo(workerVo);
@@ -1168,6 +1189,58 @@ public class WorkServiceImp implements WorkerService {
         return workersMapper.findWorkerLocation(workerId);
     }
 
+    public Map<String,Object> registerWorkerInfo(WorkerVo workerVo){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            map.put("success",true);
+            map.put("msg","");
+            if(PhoneUtil.isEmptyNumber(workerVo.getPhone())){
+                map.put("success",false);
+                map.put("msg","请您输入正确的手机号");
+            }else {
+                int count = workersMapper.findWorkerCount(workerVo.getPhone());
+                if (count > 0) {
+                    map.put("success", false);
+                    map.put("msg", "该手机号已存在，请您确认好输入？");
+                } else {
+                    Map<String, Object> shopMap = workersMapper.findShopByCode(workerVo.getShopCode(), null);
+                    workerVo.setShopId(ToolsUtil.getString(shopMap.get("shopId")));
+                    workerVo.setShopName(ToolsUtil.getString(shopMap.get("shopName")));
+                    String uuid = UUID.randomUUID().toString();
+                    String workerId = uuid.replace("-", "").toUpperCase();
+                    Random random = new Random();
+                    workerVo.setWorkerId(workerId);
+                    workerVo.setSellSum(15 + random.nextInt(30));
+                    //根据id获取区级信息
+                    List<ProvinceCityArea> areaList = userMapper.findProvinceInfo(3, null, workerVo.getAreaId());
+                    List<ProvinceCityArea> cityList = userMapper.findProvinceInfo(2, null, areaList.get(0).getPid());
+                    List<ProvinceCityArea> provinceList = userMapper.findProvinceInfo(1, null, cityList.get(0).getPid());
+                    String address = provinceList.get(0).getName() + cityList.get(0).getName() + areaList.get(0).getName();
+                    if (StringUtils.isNotEmpty(workerVo.getAddress())) {
+                        address += workerVo.getAddress();
+                    }
+                    LatitudeAndLongitude latAndLng = getLngAndLat.getLngAndLat(address);
+                    workerVo.setAddress(address);
+                    workerVo.setProvinceId(provinceList.get(0).getId());
+                    workerVo.setProvince(provinceList.get(0).getName());
+                    workerVo.setCityId(cityList.get(0).getId());
+                    workerVo.setCity(cityList.get(0).getName());
+                    workerVo.setAreaId(areaList.get(0).getId());
+                    workerVo.setArea(areaList.get(0).getName());
+                    workerVo.setJd(new BigDecimal(latAndLng.getLongitude()).setScale(6, BigDecimal.ROUND_HALF_UP));
+                    workerVo.setWd(new BigDecimal(latAndLng.getLatitude()).setScale(6, BigDecimal.ROUND_HALF_UP));
+                    workersMapper.addWorkerInfo(workerVo);
+                    workersMapper.addWorkerInfoPoint(workerVo);
+                }
+            }
+        }catch (Exception e){
+            map.put("success",false);
+            map.put("msg","注册失败");
+            logger.error("技师注册信息失败，错误信息为：{}",e);
+        }
+        return map;
+
+    }
 
 
     /*@Scheduled(cron = "0 0/5 * * * ?")

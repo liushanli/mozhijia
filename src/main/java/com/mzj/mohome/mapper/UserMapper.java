@@ -35,7 +35,7 @@ public interface UserMapper {
 
     //登录时判断客户是否存在
     @Select("select top 1 s.* from TB_SmsSend s  where s.phone = #{phoneDesc} and s.sendCode =  #{sendCode}")
-    List<Map<String,Object>> getByUserInfoExist(@Param("phoneDesc") String phoneDesc, @Param("sendCode")String sendCode) throws Exception;
+    List<Map<String,Object>> getByUserInfoExist(@Param("phoneDesc") String phoneDesc, @Param("sendCode") String sendCode) throws Exception;
 
     @Select("select top 1 t.* from TB_User t  " +
             "where 1=1 and t.isBlackList = 0 and t.phone = #{phoneDesc}  and t.is_del = 1")
@@ -64,39 +64,39 @@ public interface UserMapper {
     //如果用户不存在则直接添加到数据库
     @Insert("insert into TB_User(userId,userName,phone,nickName,loginType,loginTime,addTime,isBlackList,level,imgUrl,is_del,sourceType)\n" +
             "VALUES(#{userId},#{name},#{phoneDesc},#{name},0,GETDATE(),GETDATE(),0,0,'/static/images/userLogo.png',1,#{sourceType})")
-    int addUserInfo(@Param("userId")String userId,@Param("phoneDesc") String phoneDesc,@Param("name")String name,@Param("sourceType") String sourceType) throws Exception;
+    int addUserInfo(@Param("userId") String userId, @Param("phoneDesc") String phoneDesc, @Param("name") String name, @Param("sourceType") String sourceType) throws Exception;
 
     //如果用户不存在则直接添加到数据库微信
     @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,is_del,sourceType)\n" +
             "VALUES(#{userId},#{phoneDesc},#{phoneDesc},#{nickName},#{imgUrl},#{sex},#{openId}, 0,GETDATE(),GETDATE(),0,0,1,#{sourceType})")
-    int addWhatUserInfo(@Param("userId")String userId,@Param("phoneDesc")String phoneDesc, @Param("nickName")String nickName,
-                        @Param("imgUrl") String imgUrl, @Param("openId")String openId,
-                        @Param("sex")String sex,
+    int addWhatUserInfo(@Param("userId") String userId, @Param("phoneDesc") String phoneDesc, @Param("nickName") String nickName,
+                        @Param("imgUrl") String imgUrl, @Param("openId") String openId,
+                        @Param("sex") String sex,
                         @Param("sourceType") String sourceType) throws Exception;
 
 
     //如果用户不存在则直接添加到数据库微信
     @Insert("insert into TB_User(userId,userName,phone,nickName,imgUrl,sex,openId,loginType,loginTime,addTime,isBlackList,level,appleData,is_del,sourceType)\n" +
             " VALUES(#{userId},#{nickName},'',#{nickName},'','','', 0,GETDATE(),GETDATE(),0,0,#{appleData},1,#{sourceType})")
-    int addAppleUserInfo(@Param("userId")String userId,@Param("appleData") String appleData, @Param("nickName")String nickName,@Param("sourceType") String sourceType) throws Exception;
+    int addAppleUserInfo(@Param("userId") String userId, @Param("appleData") String appleData, @Param("nickName") String nickName, @Param("sourceType") String sourceType) throws Exception;
 
 
 
     //有手机号没有绑定微信用户信息的时候
     @Update("update TB_User set openId = #{openId},imgUrl = #{imgUrl},nickName=#{nickName},sex=#{sex} where phone = #{phoneDesc}")
-    int updUserInfoByPhone(@Param("phoneDesc") String phoneDesc, @Param("nickName")String nickName,
-                           @Param("imgUrl")String imgUrl, @Param("openId")String openId,
-                           @Param("sex")String sex);
+    int updUserInfoByPhone(@Param("phoneDesc") String phoneDesc, @Param("nickName") String nickName,
+                           @Param("imgUrl") String imgUrl, @Param("openId") String openId,
+                           @Param("sex") String sex);
 
     @Update("update TB_User set appleData = #{appleData},loginTime = GETDATE() where phone = #{phoneDesc} ")
-    int updateUserInfoByApple(@Param("appleData") String appleData, @Param("phoneDesc")String phoneDesc) throws Exception;
+    int updateUserInfoByApple(@Param("appleData") String appleData, @Param("phoneDesc") String phoneDesc) throws Exception;
 
     @Update("update TB_User set loginTime = GETDATE() where phone = #{phoneDesc} and is_del = 1")
     int updateUserInfo(String phoneDesc) throws Exception;
 
     //根据openId来修改手机号信息
     @Update("update TB_User set phone = #{phoneDesc} where openId = #{openId} and is_del = 1")
-    int updateUserPhone(@Param("phoneDesc") String phoneDesc, @Param("openId")String openId) throws Exception;
+    int updateUserPhone(@Param("phoneDesc") String phoneDesc, @Param("openId") String openId) throws Exception;
 
     //根据手机号查询是否存在有重复的
     @Select("select *  from TB_User where phone = #{phoneDesc} and is_del = 1")
@@ -106,14 +106,22 @@ public interface UserMapper {
     //添加短信驗證碼
     @Insert("insert into TB_SmsSend(phone,sendCode,addTime)" +
             "VALUES(#{phoneDesc},#{code},GETDATE()) ")
-    int addSmsSendInfo(@Param("phoneDesc") String phoneDesc, @Param("code")String code);
+    int addSmsSendInfo(@Param("phoneDesc") String phoneDesc, @Param("code") String code);
 
     //获取城市信息，根据等级
     @Select("<script> select * from TB_ProvinceCityArea where 1=1 <if test='level!=null'> and [level] = #{level} </if> " +
-            "<if test='pid!=null'> and pid = ${pid} </if>order by id " +
+            "<if test='pid!=null'> and pid = ${pid} </if> " +
+            "<if test='id!=null'> and id = ${id} </if> " +
             "</script>")
-    List<ProvinceCityArea> findProvinceInfo(@Param("level") Integer level, @Param("pid")Integer pid);
+    List<ProvinceCityArea> findProvinceInfo(@Param("level") Integer level, @Param("pid") Integer pid,
+                                            @Param("id") Integer id);
 
+
+    @Select("<script> select id as [value],name as text from TB_ProvinceCityArea where 1=1  " +
+            "<if test='level!=null'> and [level] = #{level} </if> " +
+            "<if test='pid!=null'> and pid = ${pid} </if>" +
+            "</script>")
+    List<Map<String,Object>> findProvinceInfoList(@Param("level") Integer level, @Param("pid") Integer pid);
 
     //获取城市信息，根据等级
     @Select("<script> select * from TB_ProvinceCityArea where [level] = 2 " +
@@ -153,7 +161,7 @@ public interface UserMapper {
     int updAddressById(String userId);
 
     @Update(" update TB_Address set isDefault = 1 where userId=#{userId} and id = #{id}")
-    int updAddressByIdStatus(@Param("userId") String userId, @Param("id")String id);
+    int updAddressByIdStatus(@Param("userId") String userId, @Param("id") String id);
 
     @Delete("delete from TB_Address where id = ${id}")
     int delAddressById(Integer id);
@@ -161,7 +169,7 @@ public interface UserMapper {
 
     //查询地址
     @Select("<script> select * from TB_Address where 1=1 <if test='id!=null'> and id = #{id} </if> <if test='userId!=null'> and userId = #{userId}</if> <if test='isDefault!=null'> and isDefault=#{isDefault} </if> order by isDefault desc</script>")
-    List<Address> findAddress(@Param("id") String id, @Param("userId") String userId, @Param("isDefault")String isDefault);
+    List<Address> findAddress(@Param("id") String id, @Param("userId") String userId, @Param("isDefault") String isDefault);
 
     //添加评价
     @Insert("insert into TB_Evaluate(userId,content,star,imgUrl,orderId,addTime,updateTime)\n" +
@@ -201,7 +209,7 @@ public interface UserMapper {
             " where  1=1 and u.is_del = 1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             ") t where rownumber &gt; ${page} </script>")
-    List<Map<String,Object>> findEvaluateListByUserIdPage(@Param("userId") String userId, @Param("shopId")String shopId,@Param("page")Integer page);
+    List<Map<String,Object>> findEvaluateListByUserIdPage(@Param("userId") String userId, @Param("shopId") String shopId, @Param("page") Integer page);
 
 
 
@@ -211,7 +219,7 @@ public interface UserMapper {
             " where  1=1 and u.is_del = 1 <if test='userId!=null'> and e.userId = #{userId} </if> " +
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             " order by e.updateTime desc </script>")
-    List<Map<String,Object>> findEvaluateListByUserId(@Param("userId") String userId, @Param("shopId")String shopId);
+    List<Map<String,Object>> findEvaluateListByUserId(@Param("userId") String userId, @Param("shopId") String shopId);
     //查询评价根据id
     @Select("select e.*,w.userName from TB_Evaluate e join TB_Worker w on e.workId = w.id  where e.id = #{id}")
     Map<String,Object> findEvalById(String id);
@@ -236,7 +244,7 @@ public interface UserMapper {
 
     //添加中间表
     @Insert("INSERT into TB_Eval_Choose VALUES(${evalId},${chooseId})")
-    int insertEvalChose(@Param("evalId") Integer evalId, @Param("chooseId")Integer chooseId);
+    int insertEvalChose(@Param("evalId") Integer evalId, @Param("chooseId") Integer chooseId);
 
     ////删除中间表数据
     @Delete("delete from TB_Eval_Choose where evalId = ${chooseId}")
@@ -277,7 +285,7 @@ public interface UserMapper {
     //添加优惠券和用户表Id
     @Insert("insert into TB_CouponAndUserId(userId,parentId,isUser,addTime)\n" +
             "values(#{userId},#{parentId},0,GETDATE())")
-    int addCouponUserId(@Param("userId") String userId,@Param("parentId")String parentId);
+    int addCouponUserId(@Param("userId") String userId, @Param("parentId") String parentId);
 
     //查询优惠券
     @Select("select * from TB_CouponAndUserId where  isUser  = 0  and userId = #{userId} ")
@@ -289,7 +297,7 @@ public interface UserMapper {
 
 
     @Update("update TB_CouponAndUserId set isUser = #{isUser},orderId=#{orderId} where id = #{id}")
-    int updateTbCoupon(@Param("isUser")String isUser,@Param("id")String id,@Param("orderId") String orderId);
+    int updateTbCoupon(@Param("isUser") String isUser, @Param("id") String id, @Param("orderId") String orderId);
 
     /**
      * 查询是否有用户十五分钟内没有支付，且给返还优惠券
@@ -311,17 +319,17 @@ public interface UserMapper {
 
     //查询版本信息
     @Select("select * from tb_version where type = #{type} and version>#{version} and status = 1")
-    Map<String,Object> findVersionInfo(@Param("version")String version,@Param("type")String type);
+    Map<String,Object> findVersionInfo(@Param("version") String version, @Param("type") String type);
 
     //查询版本信息
     @Select("select count(1) from tb_user_version where userId = #{userId} and recStatus = '1' " +
             " and version < (select version from TB_Version where type = #{type} and status = '1')")
-    int findVersionNew(@Param("userId")String userId,@Param("type")String type);
+    int findVersionNew(@Param("userId") String userId, @Param("type") String type);
 
 
     //查询版本信息
     @Update("update TB_User set version = #{version} where userId = #{userId} and is_del = 1")
-    int updateVersion(@Param("version") String version,@Param("userId") String userId);
+    int updateVersion(@Param("version") String version, @Param("userId") String userId);
 
     /**
      * 查询优惠券的数量
@@ -340,7 +348,7 @@ public interface UserMapper {
     int delUserById(String userId);
 
     @Select("select count(1) from TB_SmsSend where phone = #{phone} and sendCode = #{smsCode}")
-    int findSms(@Param("phone") String phone,@Param("smsCode")String smsCode);
+    int findSms(@Param("phone") String phone, @Param("smsCode") String smsCode);
 
 
     /**
@@ -348,14 +356,14 @@ public interface UserMapper {
      */
     @Insert("INSERT into tb_user_version(userId,version,createTime,lastTime,recStatus) " +
             "values(#{userId},#{version},GETDATE(),GETDATE(),'1')")
-    int addUserVersion(@Param("userId") String userId,@Param("version")String version);
+    int addUserVersion(@Param("userId") String userId, @Param("version") String version);
 
 
     /**
      * 修改版本的中间表
      */
     @Update("update tb_user_version set version = #{version},lastTime=GETDATE() where userId = #{userId}")
-    int updUserVersion(@Param("userId") String userId,@Param("version")String version);
+    int updUserVersion(@Param("userId") String userId, @Param("version") String version);
 
     /**
      * 根据用户id来判断版本号
@@ -391,7 +399,7 @@ public interface UserMapper {
     String getToken(String wxAppid);
 
     @Update("update tb_wxTokenInfo set startTime = GETDATE(),endTime = DATEADD(HH,2, GETDATE()),token = #{token} where wxAppid = #{wxAppid}")
-    int updTokenInfo(@Param("wxAppid") String wxAppid,@Param("token")String token);
+    int updTokenInfo(@Param("wxAppid") String wxAppid, @Param("token") String token);
 
     /**
      * 添加关注微信公众号信息
@@ -421,20 +429,20 @@ public interface UserMapper {
             "<if test='workerId != null'> and workerId = #{workerId} </if>" +
             "<if test='openId != null'> and openId = #{openId} </if>" +
             " </script>")
-    String findUserOpenInfo(@Param("workerId")String workerId,@Param("openId")String openId);
+    String findUserOpenInfo(@Param("workerId") String workerId, @Param("openId") String openId);
 
     @Update("update TB_UserAndOpenId set workerId = #{workerId},updateTime=getdate() where openId = #{openId}")
-    int updUserOpenInfo(@Param("workerId")String workerId,@Param("openId")String openId);
+    int updUserOpenInfo(@Param("workerId") String workerId, @Param("openId") String openId);
 
     @Insert("insert into TB_UserAndOpenId(openId,createTime,updateTime)" +
             " VALUES(#{openId},GETDATE(),GETDATE())")
-    int addUserOpenInfo(@Param("openId")String openId);
+    int addUserOpenInfo(@Param("openId") String openId);
 
     @Select("select jsTicket from TB_WxTicketInfo where wxAppid = #{wxAppid} and  GETDATE() BETWEEN startTime and endTime")
     String getJsTicket(String wxAppid);
 
     @Update("update TB_WxTicketInfo set startTime = GETDATE(),endTime = DATEADD(HH,2, GETDATE()),jsTicket = #{jsTicket} where wxAppid = #{wxAppid}")
-    int updJsTicket(@Param("wxAppid") String wxAppid,@Param("jsTicket")String jsTicket);
+    int updJsTicket(@Param("wxAppid") String wxAppid, @Param("jsTicket") String jsTicket);
 
     @Select("select servicePhone from tb_servicePhone where serviceType = '1'")
     String findServicePhone();
@@ -447,7 +455,7 @@ public interface UserMapper {
      */
     @Insert("insert into TB_REturnOrderHistory " +
             "VALUES(#{orderId},#{status},GETDATE(),GETDATE());")
-    int addReturnOrderInfo(@Param("orderId") String orderId,@Param("status") Integer status);
+    int addReturnOrderInfo(@Param("orderId") String orderId, @Param("status") Integer status);
 
     /**
      * 查询退款返回历史表
@@ -467,7 +475,7 @@ public interface UserMapper {
             " <if test='userId!=null'> and e.userId = #{userId} </if> " +
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             " order by e.updateTime desc offset #{pageNum} rows fetch next #{size} rows only </script>")
-    List<Map<String,Object>> findEvaluateListByUserIdNew(@Param("userId") String userId,@Param("shopId") String shopId,
-                                                         @Param("pageNum")Integer pageNum,
-                                                         @Param("size")Integer size);
+    List<Map<String,Object>> findEvaluateListByUserIdNew(@Param("userId") String userId, @Param("shopId") String shopId,
+                                                         @Param("pageNum") Integer pageNum,
+                                                         @Param("size") Integer size);
 }

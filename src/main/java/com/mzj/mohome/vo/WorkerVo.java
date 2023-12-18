@@ -3,27 +3,39 @@ package com.mzj.mohome.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * @author admin
+ * 工作信息
+ */
 @Data
 public class WorkerVo implements Serializable {
-    //id,shopId,shopName,workerId,workerName,orderNum,productId,province," +
-    //            " city,cityId,area,areaId,jd,wd,radius,addTime
     private Integer id;
     private String shopId;
     private String shopName;
     private String workerName;
+    private String nickName;
     private String workerId;
     private Integer orderNum;
-    private String provinceId;
+    private Integer provinceId;
     private String province;
-    private String cityId;
+    private Integer cityId;
     private String city;
-    private String areaId;
+    private Integer areaId;
     private String area;
-    private Double jd;
-    private Double wd;
-    private Double radius;
+    private BigDecimal jd;
+    private BigDecimal wd;
+    private BigDecimal radius;
     private Date addTime;
     private String status;
+    private String imgUrl;
+    private String phone;
+    private String introduce;
+    private String gender;
+    private Integer sellSum;
+    private String address;
+    //邀请码
+    private String shopCode;
 }

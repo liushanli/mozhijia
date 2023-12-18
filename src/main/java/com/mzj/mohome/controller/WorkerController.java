@@ -415,6 +415,27 @@ public class WorkerController {
         return objectMap;
     }
 
+    /**
+     * 注册工作人员信息
+     * @param map
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/registerWorkInfo",method = RequestMethod.POST)
+    public Map<String,Object> registerWorkInfo(@RequestBody Map<String,Object> map){
+        Map<String, Object> objectMap = new HashMap<>();
+        try {
+            workerService.addWorkInfo(map);
+            objectMap.put("success",true);
+            objectMap.put("msg","");
+        } catch (Exception e) {
+            e.printStackTrace();
+            objectMap.put("success",false);
+            objectMap.put("msg","查询错误，请稍后重试");
+        }
+        return objectMap;
+    }
+
 
     //获取评价内容
     @ResponseBody
@@ -887,6 +908,20 @@ public class WorkerController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("workVo",null);
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/registerWorkerInfo")
+    public Map<String,Object> registerWorkerInfo(@RequestBody WorkerVo workerVo){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("addWorkerInfo==添加技师信息为：{}",JSON.toJSONString(workerVo));
+            map = workerService.registerWorkerInfo(workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
         }
         return map;
     }

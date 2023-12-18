@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class ProvinceCityArea implements Serializable {
     private Integer id;
     private String name;
-    private String pid;
+    private Integer pid;
     private String sname;
     private Integer level;
     private String citycode;

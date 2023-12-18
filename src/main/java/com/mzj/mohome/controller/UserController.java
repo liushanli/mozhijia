@@ -245,6 +245,15 @@ public class UserController {
     }
 
     @ResponseBody
+    @RequestMapping("findProvinceList")
+    public  List<Map<String,Object>> findProvinceList(){
+        logger.info("=====findProvinceList=======start");
+        List<Map<String,Object>>  objectMap = userService.findProvinceList();
+        logger.info("=====findProvinceList=======end");
+        return objectMap;
+    }
+
+    @ResponseBody
     @RequestMapping("findBannerList")
     public  Map<String,Object> findBannerList(){
         Map<String,Object> objectMap = new HashMap<>();

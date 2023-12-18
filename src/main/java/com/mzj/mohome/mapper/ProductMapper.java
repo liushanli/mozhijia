@@ -52,7 +52,7 @@ public interface ProductMapper {
             " <if test='id !=null '> and t.id = #{id}</if> "+
             " <if test='shopId !=null '> and t.shopId = #{shopId}</if> "+
             " order by t.orderNum,isRecom  </script>")
-    List<Map<String,Object>> findProductListInfo(@Param("city") String city,@Param("page") Integer page,
+    List<Map<String,Object>> findProductListInfo(@Param("city") String city, @Param("page") Integer page,
                                                  @Param("typeId") String typeId,
                                                  @Param("id") String id, @Param("shopId") String shopId);
 
@@ -75,9 +75,9 @@ public interface ProductMapper {
             " <if test='id !=null '> and t.id = #{id}</if> "+
             " <if test='shopId !=null '> and t.shopId = #{shopId}</if> "+
             " order by t.orderNum,isRecom  </script>")
-    List<Map<String,Object>> findProductListInfo_1(@Param("city") String city,@Param("page") Integer page,
-                                                 @Param("productTypeId") String productTypeId,
-                                                 @Param("id") String id, @Param("shopId") String shopId);
+    List<Map<String,Object>> findProductListInfo_1(@Param("city") String city, @Param("page") Integer page,
+                                                   @Param("productTypeId") String productTypeId,
+                                                   @Param("id") String id, @Param("shopId") String shopId);
 
 
 
@@ -95,7 +95,7 @@ public interface ProductMapper {
     " left join TB_WorkerSerProduct tpl on t.productId = tpl.productId \n" +
     " where t.shopId = #{shopId} and tpl.workerId = #{workerId} \n" +
     " order by t.orderNum </script>")
-    List<Map<String,Object>> findProductListInfoWorkId(@Param("shopId") String shopId,@Param("workerId") String workerId);
+    List<Map<String,Object>> findProductListInfoWorkId(@Param("shopId") String shopId, @Param("workerId") String workerId);
 
 
     @Select("select s.shopName,p.price, p.id,p.shopId,p.productId,p.imgUrl,p.productName,p.detail,p.productTime,p.isRecom,p.orderNum,p.contentText,p.oldPrice,p.memberPrice,p.groupPrice,p.serviceNumber,p.serviceArea,p.personnel,p.addTime,p.isOnline,s.orderInfo,ISNULL(tp.couponType, 0) couponType,tp.secondPrice,t.sellSum,p.sellSum sellNum from TB_Product p join TB_Shop s on p.shopId = s.shopId left join (select * from TB_Coupon where GETDATE() BETWEEN startTime and endTime and status = 1 and couponType = 1) tp on p.productId = tp.productId\n" +
@@ -126,8 +126,8 @@ public interface ProductMapper {
             "<if test='id != null'> and p.productId =#{id} </if> \n" +
             "<if test='productTypeId != null'> and p.productTypeId =#{productTypeId} </if> \n" +
             "order by p.orderNum,isRecom </script>")
-    List<Map<String,Object>> findProductInfoList(@Param("workerId") String workerId, @Param("productTypeId")String productTypeId,
-                                                 @Param("id") String id, @Param("shopId")String shopId);
+    List<Map<String,Object>> findProductInfoList(@Param("workerId") String workerId, @Param("productTypeId") String productTypeId,
+                                                 @Param("id") String id, @Param("shopId") String shopId);
 
 
 }

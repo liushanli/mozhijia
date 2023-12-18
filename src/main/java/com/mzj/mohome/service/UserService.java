@@ -26,13 +26,19 @@ public interface UserService {
     //登录时判断用户是否存在
      List<User> getByUserExist(String phone, String sendCode, String openId, String appleData, String sourceType) throws Exception;
 
-    //是否發送成功
+    //是否发送成功
      String SmsSendCode(String phone);
 
     Map<String,Object> SmsSendCodeJishi(String phone);
 
     //获取城市信息，根据等级
      Map<String,Object> findProvinceInfo(String level, String pid);
+
+    /**
+     * 查询所有的城市和区域的数据
+     * @return
+     */
+    List<Map<String,Object>> findProvinceList();
 
     //查询banner图
     List<AppBanner> findBannerList();
@@ -54,7 +60,7 @@ public interface UserService {
     //根据用户id来查询评价列表信息
     List<Map<String,Object>> findEvaluateListByUserId(String userId);
 
-    List<Map<String,Object>> findEvaluateListByUserIdNew(String userId,String shopId,Integer pageNum,Integer size);
+    List<Map<String,Object>> findEvaluateListByUserIdNew(String userId, String shopId, Integer pageNum, Integer size);
     //根据条件来查询评价列表信息
     List<Map<String,Object>> findEvaluateListByUserIdCon(Map<String, Object> map);
 
@@ -179,7 +185,7 @@ public interface UserService {
      * @param orderId
      * @return
      */
-    int updUserOrderRecord(String orderId,String payType);
+    int updUserOrderRecord(String orderId, String payType);
 
     /**
      * //status为1，添加，2修改
@@ -203,6 +209,6 @@ public interface UserService {
      */
     List<ReturnOrderStatusVo> queryReturnInfoList(String orderId);
 
-    int addReturnOrderHistory(String orderId,Integer status);
+    int addReturnOrderHistory(String orderId, Integer status);
 
 }

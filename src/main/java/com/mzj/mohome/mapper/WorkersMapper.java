@@ -47,11 +47,11 @@ public interface WorkersMapper {
             " <if test='evalNmsDesc == 2 '>order by evaluateNum desc</if>" +
             " </if>" +
             "  </script>")
-    List<Map<String,Object>> findWorkerList(@Param("city") String city,@Param("shopName")String shopName,
-                                            @Param("userName")String userName, @Param("workerId")String workerId,
-                                            @Param("shopId")String shopId, @Param("pages")Integer pages,
-                                            @Param("size")Integer size,@Param("genderDesc")String genderDesc,
-                                            @Param("onLine")String onLine,@Param("productId")String productId,
+    List<Map<String,Object>> findWorkerList(@Param("city") String city, @Param("shopName") String shopName,
+                                            @Param("userName") String userName, @Param("workerId") String workerId,
+                                            @Param("shopId") String shopId, @Param("pages") Integer pages,
+                                            @Param("size") Integer size, @Param("genderDesc") String genderDesc,
+                                            @Param("onLine") String onLine, @Param("productId") String productId,
                                             @Param("evalNmsDesc") String evalNmsDesc);
 
 
@@ -81,13 +81,13 @@ public interface WorkersMapper {
             "WHERE " +
             " w1.ID = w2.ID AND w2.n  &gt; ${pages} ORDER BY w2.n ASC "+
             "  </script>")
-    List<Map<String,Object>> findWorkerList_2(@Param("jd") String jd,@Param("wd") String wd,
-                                              @Param("city") String city,@Param("shopName")String shopName,
-                                              @Param("userName")String userName,@Param("workerId") String workerId,
-                                              @Param("shopId")String shopId, @Param("pages")Integer pages,
-                                              @Param("sizeNum")Integer sizeNum,@Param("genderDesc") String genderDesc,
-                                              @Param("onLine")String onLine,@Param("productId")String productId,
-                                              @Param("evalNmsDesc")String evalNmsDesc);
+    List<Map<String,Object>> findWorkerList_2(@Param("jd") String jd, @Param("wd") String wd,
+                                              @Param("city") String city, @Param("shopName") String shopName,
+                                              @Param("userName") String userName, @Param("workerId") String workerId,
+                                              @Param("shopId") String shopId, @Param("pages") Integer pages,
+                                              @Param("sizeNum") Integer sizeNum, @Param("genderDesc") String genderDesc,
+                                              @Param("onLine") String onLine, @Param("productId") String productId,
+                                              @Param("evalNmsDesc") String evalNmsDesc);
 
 
     @Select("<script> select * from (\n" +
@@ -124,13 +124,13 @@ public interface WorkersMapper {
             " <if test='userName!=null'> and (w.userName like concat('%',#{userName},'%') or (w.nickName like concat('%',#{userName},'%'))) </if> "+
             " <if test='genderDesc != null '> and w.gender= #{genderDesc} </if> " +
             ") t where t.n &gt; ${pages} and t.n &lt;= ${sizeNum} </script>")
-    List<Map<String,Object>> findWorkerList_3(@Param("jd") String jd,@Param("wd") String wd,
-                                              @Param("city") String city,@Param("shopName")String shopName,
-                                              @Param("userName")String userName,@Param("workerId") String workerId,
-                                              @Param("shopId")String shopId, @Param("pages")Integer pages,
-                                              @Param("sizeNum")Integer sizeNum,@Param("genderDesc") String genderDesc,
-                                              @Param("onLine")String onLine,@Param("productId")String productId,
-                                              @Param("evalNmsDesc")String evalNmsDesc);
+    List<Map<String,Object>> findWorkerList_3(@Param("jd") String jd, @Param("wd") String wd,
+                                              @Param("city") String city, @Param("shopName") String shopName,
+                                              @Param("userName") String userName, @Param("workerId") String workerId,
+                                              @Param("shopId") String shopId, @Param("pages") Integer pages,
+                                              @Param("sizeNum") Integer sizeNum, @Param("genderDesc") String genderDesc,
+                                              @Param("onLine") String onLine, @Param("productId") String productId,
+                                              @Param("evalNmsDesc") String evalNmsDesc);
 
 
 
@@ -174,13 +174,13 @@ public interface WorkersMapper {
             " </if>"+
             " offset ${pages} rows fetch next ${sizeNum} rows only"+
             "  </script>")
-    List<Map<String,Object>> findWorkerList_4(@Param("jd") String jd,@Param("wd") String wd,
-                                              @Param("city") String city,@Param("shopName")String shopName,
-                                              @Param("userName")String userName,@Param("workerId") String workerId,
-                                              @Param("shopId")String shopId, @Param("pages")Integer pages,
-                                              @Param("sizeNum")Integer sizeNum,@Param("genderDesc") String genderDesc,
-                                              @Param("onLine")String onLine,@Param("productId")String productId,
-                                              @Param("evalNmsDesc")String evalNmsDesc);
+    List<Map<String,Object>> findWorkerList_4(@Param("jd") String jd, @Param("wd") String wd,
+                                              @Param("city") String city, @Param("shopName") String shopName,
+                                              @Param("userName") String userName, @Param("workerId") String workerId,
+                                              @Param("shopId") String shopId, @Param("pages") Integer pages,
+                                              @Param("sizeNum") Integer sizeNum, @Param("genderDesc") String genderDesc,
+                                              @Param("onLine") String onLine, @Param("productId") String productId,
+                                              @Param("evalNmsDesc") String evalNmsDesc);
 
 
     /**
@@ -189,7 +189,7 @@ public interface WorkersMapper {
      * @return
      */
     @Select("select top 1 (dateStr+' '+dateHHmm) dateHHmm from TB_WorkerTime where isBusy = 0 and date>DATEADD(Minute,30, GETDATE()) and workerId = #{workerId}")
-    String getDateMM(@Param("workerId")String workerId);
+    String getDateMM(@Param("workerId") String workerId);
 
     @Select("<script> select works.*,(SELECT COUNT (1) sellNum FROM TB_Order t " +
             "LEFT JOIN TB_Product p ON t.productId = p.productId WHERE t.status = 1 OR ( t.status &gt;= 3 AND t.status &lt;= 9 ) \n" +
@@ -199,12 +199,12 @@ public interface WorkersMapper {
             "where  works.isOnline = 1 and works.is_del = 1 and tp.city = #{city}" +
             "<if test='shopId!=null'> and works.shopId = #{shopId}</if>" +
             "  order by works.orderNum desc </script>")
-    List<Map<String,Object>> workerInfoListByInfo(@Param("shopId") String shopId,@Param("city")String city);
+    List<Map<String,Object>> workerInfoListByInfo(@Param("shopId") String shopId, @Param("city") String city);
 
 
     //修改技师的时间
     @Update("update TB_WorkerTime set isBusy = #{isBusy} where [date]>= #{date} and [date] <= DATEADD(hour,2, #{date}) and workerId = #{workerId}")
-    int updateWorkTimeById(@Param("date")String date,@Param("workerId")String workerId,@Param("isBusy")String isBusy);
+    int updateWorkTimeById(@Param("date") String date, @Param("workerId") String workerId, @Param("isBusy") String isBusy);
 
 
     //根绝店铺来查询员工的信息
@@ -237,12 +237,12 @@ public interface WorkersMapper {
             " </if>" +
             " <if test='evalNmsDesc == null '> order by orderNum </if>" +
             "  </script>")
-    List<Map<String,Object>> findWorkerList_1(@Param("city") String city,@Param("shopName")String shopName,
-                                              @Param("userName")String userName, @Param("workerId")String workerId,
-                                              @Param("shopId")String shopId, @Param("pages")Integer pages,
-                                              @Param("size")Integer size, @Param("genderDesc")String genderDesc,
-                                              @Param("onLine")String onLine, @Param("productId")String productId,
-                                              @Param("evalNmsDesc")String evalNmsDesc);
+    List<Map<String,Object>> findWorkerList_1(@Param("city") String city, @Param("shopName") String shopName,
+                                              @Param("userName") String userName, @Param("workerId") String workerId,
+                                              @Param("shopId") String shopId, @Param("pages") Integer pages,
+                                              @Param("size") Integer size, @Param("genderDesc") String genderDesc,
+                                              @Param("onLine") String onLine, @Param("productId") String productId,
+                                              @Param("evalNmsDesc") String evalNmsDesc);
 
 
     @Select("select top 1 (dateStr+' '+dateHHmm) dateHHmm from TB_WorkerTime where isBusy = 0 and [date]>DATEADD(Minute,30, GETDATE()) and workerId =  #{workerId}")
@@ -262,7 +262,7 @@ public interface WorkersMapper {
     int updateLoginTime(String workId);
 
     @Update("update TB_Worker set  video = #{videoUrl},videoImage = #{imgUrl},updateTime = GETDATE() where workerId = #{workId}")
-    int updateLoginImg(@Param("workId") String workId,@Param("imgUrl")String imgUrl,@Param("videoUrl")String videoUrl);
+    int updateLoginImg(@Param("workId") String workId, @Param("imgUrl") String imgUrl, @Param("videoUrl") String videoUrl);
 
     //查询店员的工作时间
     @Select("select * from TB_WorkerTime  w where w.date>=#{startTime} and w.date<#{endTime} and workerId=#{workerId} order by [date]")
@@ -306,7 +306,7 @@ public interface WorkersMapper {
             "  left join TB_User u on e.userId = u.userId " +
             "  where  w.isOnline = '1'  and w.is_del = 1 and o.productId = #{productId} " +
             ") hhh  where hhh.n > ${startPage} and hhh.n <= ${endPage}")
-    List<Map<String,Object>> findEvaluateByProductId(@Param("productId")String productId,@Param("startPage")Integer startPage,@Param("endPage") Integer endPage);
+    List<Map<String,Object>> findEvaluateByProductId(@Param("productId") String productId, @Param("startPage") Integer startPage, @Param("endPage") Integer endPage);
 
 
     //删除和员工关联图片
@@ -316,11 +316,11 @@ public interface WorkersMapper {
     //添加和员工关联图片
     @Insert("insert into TB_WorkerPic(workerId,imgUrl,imgType,orderNum,addTime,isCheck)" +
             "VALUES(#{workerId},#{imgUrl},#{imgType},${orderNum},GETDATE(),0)")
-    int addWorkPic(@Param("workerId") String workerId, @Param("imgUrl")String imgUrl, @Param("imgType")String imgType, @Param("orderNum")Integer orderNum);
+    int addWorkPic(@Param("workerId") String workerId, @Param("imgUrl") String imgUrl, @Param("imgType") String imgType, @Param("orderNum") Integer orderNum);
 
     //修改技师证书图片
     @Update("update TB_WorkerPic set imgUrl = #{imgUrl},isCheck = 0 where workerId=#{workerId} and imgType=#{imgType} ")
-    int updWorkPic(@Param("imgUrl") String imgUrl, @Param("workerId")String workerId, @Param("imgType")String imgType);
+    int updWorkPic(@Param("imgUrl") String imgUrl, @Param("workerId") String workerId, @Param("imgType") String imgType);
 
     //根据员工id，来查询员工图片
     @Select("select * from TB_WorkerPic where workerId = #{workerId} and imgType = 0 ")
@@ -338,8 +338,8 @@ public interface WorkersMapper {
     @Update("<script> update TB_WorkerTime set isBusy = #{isBusy} where " +
             "<if test='dateStr!=null'> dateStr = #{dateStr} and workerId = #{workerId} </if>" +
             "<if test='id!=null'> id = #{id} </if> </script>")
-    int updateWorkBusy(@Param("isBusy") Integer isBusy, @Param("dateStr")String dateStr,
-                       @Param("id")String id, @Param("workerId")String workerId);
+    int updateWorkBusy(@Param("isBusy") Integer isBusy, @Param("dateStr") String dateStr,
+                       @Param("id") String id, @Param("workerId") String workerId);
 
     //查询技师的状态栏
     @Select("select  name from (select c.chooseId,count(1) nums  from TB_Eval_Choose c" +
@@ -364,7 +364,7 @@ public interface WorkersMapper {
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             "<if test='workerId!=null'> and  o.workerId = #{workerId} </if>" +
             " order by e.updateTime desc </script>")
-    List<Map<String,Object>> findWorkEval(@Param("workerId") String workerId,@Param("shopId")String shopId);
+    List<Map<String,Object>> findWorkEval(@Param("workerId") String workerId, @Param("shopId") String shopId);
 
 
 
@@ -388,7 +388,7 @@ public interface WorkersMapper {
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
             " and e.star &lt; 3" +
             "</script>")
-    List<Map<String,Object>> findWorkOrderNum(@Param("workerId") String workerId,@Param("shopId")String shopId);
+    List<Map<String,Object>> findWorkOrderNum(@Param("workerId") String workerId, @Param("shopId") String shopId);
 
 
 
@@ -408,9 +408,9 @@ public interface WorkersMapper {
             " and status &gt;= 3 and status &lt; 7 and shopReceiveTime BETWEEN #{startTime} AND  #{endTime}" +
             "</script>")
     List<Map<String,Object>> findWorkOrderNumber(@Param("workerId") String workerId,
-                                                 @Param("shopId")String shopId,
-                                                 @Param("startTime")String startTime,
-                                                 @Param("endTime")String endTime);
+                                                 @Param("shopId") String shopId,
+                                                 @Param("startTime") String startTime,
+                                                 @Param("endTime") String endTime);
 
     @Select("<script> select count(1) orderNum,ISNULL(SUM(payOnLine), 0)  payOnLine,1 status from TB_Order where 1=1 " +
             "<if test='workerId!=null'> and workerId = #{workerId} </if> " +
@@ -427,7 +427,7 @@ public interface WorkersMapper {
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
             " and status &gt;= 3 and status &lt; 7 " +
             "</script>")
-    List<Map<String,Object>> findWorkOrderNumberAll(@Param("workerId") String workerId,@Param("shopId")String shopId);
+    List<Map<String,Object>> findWorkOrderNumberAll(@Param("workerId") String workerId, @Param("shopId") String shopId);
 
 
     @Select("<script> select CONVERT(varchar(12) , workconfirmTime, 111 ) dates,count(1) num," +
@@ -437,34 +437,34 @@ public interface WorkersMapper {
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
             " <if test='msgFlag!=0'> and workconfirmTime BETWEEN #{startTime} AND #{endTime} </if> \n" +
             "group by CONVERT(varchar(12) , workconfirmTime, 111 ) </script>")
-    List<Map<String,Object>> findWorkerOrderDetail(@Param("workerId") String workerId,@Param("shopId")String shopId,
-                                                   @Param("startTime")String startTime,
-                                                   @Param("endTime")String endTime,@Param("msgFlag")Integer msgFlag);
+    List<Map<String,Object>> findWorkerOrderDetail(@Param("workerId") String workerId, @Param("shopId") String shopId,
+                                                   @Param("startTime") String startTime,
+                                                   @Param("endTime") String endTime, @Param("msgFlag") Integer msgFlag);
 
 
     @Select("select top 5 ti.id,ti.dateHHmm,ti.dateStr from TB_Order o RIGHT join TB_WorkerTime ti " +
             " on o.workerId = ti.workerId where ti.workerId = #{workerId} " +
             " and ti.date>= DATEADD(mi, -90, #{date}) and o.orderId = #{orderId} order by ti.date")
-    List<Map<String,Object>> findInfo(@Param("workerId") String workerId,@Param("orderId")String orderId,@Param("date")String date);
+    List<Map<String,Object>> findInfo(@Param("workerId") String workerId, @Param("orderId") String orderId, @Param("date") String date);
 
     //查询邀请码是否存在
     @Select("<script> select * from TB_Shop where 1=1 " +
             "<if test='code!=null'> and shopCode = #{code} </if>" +
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
             "</script>")
-    Map<String,Object> findShopByCode(@Param("code") String code,@Param("shopId")String shopId);
+    Map<String,Object> findShopByCode(@Param("code") String code, @Param("shopId") String shopId);
 
 
 
     @Update("update TB_Worker set shopCodeStatus = #{shopCodeStatus},shopId = #{shopId} where workerId = #{workerId} ")
-    int updShopByCode(@Param("shopCodeStatus") Integer shopCodeStatus,@Param("workerId")String workerId,@Param("shopId")String shopId);
+    int updShopByCode(@Param("shopCodeStatus") Integer shopCodeStatus, @Param("workerId") String workerId, @Param("shopId") String shopId);
 
     //查询版本信息
     @Update("update TB_Worker set version = #{version} where phone = #{phone}")
-    int updateVersion(@Param("version") String version,@Param("phone")String phone);
+    int updateVersion(@Param("version") String version, @Param("phone") String phone);
 
     @Update("update TB_Worker set quality = #{star},percentage = #{evaluateNumLv} where workerId = #{workerId}")
-    int updateWorkerStar(@Param("workerId") String workerId,@Param("star") int star,
+    int updateWorkerStar(@Param("workerId") String workerId, @Param("star") int star,
                          @Param("evaluateNumLv") String evaluateNumLv);
 
     //查询评价表
@@ -503,7 +503,7 @@ public interface WorkersMapper {
      * @return
      */
     @Update("update TB_Worker set dateHHmm =#{dateHHmm}  where workerId = #{workerId} and isOnline = 1 and is_del = 1")
-    int updWorkerInfo(@Param("workerId") String workerId,@Param("dateHHmm") String dateHHmm);
+    int updWorkerInfo(@Param("workerId") String workerId, @Param("dateHHmm") String dateHHmm);
 
     /**
      * 根据主键ID进行修改标签
@@ -515,9 +515,9 @@ public interface WorkersMapper {
      */
     @Update("update TB_Worker set evalStatus_one =#{evalStatus_one},evalStatus_two =#{evalStatus_two},evalStatus_three =#{evalStatus_three}  where workerId = #{workerId} and isOnline = 1 and is_del = 1")
     int updWorkerInfoLabel(@Param("workerId") String workerId
-                    ,@Param("evalStatus_one") String evalStatus_one
-                    ,@Param("evalStatus_two") String evalStatus_two
-                    ,@Param("evalStatus_three") String evalStatus_three);
+            , @Param("evalStatus_one") String evalStatus_one
+            , @Param("evalStatus_two") String evalStatus_two
+            , @Param("evalStatus_three") String evalStatus_three);
 
 
     //修改技师的经纬度和地区
@@ -555,14 +555,14 @@ public interface WorkersMapper {
             "<if test='workerId!=null'> or workerId = #{workerId} </if>" +
             "<if test='openId!=null'> and openId = #{openId} </if>" +
             "</script>")
-    int findWorkerOpenInfo(@Param("workerId") String workerId,@Param("openId") String openId);
+    int findWorkerOpenInfo(@Param("workerId") String workerId, @Param("openId") String openId);
 
     @Select("<script>" +
             "select count(1) from TB_UserAndOpenId where 1=1" +
             "<if test='workerId!=null'> and workerId = #{workerId} </if>" +
             "<if test='openId!=null'> and openId = #{openId} </if>" +
             "</script>")
-    int findWorkerOpenInfoWx(@Param("workerId") String workerId,@Param("openId") String openId);
+    int findWorkerOpenInfoWx(@Param("workerId") String workerId, @Param("openId") String openId);
 
     /**
      * 修改绑定
@@ -582,8 +582,42 @@ public interface WorkersMapper {
 
     @Insert("insert into TB_UserAndOpenId(workerId,openId,createTime,updateTime)" +
             " VALUES(#{workerId},#{openId},GETDATE(),GETDATE())")
-    int addWorkerOpenInfos(@Param("openId")String openId,@Param("workerId")String workerId);
+    int addWorkerOpenInfos(@Param("openId") String openId, @Param("workerId") String workerId);
+
+    /**
+     * 技师基本信息
+     * @param workerVo
+     * @return
+     */
+    @Insert("insert into TB_Worker(shopId,workerId,userName,imgUrl,phone,introduce,serviceArea,isOnline," +
+            "nickName,gender," +
+            "sellSum,addTime,is_del,quality,percentage)" +
+            " VALUES(#{shopId},#{workerId},#{workerName},#{imgUrl},#{phone},#{introduce},#{city},0," +
+            "#{nickName},#{gender}," +
+            "#{sellSum},GETDATE(),1,5,'100%')")
+    int addWorkerInfo(WorkerVo workerVo);
+
+
+
+    /**
+     * 技师的经纬度保存
+     * @param workerVo
+     * @return
+     */
+    @Insert("insert into TB_WorkerPoint(shopId,shopName,workerId,workerName,provinceId,province,cityId,city," +
+            "areaId,area,jd,wd,addTime,address)\n" +
+            " VALUES(#{shopId},#{shopName},#{workerId},#{workerName},#{provinceId},#{province},#{cityId},#{city}," +
+            "#{areaId},#{area},#{jd},#{wd},GETDATE(),#{address})")
+    int addWorkerInfoPoint(WorkerVo workerVo);
 
     @Select("select count(1) from TB_UserAndOpenId where workerId = #{workerId}")
     int findOpenIdCount(String workerId);
+
+    /**
+     * 查询该手机号，是否已经注册
+     * @param phone
+     * @return
+     */
+    @Select("select count(1) from TB_Worker where phone = #{phone} and is_del = '1'")
+    int findWorkerCount(String phone);
 }
