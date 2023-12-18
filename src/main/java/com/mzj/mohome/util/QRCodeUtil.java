@@ -36,7 +36,7 @@ public class QRCodeUtil {
 
     public static void main(String[] args){
         try {
-            String content = "http://www.baidu.com";
+            String content = "http://wx.mzjsh.com:9999/pages/register/register";
             String imgPath = "d:/map_2.png";
             String destPath = "d:/";
             encode(content,imgPath,destPath,false);
@@ -46,6 +46,7 @@ public class QRCodeUtil {
 
     }
     private static BufferedImage createImage(String content, String imgPath, boolean needCompress) throws Exception {
+
         Hashtable<EncodeHintType, Object> hints = new Hashtable<>();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         hints.put(EncodeHintType.CHARACTER_SET, CHARSET);
@@ -126,7 +127,7 @@ public class QRCodeUtil {
         // 随机生成二维码图片文件名
         String file = UUID.randomUUID() + ".jpg";
         ImageIO.write(image, FORMAT_NAME, new File(destPath + "/" + file));
-        return destPath + file;
+        return file;
     }
 
     /**

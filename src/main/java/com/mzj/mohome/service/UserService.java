@@ -203,6 +203,11 @@ public interface UserService {
     String findServicePhone();
 
     /**
+     * 获取二维码的信息
+     * @return
+     */
+    Map<String,Object> findQRImgInfo();
+    /**
      * 根据orderId，查询退款信息状态
      * @param orderId
      * @return

@@ -478,4 +478,23 @@ public interface UserMapper {
     List<Map<String,Object>> findEvaluateListByUserIdNew(@Param("userId") String userId, @Param("shopId") String shopId,
                                                          @Param("pageNum") Integer pageNum,
                                                          @Param("size") Integer size);
+
+    /**
+     * 查询邀请码二维码信息
+     * @return
+     */
+    @Select("select ts.shopCode,tc.shopCode childCode,tc.imgPath,tc.shopId,ts.shopName from TB_Shop ts left join TB_ShopCodeImg tc on  ts.shopId = tc.shopId")
+    Map<String,Object> findShopCode();
+
+    /**
+     * 修改二维码信息
+     * @param shopCode
+     * @param imgPath
+     * @param shopId
+     * @return
+     */
+    @Update("update TB_ShopCodeImg set shopCode = #{shopCode},imgPath= #{imgPath} where shopId =  #{shopId}")
+    int updShopCodeInfo(@Param("shopCode") String shopCode,
+                        @Param("imgPath") String imgPath,
+                        @Param("shopId") String shopId);
 }

@@ -7,6 +7,7 @@ import com.mzj.mohome.mapper.OrderMapper;
 import com.mzj.mohome.mapper.UserMapper;
 import com.mzj.mohome.mapper.WorkersMapper;
 import com.mzj.mohome.service.UserService;
+import com.mzj.mohome.util.QRCodeUtil;
 import com.mzj.mohome.util.RandomUtil;
 import com.mzj.mohome.util.SmsSendUtil;
 import com.mzj.mohome.util.ToolsUtil;
@@ -46,6 +47,12 @@ public class UserServiceImp implements UserService {
 
     @Value("${sendUrl}")
     private String sendUrl;
+
+    @Value("${filePath}")
+    private String path;
+
+    @Value("${iisPath}")
+    private String iisPath;
 
     @Override
     public List<User> getUser(Integer id) throws Exception {
@@ -952,6 +959,31 @@ public class UserServiceImp implements UserService {
         return userMapper.findServicePhone();
     }
 
+    public Map<String,Object> findQRImgInfo(){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            map = userMapper.findShopCode();
+            map.put("success",true);
+            map.put("msg","");
+            if(StringUtils.isNotEmpty(ToolsUtil.getString(map.get("childCode"))) &&
+               ToolsUtil.getString(map.get("childCode")).equals(ToolsUtil.getString(map.get("shopCode"))) &&
+               StringUtils.isNotEmpty(ToolsUtil.getString(map.get("imgPath")))){
+                return map;
+            }else{
+                String content = "http://wx.mzjsh.com:9999/pages/register/register?shopCode="+ToolsUtil.getString(map.get("shopCode"));
+                String imgPath = "d:/logo.png";
+                String fileName = QRCodeUtil.encode(content,imgPath,path,false);
+                String imgUrl = iisPath+"/"+fileName;
+                userMapper.updShopCodeInfo(ToolsUtil.getString(map.get("shopCode")),imgUrl,ToolsUtil.getString(map.get("shopId")));
+                map.put("imgPath",imgUrl);
+            }
+        }catch (Exception e){
+            logger.error("获取二维码错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","获取店铺邀请码失败");
+        }
+        return map;
+    }
     public List<ReturnOrderStatusVo> queryReturnInfoList(String orderId){
         return userMapper.queryReturnOrderInfo(orderId);
     }

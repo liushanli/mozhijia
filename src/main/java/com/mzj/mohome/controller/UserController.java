@@ -1487,5 +1487,20 @@ public class UserController {
         }
     }
 
+    @ResponseBody
+    @PostMapping("/findQRImg")
+    public Map<String,Object> findQRImg(){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("findQRImg====");
+            map = userService.findQRImgInfo();
+            return map;
+        }catch (Exception e){
+            logger.error("findQRImg====获取二维码，错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","服务异常，请稍候重试");
+            return map;
+        }
+    }
 
 }
