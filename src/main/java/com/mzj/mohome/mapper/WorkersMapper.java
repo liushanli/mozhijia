@@ -158,8 +158,9 @@ public interface WorkersMapper {
             "  </script>")*/
     @Select("<script>" +
             "SELECT w1.*" +
-            " FROM tb_workInfo_new(#{city},#{jd},#{wd}) w1 " +
+            " FROM tb_workInfo_all(#{jd},#{wd}) w1 " +
             "WHERE 1=1 " +
+            " <if test='city != null'> and city = #{city} </if>" +
             " <if test='shopId != null'> and shopId = #{shopId} </if>" +
             " <if test='productId != null'> and tbP.productId = #{productId} </if>" +
             " <if test='onLine != null'> and isOnline = #{onLine} </if>" +

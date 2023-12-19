@@ -1034,16 +1034,16 @@ public class WorkServiceImp implements WorkerService {
                     Integer distance = getDistances(wd+","+jd,worker.get("wd")+","+worker.get("jd"));
                    
                     if(radius_1<distance){
-                        continue;
-                    }
-                    if(distance<1000){
-                        worker.put("distance", distance + "m");
-                    }else{
-                        worker.put("distance", distance/1000 + "km");
+                        worker.put("distance", "超出范围");
+                    }else {
+                        if (distance < 1000) {
+                            worker.put("distance", distance + "m");
+                        } else {
+                            worker.put("distance", distance / 1000 + "km");
+                        }
                     }
                     //好评百分比
-                    worker.put("evaluateNumLv",worker.get("evaluateNumLv").toString()+"%");
-
+                    worker.put("evaluateNumLv",StringUtils.isNotEmpty(ToolsUtil.getString(worker.get("percentage")))?ToolsUtil.getString(worker.get("percentage"))+"%":"100%");
                     //标签
                     if(worker.get("evalStatus_one")!=null) {
                         worker.put("evalStatus_1", worker.get("evalStatus_one").toString());
