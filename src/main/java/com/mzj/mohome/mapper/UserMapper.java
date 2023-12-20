@@ -102,7 +102,6 @@ public interface UserMapper {
     @Select("select *  from TB_User where phone = #{phoneDesc} and is_del = 1")
     List<User> findUserCount(String phoneDesc) throws Exception;
 
-
     //添加短信驗證碼
     @Insert("insert into TB_SmsSend(phone,sendCode,addTime)" +
             "VALUES(#{phoneDesc},#{code},GETDATE()) ")
@@ -497,4 +496,31 @@ public interface UserMapper {
     int updShopCodeInfo(@Param("shopCode") String shopCode,
                         @Param("imgPath") String imgPath,
                         @Param("shopId") String shopId);
+
+    /**
+     * 判断手机号验证码是否存在
+     * @param code
+     * @param phone
+     * @return
+     */
+    @Select("select count(1) from TB_SmsSend where phone = #{phone} and sendCode = #{code}")
+    int jumpPhoneCodeInfo(@Param("code") String code,@Param("phone")String phone);
+
+    /**
+     * 判断手机号是否已存在或已被绑定
+     * @param phone
+     * @return
+     */
+    @Select("select count(1) from TB_User where phone = #{phone} and is_del = 1 and isBlackList = 0")
+    int jumpPhoneExist(String phone);
+
+    /**
+     * 用户绑定手机号
+     * @param phone
+     * @return
+     */
+    @Select("update TB_User set phone = #{phone} where userId = #{userId}")
+    int updUserPhone(@Param("phone") String phone,@Param("userId")String userId);
+
+
 }

@@ -152,7 +152,7 @@ public class UserController {
     public Map<String,Object> findUserByPhoneCount(String phone){
         Map<String,Object> map = new HashMap<>();
         try{
-            logger.error("==-findUserByPhoneCount-===");
+            logger.info("==-findUserByPhoneCount-===");
             List<User> users = userService.findUserPhone(phone);
             map.put("success",true);
             map.put("msg","");
@@ -164,6 +164,22 @@ public class UserController {
             map.put("userVo","");
             map.put("userList",false);
         }
+        return map;
+    }
+
+    @ResponseBody
+    @RequestMapping("/bangDingPhoneInfo")
+    public Map<String,Object> bangDingPhoneInfo(@RequestBody Map<String,String> paramMap){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("==-bangDingPhoneInfo-==请求参数为：={}",paramMap);
+            map = userService.bangDingPhoneInfo(paramMap);
+        }catch (Exception e){
+            logger.error("==--bangDingPhoneInfo==={}",e);
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        logger.info("==-bangDingPhoneInfo-==返回信息为：={}",map);
         return map;
     }
 

@@ -98,6 +98,13 @@ public interface UserService {
     //查询手机号是否存在重复
     List<User> findUserPhone(String phone) throws Exception;
 
+    /**
+     * 绑定手机号
+     * @param paramMap
+     * @return
+     */
+    Map<String,Object> bangDingPhoneInfo(Map<String,String> paramMap);
+
     //有手机号没有绑定微信用户信息的时候
     int updUserInfoByPhone(Map<String, Object> map);
 

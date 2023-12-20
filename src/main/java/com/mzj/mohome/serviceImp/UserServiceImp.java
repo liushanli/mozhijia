@@ -733,6 +733,29 @@ public class UserServiceImp implements UserService {
         return (users.size() > 0 && users != null) ? users : null;
     }
 
+    public Map<String,Object> bangDingPhoneInfo(Map<String,String> paramMap){
+        Map<String,Object> map = new HashMap<>();
+        map.put("success",true);
+        map.put("msg","绑定成功");
+        String code = paramMap.get("code");
+        String phone = paramMap.get("phone");
+        String userId = paramMap.get("userId");
+        int num = userMapper.jumpPhoneCodeInfo(code,phone);
+        if(num == 0){
+            map.put("success",false);
+            map.put("msg","验证码输入错误，请重新输入");
+            return map;
+        }
+        int num_1 = userMapper.jumpPhoneExist(phone);
+        if(num_1>0){
+            map.put("success",false);
+            map.put("msg","该手机号已被绑定或注册");
+            return map;
+        }
+        userMapper.updUserPhone(phone,userId);
+        return map;
+    }
+
     public int updUserInfoByPhone(Map<String, Object> map) {
         try {
             String openId = ToolsUtil.getString(map.get("openId"));
