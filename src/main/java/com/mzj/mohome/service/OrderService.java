@@ -14,39 +14,39 @@ public interface OrderService {
      * 查询订单
      * @return
      */
-    public List<OrderVo> findOrerList(Map<String,Object> map);
+    public List<OrderVo> findOrerList(Map<String, Object> map);
 
     /**
      * 添加订单信息
      * @return
      */
-    Map<String,Object> addOrderInfo(Map<String,Object> map);
+    Map<String,Object> addOrderInfo(Map<String, Object> map);
 
     /**
      * 添加订单信息
      * @return
      */
-    Map<String,Object> addOrderInfoWx(Map<String,Object> map);
+    Map<String,Object> addOrderInfoWx(Map<String, Object> map);
 
     //根据状态查询
-    List<Map<String,Object>> findOrerListInfo(Map<String,Object> map);
+    List<Map<String,Object>> findOrerListInfo(Map<String, Object> map);
 
     //接单时，所触发的修改操作
-    int updateOrderInfo(Map<String,Object> map);
+    int updateOrderInfo(Map<String, Object> map);
 
-    Map<String,Object> findOrderStatusMsg(Map<String,Object> map);
+    Map<String,Object> findOrderStatusMsg(Map<String, Object> map);
     //修改订单退款
-    int updateReturnOrder(Map<String,Object> map);
+    int updateReturnOrder(Map<String, Object> map);
 
-    Map<String,Object> orderStatusList(Map<String,Object> map);
+    Map<String,Object> orderStatusList(Map<String, Object> map);
 
     List<Map<String,Object>> findEvalChooseDetail();
 
-    List<Map<String,Object>> findOrerListInfoByCon(Map<String,Object> map);
+    List<Map<String,Object>> findOrerListInfoByCon(Map<String, Object> map);
 
-    Map<String,Object> addPhoneUp(Map<String,Object> map);
+    Map<String,Object> addPhoneUp(Map<String, Object> map);
 
-    List<Map<String,Object>> findOrderList(Map<String,Object> map);
+    List<Map<String,Object>> findOrderList(Map<String, Object> map);
 
     /**
      * 根据订单删除信息
@@ -68,5 +68,4 @@ public interface OrderService {
      * @return
      */
     OrderVo findOrderDetail(String orderId);
-
 }

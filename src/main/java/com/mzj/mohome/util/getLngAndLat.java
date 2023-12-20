@@ -88,9 +88,9 @@ public class getLngAndLat {
             map.put("district",obj.getJSONObject("result").getJSONObject("addressComponent").get("district"));
             map.put("lng",obj.getJSONObject("result").getJSONObject("location").get("lng"));
             map.put("lat",obj.getJSONObject("result").getJSONObject("location").get("lat"));
-            map.put("address",obj.getJSONObject("result").get("formatted_address"));
         }
         return map;
+
     }
 
     public static String loadJSON(String url) {

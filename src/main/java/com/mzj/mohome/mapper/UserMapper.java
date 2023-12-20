@@ -102,7 +102,6 @@ public interface UserMapper {
     @Select("select *  from TB_User where phone = #{phoneDesc} and is_del = 1")
     List<User> findUserCount(String phoneDesc) throws Exception;
 
-
     //添加短信驗證碼
     @Insert("insert into TB_SmsSend(phone,sendCode,addTime)" +
             "VALUES(#{phoneDesc},#{code},GETDATE()) ")
@@ -110,10 +109,18 @@ public interface UserMapper {
 
     //获取城市信息，根据等级
     @Select("<script> select * from TB_ProvinceCityArea where 1=1 <if test='level!=null'> and [level] = #{level} </if> " +
-            "<if test='pid!=null'> and pid = ${pid} </if>order by id " +
+            "<if test='pid!=null'> and pid = ${pid} </if> " +
+            "<if test='id!=null'> and id = ${id} </if> " +
             "</script>")
-    List<ProvinceCityArea> findProvinceInfo(@Param("level") Integer level, @Param("pid") Integer pid);
+    List<ProvinceCityArea> findProvinceInfo(@Param("level") Integer level, @Param("pid") Integer pid,
+                                            @Param("id") Integer id);
 
+
+    @Select("<script> select id as [value],name as text from TB_ProvinceCityArea where 1=1  " +
+            "<if test='level!=null'> and [level] = #{level} </if> " +
+            "<if test='pid!=null'> and pid = ${pid} </if>" +
+            "</script>")
+    List<Map<String,Object>> findProvinceInfoList(@Param("level") Integer level, @Param("pid") Integer pid);
 
     //获取城市信息，根据等级
     @Select("<script> select * from TB_ProvinceCityArea where [level] = 2 " +
@@ -212,20 +219,6 @@ public interface UserMapper {
             "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
             " order by e.updateTime desc </script>")
     List<Map<String,Object>> findEvaluateListByUserId(@Param("userId") String userId, @Param("shopId") String shopId);
-
-    @Select("<script> select e.id,e.orderId,e.userId,o.workerId workId,e.content,e.star,e.imgUrl,CONVERT(varchar(100), " +
-            " e.updateTime, 23) updateTime,o.province+' '+o.city+' '+o.area as address,o.serviceNumber,o.payOnline,p.productName," +
-            " o.workerName,u.nickName userName,u.imgUrl userImgUrl,sp.shopName,sp.shopId,e.returnContent from TB_Evaluate e " +
-            " join TB_Order o on e.orderId = o.orderId join TB_Product p on o.productId = p.productId \n" +
-            " join TB_User u on e.userId = u.userId " +
-            " join TB_Shop sp on o.shopId = sp.shopId " +
-            " where  1=1 and u.is_del = 1 " +
-            " <if test='userId!=null'> and e.userId = #{userId} </if> " +
-            "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
-            " order by e.updateTime desc offset #{pageNum} rows fetch next #{size} rows only </script>")
-    List<Map<String,Object>> findEvaluateListByUserIdNew(@Param("userId") String userId, @Param("shopId") String shopId,
-                                                         @Param("pageNum") Integer pageNum,
-                                                         @Param("size") Integer size);
     //查询评价根据id
     @Select("select e.*,w.userName from TB_Evaluate e join TB_Worker w on e.workId = w.id  where e.id = #{id}")
     Map<String,Object> findEvalById(String id);
@@ -452,6 +445,7 @@ public interface UserMapper {
 
     @Select("select servicePhone from tb_servicePhone where serviceType = '1'")
     String findServicePhone();
+
     /**
      * 添加退款返回历史表
      * @param orderId
@@ -469,4 +463,64 @@ public interface UserMapper {
      */
     @Select("select orderId,status from TB_REturnOrderHistory where orderId = #{orderId} order by createdTime desc")
     List<ReturnOrderStatusVo> queryReturnOrderInfo(String orderId);
+
+    @Select("<script> select e.id,e.orderId,e.userId,o.workerId workId,e.content,e.star,e.imgUrl,CONVERT(varchar(100), " +
+            " e.updateTime, 23) updateTime,o.province+' '+o.city+' '+o.area as address,o.serviceNumber,o.payOnline,p.productName," +
+            " o.workerName,u.nickName userName,u.imgUrl userImgUrl,sp.shopName,sp.shopId,e.returnContent from TB_Evaluate e " +
+            " join TB_Order o on e.orderId = o.orderId join TB_Product p on o.productId = p.productId \n" +
+            " join TB_User u on e.userId = u.userId " +
+            " join TB_Shop sp on o.shopId = sp.shopId " +
+            " where  1=1 and u.is_del = 1 " +
+            " <if test='userId!=null'> and e.userId = #{userId} </if> " +
+            "<if test='shopId!=null'> and  o.shopId = #{shopId} </if>" +
+            " order by e.updateTime desc offset #{pageNum} rows fetch next #{size} rows only </script>")
+    List<Map<String,Object>> findEvaluateListByUserIdNew(@Param("userId") String userId, @Param("shopId") String shopId,
+                                                         @Param("pageNum") Integer pageNum,
+                                                         @Param("size") Integer size);
+
+    /**
+     * 查询邀请码二维码信息
+     * @return
+     */
+    @Select("select ts.shopCode,tc.shopCode childCode,tc.imgPath,tc.shopId,ts.shopName from TB_Shop ts left join TB_ShopCodeImg tc on  ts.shopId = tc.shopId")
+    Map<String,Object> findShopCode();
+
+    /**
+     * 修改二维码信息
+     * @param shopCode
+     * @param imgPath
+     * @param shopId
+     * @return
+     */
+    @Update("update TB_ShopCodeImg set shopCode = #{shopCode},imgPath= #{imgPath} where shopId =  #{shopId}")
+    int updShopCodeInfo(@Param("shopCode") String shopCode,
+                        @Param("imgPath") String imgPath,
+                        @Param("shopId") String shopId);
+
+    /**
+     * 判断手机号验证码是否存在
+     * @param code
+     * @param phone
+     * @return
+     */
+    @Select("select count(1) from TB_SmsSend where phone = #{phone} and sendCode = #{code}")
+    int jumpPhoneCodeInfo(@Param("code") String code, @Param("phone") String phone);
+
+    /**
+     * 判断手机号是否已存在或已被绑定
+     * @param phone
+     * @return
+     */
+    @Select("select count(1) from TB_User where phone = #{phone} and is_del = 1 and isBlackList = 0")
+    int jumpPhoneExist(String phone);
+
+    /**
+     * 用户绑定手机号
+     * @param phone
+     * @return
+     */
+    @Select("update TB_User set phone = #{phone} where userId = #{userId}")
+    int updUserPhone(@Param("phone") String phone, @Param("userId") String userId);
+
+
 }

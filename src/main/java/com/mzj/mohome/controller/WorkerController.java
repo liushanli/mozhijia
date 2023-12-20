@@ -151,6 +151,10 @@ public class WorkerController {
         try {
             List<Map<String,Object>>  workerList = workerService.findWorkerList_2(pageUtil);
             map.put("workerList",workerList);
+            if(StringUtils.isNotBlank(pageUtil.getWorkerId())){
+                List<WorkerPic>  workerPicList = workerService.findWorkerPicById(pageUtil);
+                map.put("workePicrList",workerPicList);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             map.put("success",false);
@@ -401,6 +405,27 @@ public class WorkerController {
         Map<String, Object> objectMap = new HashMap<String, Object>();
         try {
             workerService.updateWorkInfo(map);
+            objectMap.put("success",true);
+            objectMap.put("msg","");
+        } catch (Exception e) {
+            e.printStackTrace();
+            objectMap.put("success",false);
+            objectMap.put("msg","查询错误，请稍后重试");
+        }
+        return objectMap;
+    }
+
+    /**
+     * 注册工作人员信息
+     * @param map
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/registerWorkInfo",method = RequestMethod.POST)
+    public Map<String,Object> registerWorkInfo(@RequestBody Map<String,Object> map){
+        Map<String, Object> objectMap = new HashMap<>();
+        try {
+            workerService.addWorkInfo(map);
             objectMap.put("success",true);
             objectMap.put("msg","");
         } catch (Exception e) {
@@ -665,7 +690,7 @@ public class WorkerController {
     @ResponseBody
     @RequestMapping(value = "/findShopCode",method = RequestMethod.POST)
     public Map<String,Object> findShopCode(@RequestBody Map<String,Object> map){
-        Map<String,Object> result_map = new HashMap<String,Object>();
+        Map<String,Object> result_map = new HashMap<>();
         try {
             result_map = workerService.findShopByCode(map);
 
@@ -886,51 +911,19 @@ public class WorkerController {
         }
         return map;
     }
-    /**
-     * 注销信息
-     * @param workerId
-     * @return
-     */
-    @ResponseBody
-    @RequestMapping(value = "/delWorkerInfo",method = RequestMethod.GET)
-    public Map<String,Object> delWorkerInfo(String workerId){
-        Map<String,Object> result_map = new HashMap<>();
-        try {
-            result_map.put("success", false);
-            result_map.put("msg", null);
-            int re = workerService.delWorkerInfoById(workerId);
-            if(re>0){
-                result_map.put("success", true);
-                result_map.put("msg", "修改成功");
-            }
-            result_map.put("delNum",re);
-        }catch (Exception e){
-            result_map.put("success", false);
-            result_map.put("msg", null);
-            result_map.put("delNum",0);
-        }
-        return result_map;
-    }
-    @ResponseBody
-    @RequestMapping(value = "/updWorkerOrderById",method = RequestMethod.POST)
-    public Map<String,Object> updWorkerOrderById(@RequestBody Map<String,Object> map){
-        Map<String,Object> result_map = new HashMap<>();
-        try {
-            logger.info("updWorkerOrderById==请求参数为:{}",JSON.toJSONString(map));
-            result_map.put("success", false);
-            result_map.put("msg", null);
-            int re = workerService.updWorkerOrderById(map);
-            if(re>0){
-                result_map.put("success", true);
-                result_map.put("msg", "修改成功");
-            }
-        }catch (Exception e){
-            result_map.put("success", false);
-            result_map.put("msg", null);
-            logger.error("updWorkerOrderById=修改错误信息为：={}",e);
-        }
-        return result_map;
-    }
 
+    @ResponseBody
+    @PostMapping(value = "/registerWorkerInfo")
+    public Map<String,Object> registerWorkerInfo(@RequestBody WorkerVo workerVo){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("addWorkerInfo==添加技师信息为：{}",JSON.toJSONString(workerVo));
+            map = workerService.registerWorkerInfo(workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        return map;
+    }
 }
 

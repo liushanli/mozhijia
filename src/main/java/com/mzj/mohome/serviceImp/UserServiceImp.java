@@ -7,6 +7,7 @@ import com.mzj.mohome.mapper.OrderMapper;
 import com.mzj.mohome.mapper.UserMapper;
 import com.mzj.mohome.mapper.WorkersMapper;
 import com.mzj.mohome.service.UserService;
+import com.mzj.mohome.util.QRCodeUtil;
 import com.mzj.mohome.util.RandomUtil;
 import com.mzj.mohome.util.SmsSendUtil;
 import com.mzj.mohome.util.ToolsUtil;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,6 +47,12 @@ public class UserServiceImp implements UserService {
 
     @Value("${sendUrl}")
     private String sendUrl;
+
+    @Value("${filePath}")
+    private String path;
+
+    @Value("${iisPath}")
+    private String iisPath;
 
     @Override
     public List<User> getUser(Integer id) throws Exception {
@@ -413,20 +421,52 @@ public class UserServiceImp implements UserService {
     }
 
 
-
-/*    public static void main(String[] args){
-        UserServiceImp userServiceImp = new UserServiceImp();
-        userServiceImp.SmsSendCodeJishi("13621883997");
-    }*/
-
     //获取城市信息，根据等级
+    public List<Map<String,Object>> findProvinceList() {
+
+
+        List<Map<String,Object>> provinceList = new ArrayList<>();
+
+        //获取省份数据
+        List<Map<String,Object>> provinceCityAreaList = userMapper.findProvinceInfoList(1,null);
+        /**=====================第一步：获取省份=========================*/
+        if(!CollectionUtils.isEmpty(provinceCityAreaList) && provinceCityAreaList.size()>0){
+            //获取城市数据
+            for(Map<String,Object> province : provinceCityAreaList){
+                Map<String, Object> listMap = new HashMap<>();
+                List<Map<String,Object>> cityList = new ArrayList<>();
+                listMap.put("value",ToolsUtil.getString(province.get("value")));
+                listMap.put("text",ToolsUtil.getString(province.get("text")));
+        /**=====================第二步：根据省份获取市=========================*/
+                List<Map<String,Object>> cityAreaList = userMapper.findProvinceInfoList(2,Integer.parseInt(ToolsUtil.getString(province.get("value"))));
+                if(!CollectionUtils.isEmpty(cityAreaList) && cityAreaList.size()>0){
+                    for(Map<String,Object> city : cityAreaList){
+                        //获取区级数据
+                        Map<String, Object> cityMap = new HashMap<>();
+                        cityMap.put("value",ToolsUtil.getString(city.get("value")));
+                        cityMap.put("text",ToolsUtil.getString(city.get("text")));
+                        /**=====================第三步：根据市获取区=========================*/
+                        List<Map<String,Object>> areAreaList = userMapper.findProvinceInfoList(3,Integer.parseInt(ToolsUtil.getString(city.get("value"))));
+                        cityMap.put("children",areAreaList);
+                        cityList.add(cityMap);
+                    }
+                }
+                //城市
+                listMap.put("children",cityList);
+                provinceList.add(listMap);
+            }
+        }
+        return provinceList;
+    }
+
+
     @Cacheable(value = "users")
     public Map<String, Object> findProvinceInfo(String level, String pid) {
 
         Integer level_1 = StringUtils.isEmpty(level) ? null : Integer.parseInt(level);
         Integer pid_1 = StringUtils.isEmpty(pid) ? null : Integer.parseInt(pid);
         Map<String, Object> listMap = new HashMap<String, Object>();
-        List<ProvinceCityArea> provinceCityAreaList = userMapper.findProvinceInfo(level_1, pid_1);
+        List<ProvinceCityArea> provinceCityAreaList = userMapper.findProvinceInfo(level_1, pid_1,null);
         listMap.put("provinceList", provinceCityAreaList);
         return listMap;
     }
@@ -594,7 +634,6 @@ public class UserServiceImp implements UserService {
             return null;
         }
     }
-
     public List<Map<String,Object>> findEvaluateListByUserIdNew(String userId,String shopId,Integer pageNum,Integer size){
         try {
             return userMapper.findEvaluateListByUserIdNew(userId, shopId,pageNum,size);
@@ -692,6 +731,29 @@ public class UserServiceImp implements UserService {
     public List<User> findUserPhone(String phone) throws Exception {
         List<User> users = userMapper.findUserCount(phone);
         return (users.size() > 0 && users != null) ? users : null;
+    }
+
+    public Map<String,Object> bangDingPhoneInfo(Map<String,String> paramMap){
+        Map<String,Object> map = new HashMap<>();
+        map.put("success",true);
+        map.put("msg","绑定成功");
+        String code = paramMap.get("code");
+        String phone = paramMap.get("phone");
+        String userId = paramMap.get("userId");
+        int num = userMapper.jumpPhoneCodeInfo(code,phone);
+        if(num == 0){
+            map.put("success",false);
+            map.put("msg","验证码输入错误，请重新输入");
+            return map;
+        }
+        int num_1 = userMapper.jumpPhoneExist(phone);
+        if(num_1>0){
+            map.put("success",false);
+            map.put("msg","该手机号已被绑定或注册");
+            return map;
+        }
+        userMapper.updUserPhone(phone,userId);
+        return map;
     }
 
     public int updUserInfoByPhone(Map<String, Object> map) {
@@ -915,8 +977,35 @@ public class UserServiceImp implements UserService {
             return count;
     }
 
+
     public String findServicePhone(){
         return userMapper.findServicePhone();
+    }
+
+    public Map<String,Object> findQRImgInfo(){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            map = userMapper.findShopCode();
+            map.put("success",true);
+            map.put("msg","");
+            if(StringUtils.isNotEmpty(ToolsUtil.getString(map.get("childCode"))) &&
+               ToolsUtil.getString(map.get("childCode")).equals(ToolsUtil.getString(map.get("shopCode"))) &&
+               StringUtils.isNotEmpty(ToolsUtil.getString(map.get("imgPath")))){
+                return map;
+            }else{
+                String content = "http://wx.mzjsh.com:9999/pages/register/register?shopCode="+ToolsUtil.getString(map.get("shopCode"));
+                String imgPath = "d:/logo.png";
+                String fileName = QRCodeUtil.encode(content,imgPath,path,false);
+                String imgUrl = iisPath+"/"+fileName;
+                userMapper.updShopCodeInfo(ToolsUtil.getString(map.get("shopCode")),imgUrl,ToolsUtil.getString(map.get("shopId")));
+                map.put("imgPath",imgUrl);
+            }
+        }catch (Exception e){
+            logger.error("获取二维码错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","获取店铺邀请码失败");
+        }
+        return map;
     }
     public List<ReturnOrderStatusVo> queryReturnInfoList(String orderId){
         return userMapper.queryReturnOrderInfo(orderId);

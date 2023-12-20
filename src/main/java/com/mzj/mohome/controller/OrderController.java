@@ -29,12 +29,12 @@ public class OrderController {
     private OrderService orderService;
     @Autowired
     private UserService userService;
-
     @ResponseBody
     @PostMapping("/findOrderInfo")
     public Map<String,Object> findOrderInfo(@RequestBody Map<String,Object> map){
         Map<String,Object> mapList = new HashMap<>();
         try{
+            log.info("findOrderInfo===请求参数为：{}",JSON.toJSONString(map));
                 List<OrderVo> orderList = orderService.findOrerList(map);
                 mapList.put("orderList",orderList);
         }catch (Exception e){

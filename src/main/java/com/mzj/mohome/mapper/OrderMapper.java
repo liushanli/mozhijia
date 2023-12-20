@@ -37,7 +37,7 @@ public interface OrderMapper {
             "select row_number() over(order by orders.id desc) as rownumber, " +
             "orders.*,shop.shopName,shop.servicePhone, p.imgUrl as imgProductUrl from TB_Order orders join TB_Shop shop on orders.shopId = shop.shopId join\n" +
             " TB_Product p on orders.productId = p.productId  where orders.isDel = '2' and orders.status not in(0,2) " +
-            " and  orders.status != 0 " +
+            "  and  orders.status != 0 " +
             "<if test='statusDesc != null'> " +
             "<if test='statusDesc==3'> and orders.status &gt;= 3 and orders.status &lt; 7 </if>" +
             "<if test='statusDesc==4'> and orders.status &gt;= 7 and orders.status &lt;= 9 </if>" +
@@ -182,14 +182,6 @@ public interface OrderMapper {
             " select workerId from TB_Order where orderId = #{orderId} and isDel = '2' " +
             ")")
     Map<String,Object> findWorkerInfo(@Param("orderId") String orderId);
-    /**
-     * 根据订单id修改技师id
-     * @param orderId
-     * @param workerId
-     * @return
-     */
-    @Update("update TB_Order set workerId = #{workerId} where orderId = #{orderId}")
-    int updWorkerOrderById(@Param("orderId") String orderId,@Param("workerId")String workerId);
 
 
 
