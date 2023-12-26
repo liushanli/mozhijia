@@ -357,11 +357,10 @@ public class UserServiceImp implements UserService {
             map.put("account", account);//API账号
             map.put("password", password);//API密码
             map.put("msg", "【摩之家】您好，您的验证码是" + random);//短信内容
-            map.put("phone", phone);//手机号findWorkListByShop
+            map.put("phone", phone);//手机号
             map.put("report", report);//是否需要状态报告
             map.put("extend", extend);//自定义扩展码
             JSONObject js = (JSONObject) JSONObject.toJSON(map);
-            System.out.println("js====" + js);
             logger.info("js====" + js);
             String jsonStr = smsSendUtil.sendSmsByPost(sendUrl, js.toString());
             net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(jsonStr);
@@ -369,7 +368,6 @@ public class UserServiceImp implements UserService {
             if (StringUtils.isEmpty(message)) {
                 userMapper.addSmsSendInfo(phone, random);
             }
-            //userMapper.addSmsSendInfo(phone,random);
             logger.info("message===" + message);
             System.out.println("message===" + message);
         } else {
@@ -378,6 +376,45 @@ public class UserServiceImp implements UserService {
         }
 
         return message;
+    }
+
+    public Map<String,Object> SmsSendCodeVail(String phone){
+        Map<String,Object> result_Map = new HashMap<>();
+        List<Map<String, Object>> mapList = userMapper.findSmsCode(phone);
+        String message = "";
+        String random = "";
+        if (mapList != null && mapList.size() <= 5) {
+            SmsSendUtil smsSendUtil = new SmsSendUtil();
+            random = smsSendUtil.randomCode();
+            //短信下发
+            Map<String, Object> map = new HashMap<>();
+            map.put("account", account);//API账号
+            map.put("password", password);//API密码
+            map.put("msg", "【摩之家】您好，您的验证码是" + random);//短信内容
+            map.put("phone", phone);//手机号
+            map.put("report", report);//是否需要状态报告
+            map.put("extend", extend);//自定义扩展码
+            JSONObject js = (JSONObject) JSONObject.toJSON(map);
+            logger.info("js====" + js);
+            String jsonStr = smsSendUtil.sendSmsByPost(sendUrl, js.toString());
+            net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(jsonStr);
+            message = (String) jsonObject.get("errorMsg");
+            if (StringUtils.isEmpty(message)) {
+                userMapper.addSmsSendInfo(phone, random);
+            }
+            logger.info("message===" + message);
+            System.out.println("message===" + message);
+        } else {
+            logger.info("已发送五次");
+            message = "验证码每天只能发送五次，请您明天再试";
+        }
+        result_Map.put("msg",message);
+        result_Map.put("code",random);
+        result_Map.put("success",true);
+        if(StringUtils.isNotEmpty(message)){
+            result_Map.put("success",false);
+        }
+        return result_Map;
     }
 
     public Map<String, Object> SmsSendCodeJishi(String orderId) {
@@ -1007,6 +1044,33 @@ public class UserServiceImp implements UserService {
         }
         return map;
     }
+
+    public Map<String,Object> findYaoQingOrderImg(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            map = userMapper.findShopCode();
+            map.put("success",true);
+            map.put("msg","");
+            if(StringUtils.isNotEmpty(ToolsUtil.getString(map.get("childCode"))) &&
+                    ToolsUtil.getString(map.get("childCode")).equals(ToolsUtil.getString(map.get("shopCode"))) &&
+                    StringUtils.isNotEmpty(ToolsUtil.getString(map.get("imgPath")))){
+                return map;
+            }else{
+                String content = "http://wx.mzjsh.com:9999/pages/jishi_detail/jishi_detail?shopCode="+ToolsUtil.getString(map.get("shopCode"));
+                String imgPath = "d:/logo.png";
+                String fileName = QRCodeUtil.encode(content,imgPath,path,false);
+                String imgUrl = iisPath+"/"+fileName;
+                userMapper.updShopCodeInfo(ToolsUtil.getString(map.get("shopCode")),imgUrl,ToolsUtil.getString(map.get("shopId")));
+                map.put("imgPath",imgUrl);
+            }
+        }catch (Exception e){
+            logger.error("获取二维码错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","获取店铺邀请码失败");
+        }
+        return map;
+    }
+
     public List<ReturnOrderStatusVo> queryReturnInfoList(String orderId){
         return userMapper.queryReturnOrderInfo(orderId);
     }

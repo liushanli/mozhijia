@@ -57,7 +57,7 @@ public class WxPayServiceImpl implements WxPayService {
         if(num != null){
             totalFee = num;
         }
-        String tradeNo =  WxPayUtils.generateNonceStr();
+        String tradeNo =  orderInfo.getOrderNo();
         // 构建POST请求
         HttpPost httpPost = new HttpPost("https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi");
         httpPost.addHeader("Accept", "application/json");

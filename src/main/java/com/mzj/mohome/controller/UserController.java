@@ -201,8 +201,6 @@ public class UserController {
             map.put("success",false);
             map.put("msg",e.getMessage());
         }
-       /* map.put("success",false);
-        map.put("msg","版本过低，请更新最新版本");*/
         return map;
     }
 
@@ -221,6 +219,21 @@ public class UserController {
             }
         }catch (Exception e){
             logger.info("SmsSendMsg=="+e.getMessage());
+            map.put("success",false);
+            map.put("msg",e.getMessage());
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @RequestMapping(value="/SmsSendMsgNew_1",method=RequestMethod.POST)
+    public Map<String,Object> SmsSendMsgNew_1(String phone){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("====SmsSendMsgNew_1====请求参数为：{}",phone);
+            map = userService.SmsSendCodeVail(phone);
+        }catch (Exception e){
+            logger.info("SmsSendMsgNew_1=={}",e);
             map.put("success",false);
             map.put("msg",e.getMessage());
         }
@@ -1510,6 +1523,22 @@ public class UserController {
         try {
             logger.info("findQRImg====");
             map = userService.findQRImgInfo();
+            return map;
+        }catch (Exception e){
+            logger.error("findQRImg====获取二维码，错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","服务异常，请稍候重试");
+            return map;
+        }
+    }
+
+    @ResponseBody
+    @PostMapping("/findYaoQingOrderImg")
+    public Map<String,Object> findYaoQingOrderImg(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("findQRImg====");
+            map = userService.findYaoQingOrderImg(workerId);
             return map;
         }catch (Exception e){
             logger.error("findQRImg====获取二维码，错误信息为：{}",e);

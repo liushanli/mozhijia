@@ -29,6 +29,14 @@ public interface UserService {
     //是否发送成功
      String SmsSendCode(String phone);
 
+    /**
+     * 根据手机号发送验证码
+     * @param phone
+     * @return
+     */
+     Map<String,Object> SmsSendCodeVail(String phone);
+
+
     Map<String,Object> SmsSendCodeJishi(String phone);
 
     //获取城市信息，根据等级
@@ -214,6 +222,13 @@ public interface UserService {
      * @return
      */
     Map<String,Object> findQRImgInfo();
+
+    /**
+     * 根据技师Id，获取二维码信息
+     * @param workerId
+     * @return
+     */
+    Map<String,Object> findYaoQingOrderImg(String workerId);
     /**
      * 根据orderId，查询退款信息状态
      * @param orderId
