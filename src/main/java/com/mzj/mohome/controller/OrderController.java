@@ -6,18 +6,20 @@ import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.entity.PayRecord;
 import com.mzj.mohome.service.OrderService;
 import com.mzj.mohome.service.UserService;
-import com.mzj.mohome.util.RequestApi;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.util.WxPayConfig;
+import com.mzj.mohome.util.WxPaySearchOrderUtil;
 import com.mzj.mohome.vo.OrderVo;
 import com.mzj.mohome.vo.ReturnOrderStatusVo;
+import com.mzj.mohome.vo.WxchatCallbackSuccessData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
+import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +36,10 @@ public class OrderController {
     private OrderService orderService;
     @Autowired
     private UserService userService;
-    @Autowired
-    private RequestApi requestApi;
     @Resource
     private WxPayConfig wxPayConfig;
+    @Autowired
+    private CloseableHttpClient wxPayClient;
     @ResponseBody
     @PostMapping("/findOrderInfo")
     public Map<String,Object> findOrderInfo(@RequestBody Map<String,Object> map){
@@ -46,7 +48,7 @@ public class OrderController {
             List<OrderVo> orderList = orderService.findOrerList(map);
             mapList.put("orderList",orderList);
         }catch (Exception e){
-            System.out.println("错误信息=="+e.getMessage());
+            log.error("错误消息未：{}",e);
         }
         return mapList;
     }
@@ -315,6 +317,13 @@ public class OrderController {
         }
         return resultMap;
     }
+
+
+    public WxchatCallbackSuccessData getPayResult(String orderId) {
+        PrivateKey privateKey = WxPayConfig.getPrivateKey(wxPayConfig.getPrivateKeyPath());
+        WxchatCallbackSuccessData data = WxPaySearchOrderUtil.searchByOrderId(wxPayConfig,orderId,wxPayClient);
+        return data;
+    }
     @ResponseBody
     @RequestMapping(value = "/updOrderPayInfo",method = RequestMethod.POST)
     public Map<String,Object> updOrderPayInfo(@RequestBody PayRecord payRecord){
@@ -322,14 +331,10 @@ public class OrderController {
         try {
             resultMap.put("success",true);
             resultMap.put("msg","");
-            if(StringUtils.isNotEmpty(payRecord.getTradeNo())){
-                Map<String,String> map_1 = new HashMap<>();
-                map_1.put("mchid",wxPayConfig.getMchId());
-                String url = "https://api.mch.weixin.qq.com/v3/pay/transactions/out-trade-no/"+payRecord.getOrderId();
-                log.info("updOrderPayInfo==支付成功，根据商户订单号查询相关信息请求链接：{},商户号为：{}",url,wxPayConfig.getMchId());
-                JSONObject jsonObject = requestApi.getApi(url,map_1);
-                log.info("updOrderPayInfo==支付成功，根据商户订单号查询相关信息：{}",jsonObject.toJSONString());
-                payRecord.setTradeNo(ToolsUtil.getString(jsonObject.get("transaction_id")));
+            if(StringUtils.isNotEmpty(payRecord.getTradeNo())) {
+                WxchatCallbackSuccessData data = getPayResult(payRecord.getTradeNo());
+                log.info("updOrderPayInfo==支付成功，根据商户订单号查询相关信息：{}",JSONObject.toJSONString(data));
+                payRecord.setTradeNo(data.getTransactionId());
             }
             int count = orderService.updOrderInfo(payRecord);
             if(count>0){
@@ -343,36 +348,6 @@ public class OrderController {
         }
         return resultMap;
     }
-
-    public static void main(String[] args) {
-        String str = "{\n" +
-                "\t\"amount\": {\n" +
-                "\t\t\"currency\": \"CNY\",\n" +
-                "\t\t\"payer_currency\": \"CNY\",\n" +
-                "\t\t\"payer_total\": 1,\n" +
-                "\t\t\"total\": 1\n" +
-                "\t},\n" +
-                "\t\"appid\": \"wxdace645e0bc2cXXX\",\n" +
-                "\t\"attach\": \"\",\n" +
-                "\t\"bank_type\": \"OTHERS\",\n" +
-                "\t\"mchid\": \"1900006XXX\",\n" +
-                "\t\"out_trade_no\": \"44_2126281063_5504\",\n" +
-                "\t\"payer\": {\n" +
-                "\t\t\"openid\": \"o4GgauJP_mgWEWictzA15WT15XXX\"\n" +
-                "\t},\n" +
-                "\t\"promotion_detail\": [],\n" +
-                "\t\"success_time\": \"2021-03-22T10:29:05+08:00\",\n" +
-                "\t\"trade_state\": \"SUCCESS\",\n" +
-                "\t\"trade_state_desc\": \"支付成功\",\n" +
-                "\t\"trade_type\": \"JSAPI\",\n" +
-                "\t\"transaction_id\": \"4200000891202103228088184743\"\n" +
-                "}";
-        JSONObject jsonObject = JSONObject.parseObject(str);
-        System.out.println(jsonObject.get("transaction_id"));
-
-        System.out.println(jsonObject.toJSONString());
-    }
-
 
     @ResponseBody
     @RequestMapping(value = "/findOrderDetailInfo",method = RequestMethod.POST)

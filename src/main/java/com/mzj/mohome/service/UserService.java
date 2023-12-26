@@ -1,7 +1,9 @@
 package com.mzj.mohome.service;
 
 import com.mzj.mohome.entity.*;
+import com.mzj.mohome.vo.InviteImageVo;
 import com.mzj.mohome.vo.ReturnOrderStatusVo;
+import com.mzj.mohome.vo.UserMoneyRecord;
 
 import java.util.List;
 import java.util.Map;
@@ -111,7 +113,7 @@ public interface UserService {
      * @param paramMap
      * @return
      */
-    Map<String,Object> bangDingPhoneInfo(Map<String,String> paramMap);
+    Map<String,Object> bangDingPhoneInfo(Map<String, String> paramMap);
 
     //有手机号没有绑定微信用户信息的时候
     int updUserInfoByPhone(Map<String, Object> map);
@@ -224,11 +226,11 @@ public interface UserService {
     Map<String,Object> findQRImgInfo();
 
     /**
-     * 根据技师Id，获取二维码信息
-     * @param workerId
+     * 根据用户Id，获取二维码信息
+     * @param inviteImageVo
      * @return
      */
-    Map<String,Object> findYaoQingOrderImg(String workerId);
+    Map<String,Object> findInviteOrderImg(InviteImageVo inviteImageVo);
     /**
      * 根据orderId，查询退款信息状态
      * @param orderId
@@ -238,4 +240,30 @@ public interface UserService {
 
     int addReturnOrderHistory(String orderId, Integer status);
 
+
+    /**
+     * 添加用户钱包信息
+     * @return
+     */
+    int addUserMoneyInfo(UserMoneyRecord record,UserMoneyRecord moneyRecord);
+
+    /**
+     * 添加钱包记录
+     * @return
+     */
+    int addUserMoneyRecord(UserMoneyRecord record);
+
+    /**
+     * 查询根据用户id来查询是否已存在
+     * @return
+     */
+    UserMoneyRecord findUserMoneyInfo(String userId);
+
+    /**
+     * 修改相关信息
+     * @return
+     */
+    int updUserMoneyInfo(UserMoneyRecord record);
+
+    List<UserMoneyRecord> findUserMoneyInfoRecord(UserMoneyRecord record);
 }

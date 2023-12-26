@@ -14,6 +14,9 @@ import com.mzj.mohome.service.UserService;
 
 import com.mzj.mohome.service.WxTemplateService;
 import com.mzj.mohome.util.*;
+import com.mzj.mohome.vo.InviteImageVo;
+import com.mzj.mohome.vo.UserMoneyRecord;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1533,15 +1536,92 @@ public class UserController {
     }
 
     @ResponseBody
-    @PostMapping("/findYaoQingOrderImg")
-    public Map<String,Object> findYaoQingOrderImg(String workerId){
+    @PostMapping("/addUserMoneyInfo")
+    public Map<String,Object> addUserMoneyInfo(@RequestBody UserMoneyRecord record){
         Map<String,Object> map = new HashMap<>();
         try {
-            logger.info("findQRImg====");
-            map = userService.findYaoQingOrderImg(workerId);
+            logger.info("addUserMoneyInfo==请求参数为：{}==",JSON.toJSONString(record));
+            UserMoneyRecord moneyRecord = new UserMoneyRecord();
+            BeanUtils.copyProperties(moneyRecord,record);
+            logger.info("===={}",JSON.toJSONString(moneyRecord));
+            userService.addUserMoneyInfo(record,moneyRecord);
+            map.put("success",true);
+            map.put("msg","");
             return map;
         }catch (Exception e){
-            logger.error("findQRImg====获取二维码，错误信息为：{}",e);
+            logger.error("addUserMoneyInfo==错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","服务异常，请稍候重试");
+            return map;
+        }
+    }@ResponseBody
+    @PostMapping("/updUserMoneyInfo")
+    public Map<String,Object> updUserMoneyInfo(@RequestBody UserMoneyRecord record){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("updUserMoneyInfo==请求参数为：{}==",JSON.toJSONString(record));
+            userService.updUserMoneyInfo(record);
+            map.put("success",true);
+            map.put("msg","");
+            return map;
+        }catch (Exception e){
+            logger.error("updUserMoneyInfo==错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","服务异常，请稍候重试");
+            return map;
+        }
+    }
+
+    @ResponseBody
+    @PostMapping("/findUserMoneyInfo")
+    public Map<String,Object> findUserMoneyInfo(@RequestBody UserMoneyRecord record){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("findUserMoneyInfo==请求参数为：{}==",JSON.toJSONString(record));
+            UserMoneyRecord recordInfo = userService.findUserMoneyInfo(record.getUserId());
+            map.put("success",true);
+            map.put("msg","");
+            map.put("info",recordInfo);
+            return map;
+        }catch (Exception e){
+            logger.error("findUserMoneyInfo==错误信息为：{}",e);
+            map.put("success",false);
+            map.put("info",null);
+            map.put("msg","服务异常，请稍候重试");
+            return map;
+        }
+    }
+
+    @ResponseBody
+    @PostMapping("/findUserMoneyInfoRecord")
+    public Map<String,Object> findUserMoneyInfoRecord(@RequestBody UserMoneyRecord record){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("findUserMoneyInfo==请求参数为：{}==",JSON.toJSONString(record));
+            List<UserMoneyRecord> recordInfo = userService.findUserMoneyInfoRecord(record);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("infoList",recordInfo);
+            return map;
+        }catch (Exception e){
+            logger.error("findUserMoneyInfo==错误信息为：{}",e);
+            map.put("success",false);
+            map.put("info",null);
+            map.put("msg","服务异常，请稍候重试");
+            return map;
+        }
+    }
+
+    @ResponseBody
+    @PostMapping("/findInviteImageInfo")
+    public Map<String,Object> findInviteImageInfo(@RequestBody InviteImageVo inviteImageVo){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("findInviteImageInfo==请求参数为：{}==",JSON.toJSONString(inviteImageVo));
+            map = userService.findInviteOrderImg(inviteImageVo);
+            return map;
+        }catch (Exception e){
+            logger.error("findInviteImageInfo==错误信息为：{}",e);
             map.put("success",false);
             map.put("msg","服务异常，请稍候重试");
             return map;

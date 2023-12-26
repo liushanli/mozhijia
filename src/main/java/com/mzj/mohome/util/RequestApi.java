@@ -31,7 +31,7 @@ public class RequestApi {
             //Set url, restTemplate请求的url后面要有占位符
             //url=url+"?";
             StringBuffer sb = new StringBuffer(url);
-            if(parameters != null){
+            if(parameters != null && parameters.size()>0){
                 sb = sb.append("?");
                 //sb=sb.append("?Prameter1={pam1}&Name={Name}&Type={Type}");//get请求得参数，需要先占位 才能请求成功
                 for (String key : parameters.keySet()) {

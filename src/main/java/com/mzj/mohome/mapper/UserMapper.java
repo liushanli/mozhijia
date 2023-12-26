@@ -1,7 +1,9 @@
 package com.mzj.mohome.mapper;
 
 import com.mzj.mohome.entity.*;
+import com.mzj.mohome.vo.InviteImageVo;
 import com.mzj.mohome.vo.ReturnOrderStatusVo;
+import com.mzj.mohome.vo.UserMoneyRecord;
 import org.apache.ibatis.annotations.*;
 import java.util.List;
 import java.util.Map;
@@ -482,8 +484,35 @@ public interface UserMapper {
      * 查询邀请码二维码信息
      * @return
      */
-    @Select("select ts.shopCode,tc.shopCode childCode,tc.imgPath,tc.shopId,ts.shopName from TB_Shop ts left join TB_ShopCodeImg tc on  ts.shopId = tc.shopId")
+    @Select("select ts.shopCode,tc.shopCode childCode,tc.imgPath,tc.shopId,ts.shopName from TB_Shop ts join TB_InviteCodeImg tc on  ts.shopId = tc.shopId")
     Map<String,Object> findShopCode();
+
+    /**
+     * 查询用户的邀请码
+     * @param userId
+     * @return
+     */
+    @Select("select tc.imgPath,tc.shopId,ts.userName from TB_User ts join TB_InviteCodeImg tc on  ts.userId = tc.shopId\n" +
+            "where type = '2' and ts.userId = #{userId}")
+    InviteImageVo findUserInviteImg(String userId);
+
+    /**
+     * 修改用户信息
+     * @param inviteImageVo
+     * @return
+     */
+    @Update("update TB_InviteCodeImg set imgUrl = #{imgUrl}," +
+            "imgPath=#{imgPath},updateTime=GETDATE() where shopId = #{shopId}")
+    int updUserInviteImg(InviteImageVo inviteImageVo);
+
+    /**
+     * 添加信息
+     * @param inviteImageVo
+     * @return
+     */
+    @Insert("insert into TB_InviteCodeImg(imgPath,shopId,type,imgUrl,addTime,updateTime)\n" +
+            "VALUES(#{imgPath},#{shopId},'2',#{imgUrl},GETDATE(),GETDATE())")
+    int addUserInviteImg(InviteImageVo inviteImageVo);
 
     /**
      * 修改二维码信息
@@ -492,7 +521,7 @@ public interface UserMapper {
      * @param shopId
      * @return
      */
-    @Update("update TB_ShopCodeImg set shopCode = #{shopCode},imgPath= #{imgPath} where shopId =  #{shopId}")
+    @Update("update TB_InviteCodeImg set shopCode = #{shopCode},imgPath= #{imgPath} where shopId =  #{shopId}")
     int updShopCodeInfo(@Param("shopCode") String shopCode,
                         @Param("imgPath") String imgPath,
                         @Param("shopId") String shopId);
@@ -504,7 +533,7 @@ public interface UserMapper {
      * @return
      */
     @Select("select count(1) from TB_SmsSend where phone = #{phone} and sendCode = #{code}")
-    int jumpPhoneCodeInfo(@Param("code") String code,@Param("phone")String phone);
+    int jumpPhoneCodeInfo(@Param("code") String code, @Param("phone") String phone);
 
     /**
      * 判断手机号是否已存在或已被绑定
@@ -520,7 +549,76 @@ public interface UserMapper {
      * @return
      */
     @Select("update TB_User set phone = #{phone} where userId = #{userId}")
-    int updUserPhone(@Param("phone") String phone,@Param("userId")String userId);
+    int updUserPhone(@Param("phone") String phone, @Param("userId") String userId);
 
+    /**
+     * 添加用户钱包信息
+     * @return
+     */
+    @Insert("insert into TB_UserMoneyInfo(userId,userName,money,type,addTime,updateTime)\n" +
+            "VALUES(#{userId},#{userName},#{money},#{type},GETDATE(),GETDATE())")
+    int addUserMoneyInfo(UserMoneyRecord record);
+
+    /**
+     * 添加钱包记录
+     * @return
+     */
+    @Insert("insert into TB_UserMoneyInfoRecord(userId,userName,moneyType,money,type,submitStatus,orderId,addTime,updateTime)\n" +
+            "VALUES(#{userId},#{userName},#{moneyType},#{money},#{type},#{submitStatus},#{orderId},GETDATE(),GETDATE())")
+    int addUserMoneyRecord(UserMoneyRecord record);
+
+    /**
+     * 查询根据用户id来查询是否已存在
+     * @return
+     */
+    @Select("select userId,userName,submitName,money,type,addTime,updateTime,phone,submitType" +
+            " from TB_UserMoneyInfo where userId = #{userId}")
+    UserMoneyRecord findUserMoneyInfo(String userId);
+
+    /**
+     * 查询相关记录
+     * @param record
+     * @return
+     */
+    @Select("<script>" +
+            "select userId,userName,moneyType,money,type,submitStatus,orderId,addTime,updateTime," +
+            "CONVERT(varchar(100), updateTime, 120) addTimeStr \n" +
+            "             from TB_UserMoneyInfoRecord where 1=1 " +
+            "<if test='userId != null'> and userId = #{userId}</if>" +
+            "<if test='moneyType != null'> and moneyType = #{moneyType}</if>" +
+            " order by updateTime desc" +
+            " offset ${page} rows fetch next 10 rows only" +
+            "</script>")
+    List<UserMoneyRecord> findUserMoneyInfoRecord(UserMoneyRecord record);
+
+    /**
+     * 修改相关信息
+     * @return
+     */
+    @Update("<script>" +
+            "update TB_UserMoneyInfo set updateTime=GETDATE() " +
+            "<if test='money!=null'>,money = #{money}</if>" +
+            "<if test='submitName!=null'>,submitName = #{submitName}</if>"+
+            "<if test='submitType!=null'>,submitType = #{submitType}</if>"+
+            "<if test='phone!=null'>,phone = #{phone}</if>"+
+            " where userId = #{userId}" +
+            "</script>")
+    int updUserMoneyInfo(UserMoneyRecord record);
+
+    /**
+     * 根据用户id查询用户名称
+     * @param userId
+     * @return
+     */
+    @Select("select nickName from TB_User where userId = #{userId}")
+    String findUserName(String userId);
+
+    /**
+     * 根据id查询技师姓名
+     * @param workerId
+     * @return
+     */
+    @Select("select userName from TB_Worker where workerId = #{workerId}")
+    String findWorkerName(String workerId);
 
 }

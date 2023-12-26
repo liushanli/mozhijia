@@ -17,6 +17,7 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 二维码生成类
@@ -24,6 +25,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
  * @author 18316
  *
  */
+@Slf4j
 public class QRCodeUtil {
     private static final String CHARSET = "utf-8";
     private static final String FORMAT_NAME = "jpg";
@@ -37,9 +39,9 @@ public class QRCodeUtil {
     public static void main(String[] args){
         try {
             String content = "http://wx.mzjsh.com:9999/pages/register/register";
-            String imgPath = "d:/map_2.png";
+            String imgPath = "D:\\map_2.png";
             String destPath = "d:/";
-            encode(content,imgPath,destPath,false);
+            encode(content,imgPath,destPath,true);
         }catch (Exception e){
             System.out.println("==="+e);
         }
@@ -64,6 +66,7 @@ public class QRCodeUtil {
         if (imgPath == null || "".equals(imgPath)) {
             return image;
         }
+        log.info("插入图片");
         // 插入图片
         QRCodeUtil.insertImage(image, imgPath, needCompress);
         return image;
@@ -100,6 +103,7 @@ public class QRCodeUtil {
             g.dispose();
             src = image;
         }
+        log.info("插入logo");
         // 插入LOGO
         Graphics2D graph = source.createGraphics();
         int x = (QRCODE_SIZE - width) / 2;
@@ -126,6 +130,25 @@ public class QRCodeUtil {
         mkdirs(destPath);
         // 随机生成二维码图片文件名
         String file = UUID.randomUUID() + ".jpg";
+        ImageIO.write(image, FORMAT_NAME, new File(destPath + "/" + file));
+        return file;
+    }
+
+    /**
+     * 生成二维码(内嵌LOGO)
+     *
+     * @param content      内容
+     * @param imgPath      LOGO地址
+     * @param destPath     存放目录
+     * @param needCompress 是否压缩LOGO
+     * @throws Exception
+     */
+    public static String encodeInfo(String content, String imgPath, String destPath, boolean needCompress,String fileName)
+            throws Exception {
+        BufferedImage image = QRCodeUtil.createImage(content, imgPath, needCompress);
+        mkdirs(destPath);
+        // 随机生成二维码图片文件名
+        String file = fileName + ".jpg";
         ImageIO.write(image, FORMAT_NAME, new File(destPath + "/" + file));
         return file;
     }

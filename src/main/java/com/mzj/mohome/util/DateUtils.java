@@ -23,4 +23,13 @@ public class DateUtils {
         }
         return "";
     }
+
+    public static String getSysDateString(String str){
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat_1 = new SimpleDateFormat(str);
+        if(date != null){
+            return simpleDateFormat_1.format(date);
+        }
+        return "";
+    }
 }

@@ -26,6 +26,12 @@ public class WxPayConfig{
     /**
      * 商户号
      */
+    @Value("${doMain}")
+    private String doMain;
+
+    /**
+     * 商户号
+     */
     @Value("${wechatShopId}")
     private String mchId;
 
@@ -73,7 +79,7 @@ public class WxPayConfig{
      *获取商户秘钥
      *@return PrivateKey
      */
-    public PrivateKey getPrivateKey(String filename){
+    public static PrivateKey getPrivateKey(String filename){
         try{
             return PemUtil.loadPrivateKey(new FileInputStream(filename));
         } catch (FileNotFoundException e){
