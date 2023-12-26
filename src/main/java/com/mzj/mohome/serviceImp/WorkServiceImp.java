@@ -1276,7 +1276,7 @@ public class WorkServiceImp implements WorkerService {
             String evalStatus_3 = "";
             String workerId = worker.get("workerId");
             List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(workerId);
-            logger.info("技师:"+workerId+"的标签："+mapList!=null?JSON.toJSONString(mapList):"");
+            //logger.info("技师:"+workerId+"的标签："+mapList!=null?JSON.toJSONString(mapList):"");
             if (mapList != null && mapList.size() > 0) {
                 for (int i = 0; i < mapList.size(); i++) {
                     Map<String, Object> map = mapList.get(i);
