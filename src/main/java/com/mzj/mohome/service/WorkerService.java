@@ -1,13 +1,10 @@
 package com.mzj.mohome.service;
 
-import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
+import com.mzj.mohome.vo.NoticeMsgVo;
 import com.mzj.mohome.vo.PageUtil;
 import com.mzj.mohome.vo.WorkerVo;
-import com.mzj.mohome.vo.WorkerWxInfo;
 import com.winnerlook.model.VoiceResponseResult;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 import java.util.Map;
@@ -132,4 +129,17 @@ public interface WorkerService {
     Map<String,Object> registerWorkerInfo(WorkerVo workerVo);
 
     int updWorkerOrder(Map<String,Object> map);
+
+    /**
+     * 添加公告
+     * @param noticeMsgVo
+     * @return
+     */
+    int addNoticeMsg(NoticeMsgVo noticeMsgVo);
+
+    int updNoticeMsg(NoticeMsgVo noticeMsgVo);
+
+    int delNoticeMsg(Integer id);
+
+    List<NoticeMsgVo> findNoticeMsg(NoticeMsgVo noticeMsgVo);
 }

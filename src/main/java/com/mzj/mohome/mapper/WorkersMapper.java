@@ -636,18 +636,27 @@ public interface WorkersMapper {
      * @param noticeMsgVo
      * @return
      */
-    @Insert("insert into TB_NoticeInfo(title,content,addTime,updateTime)\n" +
-            " VALUES(#{title},#{content},GETDATE(),GETDATE())")
+    @Insert("insert into TB_NoticeInfo(title,content,addTime,updateTime,shopId,sendType)\n" +
+            " VALUES(#{title},#{content},GETDATE(),GETDATE(),#{shopId},'0')")
     int addNoticeMsg(NoticeMsgVo noticeMsgVo);
-    @Update("update TB_NoticeInfo set title = #{title},content = #{content},updateTime=GETDATE() where id = #{id}")
+    @Update("<script>" +
+            "update TB_NoticeInfo set updateTime=GETDATE() " +
+            "<if test='title!=null'> ,title = #{title}</if>" +
+            "<if test='content!=null'>,content = #{content} </if>" +
+            "<if test='sendType!=null'>,sendType = #{sendType} </if>" +
+            " where id = #{id}" +
+            "</script>")
     int updNoticeMsg(NoticeMsgVo noticeMsgVo);
 
     @Delete("delete from TB_NoticeInfo where id = #{id}")
     int delNoticeMsg(Integer id);
 
     @Select("<script>" +
-            " select id,title,content from TB_NoticeInfo where 1=1 " +
+            " select id,title,content,sendType from TB_NoticeInfo where 1=1 " +
             "<if test='id!=null'> and id = #{id} </if>" +
-            "  order by updateTime desc")
+            "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
+            "<if test='sendType!=null'> and sendType = #{sendType} </if>" +
+            "  order by updateTime desc " +
+            "</script>")
     List<NoticeMsgVo> findNoticeMsg(NoticeMsgVo noticeMsgVo);
 }

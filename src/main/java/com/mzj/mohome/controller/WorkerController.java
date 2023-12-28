@@ -10,6 +10,7 @@ import com.mzj.mohome.util.ImageUtil;
 import com.mzj.mohome.util.RequestApi;
 import com.mzj.mohome.util.ToolVideo;
 import com.mzj.mohome.util.ToolsUtil;
+import com.mzj.mohome.vo.NoticeMsgVo;
 import com.mzj.mohome.vo.PageUtil;
 import com.mzj.mohome.vo.WorkerVo;
 import com.winnerlook.model.VoiceResponseResult;
@@ -939,6 +940,72 @@ public class WorkerController {
             map.put("success",true);
             map.put("msg","");
         }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/addNoticeMsg")
+    public Map<String,Object> addNoticeMsg(@RequestBody NoticeMsgVo msgVo){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("addNoticeMsg==添加公告信息为：{}",JSON.toJSONString(msgVo));
+            workerService.addNoticeMsg(msgVo);
+            map.put("success",true);
+            map.put("msg","添加成功");
+        }catch (Exception e){
+            logger.error("addNoticeMsg==添加公告错误信息为：{}",e);
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        return map;
+    }
+    @ResponseBody
+    @PostMapping(value = "/updNoticeMsg")
+    public Map<String,Object> updNoticeMsg(@RequestBody NoticeMsgVo msgVo){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("updNoticeMsg==修改公告信息为：{}",JSON.toJSONString(msgVo));
+            workerService.updNoticeMsg(msgVo);
+            map.put("success",true);
+            map.put("msg","修改成功");
+        }catch (Exception e){
+            logger.error("updNoticeMsg==修改公告，错误信息为：{}",e);
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        return map;
+    }
+    @ResponseBody
+    @PostMapping(value = "/delNoticeMsg")
+    public Map<String,Object> delNoticeMsg(@RequestBody NoticeMsgVo noticeMsgVo){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("delNoticeMsg==删除公告信息为：{}",JSON.toJSONString(noticeMsgVo));
+            workerService.delNoticeMsg(noticeMsgVo.getId());
+            map.put("success",true);
+            map.put("msg","");
+        }catch (Exception e){
+            logger.error("delNoticeMsg==删除公告信息，错误信息为：{}",e);
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        return map;
+    }
+    @ResponseBody
+    @PostMapping(value = "/findNoticeMsg")
+    public Map<String,Object> findNoticeMsg(@RequestBody NoticeMsgVo noticeMsgVo){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("findNoticeMsg==修改技师信息为：{}",JSON.toJSONString(noticeMsgVo));
+            List<NoticeMsgVo> noticeMsgVoList = workerService.findNoticeMsg(noticeMsgVo);
+            map.put("success",true);
+            map.put("msg","");
+            map.put("noticeList",noticeMsgVoList);
+        }catch (Exception e){
+            logger.error("findNoticeMsg==查询公告信息失败，错误信息为：{}",e);
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
         }

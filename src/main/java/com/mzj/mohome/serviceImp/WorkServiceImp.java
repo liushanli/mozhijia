@@ -13,6 +13,7 @@ import com.mzj.mohome.mapper.WorkersMapper;
 import com.mzj.mohome.service.UserService;
 import com.mzj.mohome.service.WorkerService;
 import com.mzj.mohome.util.*;
+import com.mzj.mohome.vo.NoticeMsgVo;
 import com.mzj.mohome.vo.PageUtil;
 import com.mzj.mohome.vo.WorkerVo;
 import com.mzj.mohome.vo.WorkerWxInfo;
@@ -1250,60 +1251,19 @@ public class WorkServiceImp implements WorkerService {
         String workerId = ToolsUtil.getString(map.get("workerId"));
         return workersMapper.updWorkerOrder(orderId,workerId);
     }
-
-
-    /*@Scheduled(cron = "0 0/5 * * * ?")
-    @Async*/
-    public void updateWorkDateHHmm(){
-        Long oldtime=System.currentTimeMillis();
-        logger.info("updateWorkDateHHmm=====修改时间日期定时开始："+(new Date()));
-        List<Map<String,String>> workerList = workersMapper.queryWorkerList();
-
-        if(workerList.size()>0 && workerList != null){
-            updateWorkerInfoLabel(workerList);
-            for(Map<String,String> worker : workerList ){
-                String workerId = worker.get("workerId");
-                String dateHHmm = workersMapper.getDateMM(workerId);
-                if(StringUtils.isEmpty(worker.get("dateHHmm")) || !dateHHmm.equals(worker.get("dateHHmm"))){
-                    workersMapper.updWorkerInfo(workerId,dateHHmm);
-                }
-            }
-        }
-        Long systime=System.currentTimeMillis();
-        //相差毫秒数
-        Long time = systime - oldtime;
-        logger.info("updateWorkDateHHmm=====修改时间日期定时结束==结束的毫秒为：{}",time);
-        logger.info("updateWorkDateHHmm=====修改时间日期定时结束："+(new Date()));
+    public int addNoticeMsg(NoticeMsgVo noticeMsgVo){
+        return workersMapper.addNoticeMsg(noticeMsgVo);
     }
-    //获取标签，进行修改信息
-    private void updateWorkerInfoLabel(List<Map<String,String>> workerList){
-        Long oldtime=System.currentTimeMillis();
-        logger.info("updateWorkerInfoLabel===start==技师标签修改："+(new Date()));
-        for(Map<String,String> worker : workerList ){
-            String evalStatus_1 = "";
-            String evalStatus_2 = "";
-            String evalStatus_3 = "";
-            String workerId = worker.get("workerId");
-            List<Map<String, Object>> mapList = workersMapper.findWorkEvalStatus(workerId);
-            logger.info("技师:"+workerId+"的标签："+mapList!=null?JSON.toJSONString(mapList):"");
-            if (mapList != null && mapList.size() > 0) {
-                for (int i = 0; i < mapList.size(); i++) {
-                    Map<String, Object> map = mapList.get(i);
-                    if (i == 0) {
-                        evalStatus_1 = map.get("name").toString();
-                    } else if (i == 1) {
-                        evalStatus_2 = map.get("name").toString();
-                    } else if (i == 2) {
-                        evalStatus_3 = map.get("name").toString();
-                    }
-                }
-                workersMapper.updWorkerInfoLabel(workerId,evalStatus_1,evalStatus_2,evalStatus_3);
-            }
-        }
-        Long systime=System.currentTimeMillis();
-        //相差毫秒数
-        Long time = systime - oldtime;
-        logger.info("updateWorkerInfoLabel===end==技师标签修改==结束的毫秒为：{}",time);
-        logger.info("updateWorkerInfoLabel===end==技师标签修改："+(new Date()));
+
+    public int updNoticeMsg(NoticeMsgVo noticeMsgVo){
+        return workersMapper.updNoticeMsg(noticeMsgVo);
+    }
+
+    public int delNoticeMsg(Integer id){
+        return workersMapper.delNoticeMsg(id);
+    }
+
+    public List<NoticeMsgVo> findNoticeMsg(NoticeMsgVo noticeMsgVo){
+        return workersMapper.findNoticeMsg(noticeMsgVo);
     }
 }

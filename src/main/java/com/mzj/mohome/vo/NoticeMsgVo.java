@@ -11,4 +11,7 @@ public class NoticeMsgVo {
     private String content;
     private Date addTime;
     private Date updateTime;
+
+    private String shopId;
+    private String sendType;
 }
