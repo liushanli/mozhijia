@@ -130,4 +130,11 @@ public interface WorkerService {
      * @return
      */
     Map<String,Object> registerWorkerInfo(WorkerVo workerVo);
+
+    /**
+     * 根据技师Id查询信息
+     * @param workerId
+     * @return
+     */
+    Map<String,Object> findWorkerInfoById(String workerId);
 }

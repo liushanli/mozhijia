@@ -925,5 +925,19 @@ public class WorkerController {
         }
         return map;
     }
+
+    @ResponseBody
+    @PostMapping(value = "/findWorkerInfoById")
+    public Map<String,Object> findWorkerInfoById(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("findWorkerInfoById==查询技师信息的请求参数：{}",workerId);
+            map = workerService.registerWorkerInfo(workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        return map;
+    }
 }
 

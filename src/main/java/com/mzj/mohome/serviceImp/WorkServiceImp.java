@@ -16,6 +16,7 @@ import com.mzj.mohome.util.*;
 import com.mzj.mohome.vo.PageUtil;
 import com.mzj.mohome.vo.WorkerVo;
 import com.mzj.mohome.vo.WorkerWxInfo;
+import com.sun.javafx.fxml.builder.JavaFXFontBuilder;
 import com.winnerlook.model.PrivacyBindBodyAxb;
 import com.winnerlook.model.PrivacyUnbindBody;
 import com.winnerlook.model.VoiceResponseResult;
@@ -1026,9 +1027,9 @@ public class WorkServiceImp implements WorkerService {
             String onLine = ToolsUtil.getString(pageUtil.getOnLine());
             String city = ToolsUtil.getString(pageUtil.getCity());
             String productId = ToolsUtil.getString(pageUtil.getProductId());
-            if(onLine==null){
+            /*if(onLine==null){
                 onLine = "1";
-            }
+            }*/
             logger.info("findWorkerList_2===city==="+city);
 
             String jd = ToolsUtil.getString(pageUtil.getJd());
@@ -1297,4 +1298,14 @@ public class WorkServiceImp implements WorkerService {
         logger.info("updateWorkerInfoLabel===end==技师标签修改==结束的毫秒为：{}",time);
         logger.info("updateWorkerInfoLabel===end==技师标签修改："+(new Date()));
     }
+
+    public Map<String,Object> findWorkerInfoById(String workerId){
+        Map<String,Object> map = new HashMap<>();
+        map.put("success",true);
+        map.put("msg","");
+
+        return map;
+    }
+
+
 }
