@@ -134,9 +134,10 @@ public class ShopServiceImp implements ShopService {
         String city = ToolsUtil.getString(map.get("city"));
         String onLine = ToolsUtil.getString(map.get("onLine"));
         String workerName = ToolsUtil.getString(map.get("workerName"));
+        String workerId = ToolsUtil.getString(map.get("workerId"));
         Integer page = ToolsUtil.getString(map.get("page"))!=null?(Integer)map.get("page"):1;
         page = (page-1)*10;
-        List<Map<String,Object>> mapList_1 = shopMapper.findWorkerListByShopId(city,shopId,onLine,page,workerName);
+        List<Map<String,Object>> mapList_1 = shopMapper.findWorkerListByShopId(city,shopId,onLine,page,workerName,workerId);
         DecimalFormat df = new DecimalFormat("0%");
         if(mapList_1!=null){
             logger.info("==========start=======");

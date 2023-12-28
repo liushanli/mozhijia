@@ -165,6 +165,8 @@ public class WorkerController {
 
 
 
+
+
     @ResponseBody
     @PostMapping("/findWorkEval")
     public Map<String,Object> findWorkEval(@RequestBody Map<String,Object> objectMap){
@@ -654,7 +656,7 @@ public class WorkerController {
     @ResponseBody
     @RequestMapping(value = "/findOrderNumInfo",method = RequestMethod.POST)
     public Map<String,Object> findOrderNumInfo(@RequestBody Map<String,Object> map){
-        Map<String,Object> result_map = new HashMap<String,Object>();
+        Map<String,Object> result_map = new HashMap<>();
         try {
             Map<String,Object> resultMap = workerService.findWorkOrderNumInfo(map);
             if (resultMap != null) {
@@ -816,13 +818,14 @@ public class WorkerController {
     public Map<String,Object> updWorkerInfo(@RequestBody Map<String,Object> stringObjectMap){
         Map<String,Object> map = new HashMap<>();
         try{
+            logger.info("请求参数为：{}",JSON.toJSONString(stringObjectMap));
             workerService.updWorkerInfoJW(stringObjectMap);
             map.put("success",true);
             map.put("msg","");
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
-            map.put("workVo",null);
+            logger.error("错误信息为：{}",e);
         }
         return map;
     }
@@ -919,6 +922,22 @@ public class WorkerController {
         try{
             logger.info("addWorkerInfo==添加技师信息为：{}",JSON.toJSONString(workerVo));
             map = workerService.registerWorkerInfo(workerVo);
+        }catch (Exception e){
+            map.put("msg","系统出现异常，请稍后重试");
+            map.put("success","false");
+        }
+        return map;
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/updWorkerOrderById")
+    public Map<String,Object> updWorkerOrderById(@RequestBody Map<String,Object> paramMap){
+        Map<String,Object> map = new HashMap<>();
+        try{
+            logger.info("updWorkerOrderById==修改技师信息为：{}",JSON.toJSONString(paramMap));
+            int num = workerService.updWorkerOrder(paramMap);
+            map.put("success",true);
+            map.put("msg","");
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");

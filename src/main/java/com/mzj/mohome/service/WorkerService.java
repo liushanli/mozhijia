@@ -130,4 +130,6 @@ public interface WorkerService {
      * @return
      */
     Map<String,Object> registerWorkerInfo(WorkerVo workerVo);
+
+    int updWorkerOrder(Map<String,Object> map);
 }

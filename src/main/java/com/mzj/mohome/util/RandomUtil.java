@@ -6,6 +6,18 @@ import java.util.Random;
 
 public class RandomUtil {
 
+    /**
+     * min 最小获取的随机数，
+     * 最大获取的随机数max:min+num+1
+     * @param min
+     * @param num
+     * @return
+     */
+    public static int getRandomMinAndMax(int min,int num){
+        Random random = new Random();
+        return (min + Math.abs(random.nextInt(num))); // 获取高位值
+    }
+
     /**方法1*/
     public static String getRandomJianHan(int len) {
         String randomName = "";

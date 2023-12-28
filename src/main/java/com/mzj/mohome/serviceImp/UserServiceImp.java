@@ -11,7 +11,9 @@ import com.mzj.mohome.util.QRCodeUtil;
 import com.mzj.mohome.util.RandomUtil;
 import com.mzj.mohome.util.SmsSendUtil;
 import com.mzj.mohome.util.ToolsUtil;
+import com.mzj.mohome.vo.InviteImageVo;
 import com.mzj.mohome.vo.ReturnOrderStatusVo;
+import com.mzj.mohome.vo.UserMoneyRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,11 @@ public class UserServiceImp implements UserService {
 
     @Value("${iisPath}")
     private String iisPath;
+
+    @Value("${invite_path}")
+    private String invitePath;
+    @Value("${savePath}")
+    private String savePath;
 
     @Override
     public List<User> getUser(Integer id) throws Exception {
@@ -989,12 +996,12 @@ public class UserServiceImp implements UserService {
             map.put("success",true);
             map.put("msg","");
             if(StringUtils.isNotEmpty(ToolsUtil.getString(map.get("childCode"))) &&
-               ToolsUtil.getString(map.get("childCode")).equals(ToolsUtil.getString(map.get("shopCode"))) &&
-               StringUtils.isNotEmpty(ToolsUtil.getString(map.get("imgPath")))){
+                    ToolsUtil.getString(map.get("childCode")).equals(ToolsUtil.getString(map.get("shopCode"))) &&
+                    StringUtils.isNotEmpty(ToolsUtil.getString(map.get("imgPath")))){
                 return map;
             }else{
                 String content = "http://wx.mzjsh.com:9999/pages/register/register?shopCode="+ToolsUtil.getString(map.get("shopCode"));
-                String imgPath = "d:/logo.png";
+                String imgPath = invitePath+"/logo.png";
                 String fileName = QRCodeUtil.encode(content,imgPath,path,false);
                 String imgUrl = iisPath+"/"+fileName;
                 userMapper.updShopCodeInfo(ToolsUtil.getString(map.get("shopCode")),imgUrl,ToolsUtil.getString(map.get("shopId")));
@@ -1007,6 +1014,46 @@ public class UserServiceImp implements UserService {
         }
         return map;
     }
+
+    public Map<String,Object> findInviteOrderImg(InviteImageVo inviteImageVo){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            map.put("success",true);
+            map.put("msg","");
+            String content = "http://wx.mzjsh.com:9999/pages/jishi_yaoqing_init/jishi_yaoqing_init?code="+inviteImageVo.getShopId();
+            String pathStr = getPathUrl(inviteImageVo.getImgUrl());
+            String imgPath = "";
+            if(StringUtils.isNotBlank(pathStr)){
+                imgPath = savePath+pathStr;
+            }
+            logger.info("imgPAth==="+imgPath);
+            String fileName = QRCodeUtil.encodeInfo(content,imgPath,path,true,inviteImageVo.getShopId()+"_QRCode");
+            String imgUrl = iisPath+"/"+fileName;
+            inviteImageVo.setImgPath(imgUrl);
+            logger.info("===imgUrl==="+imgUrl);
+            InviteImageVo imageVo = userMapper.findUserInviteImg(inviteImageVo.getShopId());
+            if(imageVo != null){
+                userMapper.updUserInviteImg(inviteImageVo);
+            }else{
+                userMapper.addUserInviteImg(inviteImageVo);
+            }
+            map.put("imgPath",imgUrl);
+        }catch (Exception e){
+            logger.error("获取二维码错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","系统异常，请稍后重试");
+        }
+        return map;
+    }
+    public String getPathUrl(String url){
+        logger.info("获取用户头像链接为：{}",url);
+        if(StringUtils.isNotEmpty(url) && url.contains("Upload")){
+            String pathUrl = url.substring(url.indexOf("U"),url.length());
+            logger.info("截取后，获取的地址为：{}",pathUrl);
+            return pathUrl;
+        }
+        return null;
+    }
     public List<ReturnOrderStatusVo> queryReturnInfoList(String orderId){
         return userMapper.queryReturnOrderInfo(orderId);
     }
@@ -1015,5 +1062,92 @@ public class UserServiceImp implements UserService {
         return userMapper.addReturnOrderInfo(orderId,status);
     }
 
+    @Override
+    public int addUserMoneyInfo(UserMoneyRecord record, UserMoneyRecord moneyRecord) {
+        int money;
+        int count;
+        String userName;
+        if(record.getType() == 2){
+            userName = userMapper.findUserName(record.getUserId());
+        }else{
+            userName = userMapper.findWorkerName(record.getUserId());
+        }
+        record.setUserName(userName);
+        moneyRecord.setUserName(userName);
+        UserMoneyRecord record_1 = userMapper.findUserMoneyInfo(record.getUserId());
+        if(record_1 != null){
+            //收入类型，1：支出，2：收入
+            if(record.getMoneyType() == 2){
+                //收入是，奖励在3-5元之间
+                int num = RandomUtil.getRandomMinAndMax(3,3);
+                money = num+record_1.getMoney();
+                moneyRecord.setMoney(num);
+            }else{
+                money = record_1.getMoney()-record.getMoney();
+            }
+            record.setMoney(money);
+            count = userMapper.updUserMoneyInfo(record);
+        }else{
+            //收入是，奖励在3-5元之间
+            int money_2= RandomUtil.getRandomMinAndMax(3,3);
+            record.setMoney(money_2);
+            moneyRecord.setMoney(money_2);
+            count = userMapper.addUserMoneyInfo(record);
+        }
+        //添加记录
+        userMapper.addUserMoneyRecord(moneyRecord);
+        return count;
+    }
+
+    @Override
+    public int addUserMoneyRecord(UserMoneyRecord record) {
+        return userMapper.addUserMoneyRecord(record);
+    }
+
+    @Override
+    public UserMoneyRecord findUserMoneyInfo(String userId) {
+        return userMapper.findUserMoneyInfo(userId);
+    }
+
+    @Override
+    public int updUserMoneyInfo(UserMoneyRecord record) {
+        return userMapper.updUserMoneyInfo(record);
+    }
+
+    public List<UserMoneyRecord> findUserMoneyInfoRecord(UserMoneyRecord record){
+        Integer page = (record.getPage()-1)*10;
+        record.setPage(page);
+        List<UserMoneyRecord> list = userMapper.findUserMoneyInfoRecord(record);
+        if(list != null && list.size()>0){
+            for(UserMoneyRecord moneyRecord : list){
+                /**
+                 * 提现状态：0：未提现，1：提现中，2：已提现，收入为空
+                 */
+                if(moneyRecord.getSubmitStatus()!=null){
+                    if(moneyRecord.getSubmitStatus()==0){
+                        moneyRecord.setSubmitName("未提现");
+                    }else  if(moneyRecord.getSubmitStatus()==1){
+                        moneyRecord.setSubmitName("提现中");
+                    }else if(moneyRecord.getSubmitStatus()==2){
+                        moneyRecord.setSubmitName("已提现");
+                    }else{
+                        moneyRecord.setSubmitName("");
+                    }
+                }
+            }
+        }
+        return list;
+    }
+    public int updUserMoney(UserMoneyRecord record){
+        Map<String,Object> map = userMapper.findUserMoneyCount(record.getOrderId());
+        if(map!= null && !map.isEmpty()){
+            Integer money = StringUtils.isNotBlank(ToolsUtil.getString(map.get("money")))?Integer.parseInt(ToolsUtil.getString(map.get("money"))):0;
+            Integer userMoney = StringUtils.isNotBlank(ToolsUtil.getString(map.get("userMoney")))?Integer.parseInt(ToolsUtil.getString(map.get("userMoney"))):0;
+            String userId = StringUtils.isNotBlank(ToolsUtil.getString(map.get("userId")))?ToolsUtil.getString(map.get("userId")):null;
+            userMapper.updUserMoneySend(record.getOrderId());
+            userMapper.updUserMoneyInfos(userId,(money+userMoney));
+        }
+        return 0;
+    }
 
 }

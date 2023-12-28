@@ -95,17 +95,18 @@ public interface ShopMapper {
             "(select count(1) from TB_Order where workerId = t.workerId and status &gt;= 3 and status &lt;= 9)sellSum," +
             " t.userName,t.imgUrl,t.phone,t.introduce,t.serviceArea,t.workerTitle,t.isOnline,CONVERT(varchar(100)," +
             " loginTime, 120) loginTime,t.orderNum,t.workerId,shop.shopName,tp.jd,tp.wd,tp.address,tp.province,tp.city,tp.area," +
-            "  t.gender,t.evalStatus_one,t.evalStatus_two,t.evalStatus_three,t.quality" +
+            "  t.gender,t.evalStatus_one,t.evalStatus_two,t.evalStatus_three,t.quality,t.dateHHmm " +
             "  from TB_Worker t " +
             "join TB_WorkerPoint tp on t.workerId = tp.workerId" +
             " INNER JOIN TB_Shop shop on t.shopId = shop.shopId  and t.is_del = 1" +
             " <if test='workerName != null'> and t.userName like concat('%',#{workerName},'%') </if>"+
             " <if test='onLine != null'> and t.isOnline = #{onLine} </if>"+
             " <if test='shopId != null'> and t.shopId = #{shopId} </if>"+
+            " <if test='workerId != null'> and t.workerId = #{workerId} </if>"+
             ") t where rownumber &gt; ${page} </script>")
     List<Map<String,Object>> findWorkerListByShopId(@Param("city") String city, @Param("shopId") String shopId,
                                                     @Param("onLine") String onLine, @Param("page") Integer page,
-                                                    @Param("workerName")String workerName);
+                                                    @Param("workerName")String workerName,@Param("workerId")String workerId);
 
 
     @Update("update TB_Worker set isOnline = #{isOnline}  where workerId = #{workerId}")

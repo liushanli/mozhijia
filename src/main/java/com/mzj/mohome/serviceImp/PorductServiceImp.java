@@ -83,8 +83,8 @@ public class PorductServiceImp implements ProductService {
     public List<Map<String,Object>> findProductListByWork(Map<String,Object> map){
 
 
-        String workerId = String.valueOf(map.get("workerId"));
-        String shopId = String.valueOf(map.get("shopId"));
+        String workerId = ToolsUtil.getString(map.get("workerId"));
+        String shopId = ToolsUtil.getString(map.get("shopId"));
 
         List<Map<String,Object>> productList = productMapper.findProductListInfoWorkId(shopId,workerId);
         if(productList!=null && productList.size()>0){

@@ -1173,9 +1173,9 @@ public class WorkServiceImp implements WorkerService {
         workerVo.setArea(ToolsUtil.getString(paramMap.get("area")));
         //status为1的时候,根据姓名查询id,否则，不查询
         if(ToolsUtil.getString(paramMap.get("status")).equals("1")){
-            String provinceId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("province")));
-            String cityId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("city")));
-            String areaId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("area")));
+            String provinceId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("province")),1);
+            String cityId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("city")),2);
+            String areaId = workersMapper.findProvinceInfo(ToolsUtil.getString(paramMap.get("area")),3);
             workerVo.setProvinceId(Integer.parseInt(provinceId));
             workerVo.setCityId(Integer.parseInt(cityId));
             workerVo.setAreaId(Integer.parseInt(areaId));
@@ -1243,6 +1243,12 @@ public class WorkServiceImp implements WorkerService {
         }
         return map;
 
+    }
+
+    public int updWorkerOrder(Map<String,Object> map){
+        String orderId = ToolsUtil.getString(map.get("orderId"));
+        String workerId = ToolsUtil.getString(map.get("workerId"));
+        return workersMapper.updWorkerOrder(orderId,workerId);
     }
 
 

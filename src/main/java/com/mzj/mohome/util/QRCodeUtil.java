@@ -131,6 +131,25 @@ public class QRCodeUtil {
     }
 
     /**
+     * 生成二维码(内嵌LOGO)
+     *
+     * @param content      内容
+     * @param imgPath      LOGO地址
+     * @param destPath     存放目录
+     * @param needCompress 是否压缩LOGO
+     * @throws Exception
+     */
+    public static String encodeInfo(String content, String imgPath, String destPath, boolean needCompress,String fileName)
+            throws Exception {
+        BufferedImage image = QRCodeUtil.createImage(content, imgPath, needCompress);
+        mkdirs(destPath);
+        // 随机生成二维码图片文件名
+        String file = fileName + ".jpg";
+        ImageIO.write(image, FORMAT_NAME, new File(destPath + "/" + file));
+        return file;
+    }
+
+    /**
      * 当文件夹不存在时，mkdirs会自动创建多层目录，区别于mkdir．(mkdir如果父目录不存在则会抛出异常)
      *
      * @author lanyuan Email: mmm333zzz520@163.com

@@ -1,7 +1,13 @@
 package com.mzj.mohome.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.mzj.mohome.entity.Shop;
+import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.service.ShopService;
+import com.mzj.mohome.service.WorkerService;
+import com.mzj.mohome.util.ToolsUtil;
+import com.mzj.mohome.vo.PageUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +23,8 @@ public class ShopController {
     private final static Logger logger = LoggerFactory.getLogger(ShopController.class);
     @Autowired
     private ShopService shopService;
+    @Autowired
+    private WorkerService workerService;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private SimpleDateFormat simpleDateF = new SimpleDateFormat("yyyy-MM-dd");
@@ -135,6 +143,15 @@ public class ShopController {
         try {
             List<Map<String,Object>>  workList = shopService.findShopWorkInfoByCons(map_1);
             map.put("workList",workList);
+            String workerId = ToolsUtil.getString(map_1.get("workerId"));
+            if(StringUtils.isNotBlank(workerId)){
+                PageUtil pageUtil = new PageUtil();
+                pageUtil.setWorkerId(workerId);
+                List<WorkerPic>  workerPicList = workerService.findWorkerPicById(pageUtil);
+                map.put("workePicrList",workerPicList);
+                logger.info("====workePicrList="+ JSON.toJSONString(workerPicList));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             map.put("success",false);

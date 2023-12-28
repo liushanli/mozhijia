@@ -2,6 +2,7 @@ package com.mzj.mohome.mapper;
 
 import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
+import com.mzj.mohome.vo.NoticeMsgVo;
 import com.mzj.mohome.vo.WorkerVo;
 import com.mzj.mohome.vo.WorkerWxInfo;
 import org.apache.ibatis.annotations.*;
@@ -527,8 +528,8 @@ public interface WorkersMapper {
     int updWorkInfo(WorkerVo workerVo);
 
     //查看省份地区的id
-    @Select("select id from TB_ProvinceCityArea where name = #{name}")
-    String findProvinceInfo(@Param("name") String name);
+    @Select("select id from TB_ProvinceCityArea where name = #{name} and [level] = #{level}")
+    String findProvinceInfo(@Param("name") String name,@Param("level") Integer level);
 
     @Select("select id,shopId,shopName,workerId,workerName,orderNum,productId,province," +
             " city,cityId,area,areaId,jd,wd,radius,addTime from" +
@@ -620,4 +621,33 @@ public interface WorkersMapper {
      */
     @Select("select count(1) from TB_Worker where phone = #{phone} and is_del = '1'")
     int findWorkerCount(String phone);
+
+    /**
+     * 更换技师
+     * @param orderId
+     * @param workerId
+     * @return
+     */
+    @Update("update TB_Order set workerId = #{workerId} where orderId = #{orderId}")
+    int updWorkerOrder(@Param("orderId") String orderId,@Param("workerId")String workerId);
+
+    /**
+     * 添加公告
+     * @param noticeMsgVo
+     * @return
+     */
+    @Insert("insert into TB_NoticeInfo(title,content,addTime,updateTime)\n" +
+            " VALUES(#{title},#{content},GETDATE(),GETDATE())")
+    int addNoticeMsg(NoticeMsgVo noticeMsgVo);
+    @Update("update TB_NoticeInfo set title = #{title},content = #{content},updateTime=GETDATE() where id = #{id}")
+    int updNoticeMsg(NoticeMsgVo noticeMsgVo);
+
+    @Delete("delete from TB_NoticeInfo where id = #{id}")
+    int delNoticeMsg(Integer id);
+
+    @Select("<script>" +
+            " select id,title,content from TB_NoticeInfo where 1=1 " +
+            "<if test='id!=null'> and id = #{id} </if>" +
+            "  order by updateTime desc")
+    List<NoticeMsgVo> findNoticeMsg(NoticeMsgVo noticeMsgVo);
 }
