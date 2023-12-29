@@ -659,6 +659,7 @@ public class WorkerController {
     public Map<String,Object> findOrderNumInfo(@RequestBody Map<String,Object> map){
         Map<String,Object> result_map = new HashMap<>();
         try {
+            logger.info("请求参数为：{}",JSON.toJSONString(map));
             Map<String,Object> resultMap = workerService.findWorkOrderNumInfo(map);
             if (resultMap != null) {
                 result_map.put("success", true);
@@ -668,6 +669,7 @@ public class WorkerController {
                 result_map.put("resultMap", null);
             }
         }catch (Exception e){
+            logger.error("错误消息为：{}",e);
             result_map.put("success", false);
             result_map.put("resultMap", null);
         }

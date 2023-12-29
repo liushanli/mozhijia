@@ -396,7 +396,7 @@ public interface WorkersMapper {
     @Select("<script> select count(1) orderNum,ISNULL(SUM(payOnLine), 0)  payOnLine,1 status from TB_Order where  1=1 " +
             "<if test='workerId!=null'> and workerId = #{workerId} </if> " +
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
-            "and status = -1 and shopReceiveTime BETWEEN #{startTime} AND  #{endTime}\n" +
+            "and (status = -1 or status = 12) and addTime BETWEEN #{startTime} AND  #{endTime}\n" +
             "UNION ALL\n" +
             "select count(1) orderNum,ISNULL(SUM(payOnLine), 0)  payOnLine,2 status from TB_Order where 1=1 " +
             "<if test='workerId!=null'> and workerId = #{workerId} </if> " +
@@ -416,7 +416,7 @@ public interface WorkersMapper {
     @Select("<script> select count(1) orderNum,ISNULL(SUM(payOnLine), 0)  payOnLine,1 status from TB_Order where 1=1 " +
             "<if test='workerId!=null'> and workerId = #{workerId} </if> " +
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
-            " and status = -1 \n" +
+            " and (status = -1 or status = 12) \n" +
             "UNION ALL\n" +
             "select count(1) orderNum,ISNULL(SUM(payOnLine), 0)  payOnLine,2 status from TB_Order where 1=1 " +
             "<if test='workerId!=null'> and workerId = #{workerId} </if> " +
@@ -431,13 +431,17 @@ public interface WorkersMapper {
     List<Map<String,Object>> findWorkOrderNumberAll(@Param("workerId") String workerId, @Param("shopId") String shopId);
 
 
-    @Select("<script> select CONVERT(varchar(12) , workconfirmTime, 111 ) dates,count(1) num," +
+    @Select("<script> " +
+            "select dates,num,payOnline,trafficPrice,fillMoney from (" +
+            "select CONVERT(varchar(12) , shopReceiveTime, 111 ) dates,count(1) num," +
             "SUM(ISNULL((payOnline),0)) payOnline,SUM(ISNULL((trafficPrice),0)) trafficPrice," +
-            "SUM(ISNULL(fillMoney, 0)) fillMoney  from TB_Order where status &gt;=8 and status &lt;=9 " +
+            "SUM(ISNULL(fillMoney, 0)) fillMoney  from TB_Order where status &gt;=7 and status &lt;=9 " +
             "<if test='workerId!=null'> and workerId = #{workerId} </if>" +
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
-            " <if test='msgFlag!=0'> and workconfirmTime BETWEEN #{startTime} AND #{endTime} </if> \n" +
-            "group by CONVERT(varchar(12) , workconfirmTime, 111 ) </script>")
+            " <if test='msgFlag!=0'> and shopReceiveTime BETWEEN #{startTime} AND #{endTime} </if> \n" +
+            " and shopReceiveTime> CONVERT(varchar(12) , GETDATE()-90, 111 ) " +
+            "group by CONVERT(varchar(12) , shopReceiveTime, 111 )" +
+            ") t order by dates desc </script>")
     List<Map<String,Object>> findWorkerOrderDetail(@Param("workerId") String workerId, @Param("shopId") String shopId,
                                                    @Param("startTime") String startTime,
                                                    @Param("endTime") String endTime, @Param("msgFlag") Integer msgFlag);
@@ -652,7 +656,7 @@ public interface WorkersMapper {
     int delNoticeMsg(Integer id);
 
     @Select("<script>" +
-            " select id,title,content,sendType from TB_NoticeInfo where 1=1 " +
+            " select id,title,content,sendType,updateTime,CONVERT(varchar(100), updateTime, 20) updateTimeStr from TB_NoticeInfo where 1=1 " +
             "<if test='id!=null'> and id = #{id} </if>" +
             "<if test='shopId!=null'> and shopId = #{shopId} </if>" +
             "<if test='sendType!=null'> and sendType = #{sendType} </if>" +

@@ -14,4 +14,5 @@ public class NoticeMsgVo {
 
     private String shopId;
     private String sendType;
+    private String updateTimeStr;
 }
