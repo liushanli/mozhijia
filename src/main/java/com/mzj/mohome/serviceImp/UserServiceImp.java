@@ -394,13 +394,13 @@ public class UserServiceImp implements UserService {
             JSONObject js = (JSONObject) JSONObject.toJSON(map);
             logger.info("js====" + js);
             String jsonStr = smsSendUtil.sendSmsByPost(sendUrl, js.toString());
+            logger.info("请求发送短信返回信息为==={}" + jsonStr);
             net.sf.json.JSONObject jsonObject = net.sf.json.JSONObject.fromObject(jsonStr);
             message = (String) jsonObject.get("errorMsg");
             if (StringUtils.isEmpty(message)) {
                 userMapper.addSmsSendInfo(phone, random);
             }
             logger.info("message===" + message);
-            System.out.println("message===" + message);
         } else {
             logger.info("已发送五次");
             message = "验证码每天只能发送五次，请您明天再试";
