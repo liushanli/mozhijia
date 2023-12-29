@@ -1,6 +1,5 @@
 package com.mzj.mohome.mapper;
 
-import com.mzj.mohome.entity.Product;
 import com.mzj.mohome.entity.ProductType;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

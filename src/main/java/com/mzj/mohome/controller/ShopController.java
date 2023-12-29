@@ -32,7 +32,8 @@ public class ShopController {
     @ResponseBody
     @PostMapping("/findShopList")
     public Map<String,Object> findShopList(@RequestBody Map<String,Object> map_1){
-        Map<String,Object> map = new HashMap<String,Object>();
+        logger.info("findShopList===请求参数为：{}", JSON.toJSONString(map_1));
+        Map<String,Object> map = new HashMap<>();
         List<Shop> shopList = shopService.findShopList(map_1);
         map.put("shopList",shopList);
         map.put("success",true);
@@ -42,7 +43,8 @@ public class ShopController {
     @ResponseBody
     @PostMapping("/findShopInfo")
     public Map<String,Object> findShopInfo(@RequestBody Map<String,Object> map){
-        Map<String,Object> objectMap = new HashMap<String,Object>();
+        logger.info("findShopInfo===请求参数为：{}", JSON.toJSONString(map));
+        Map<String,Object> objectMap = new HashMap<>();
         List<Shop> shopInfo = shopService.findShopInfoByCon(map);
         objectMap.put("shopList",shopInfo);
         objectMap.put("success",true);
@@ -52,9 +54,10 @@ public class ShopController {
     @ResponseBody
     @PostMapping("/findShopBySendCode")
     public Map<String,Object> findShopBySendCode(@RequestBody Map<String,Object> map){
-        Map<String,Object> objectMap = new HashMap<String,Object>();
+        Map<String,Object> objectMap = new HashMap<>();
         try{
-           objectMap = shopService.findShopBySend(map);
+            logger.info("findShopBySendCode===请求参数为：{}", JSON.toJSONString(map));
+            objectMap = shopService.findShopBySend(map);
         }catch (Exception e){
             objectMap.put("shopList",null);
             objectMap.put("success",false);
@@ -68,10 +71,11 @@ public class ShopController {
     @ResponseBody
     @RequestMapping(value = "/findShopTimeById",method = RequestMethod.POST)
     public Map<String,Object> findShopTimeById(@RequestBody Map<String,Object> map_1){
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("success",true);
         map.put("msg","");
         try {
+            logger.info("findShopTimeById===请求参数为：{}", JSON.toJSONString(map_1));
             Map<String,Object> map2 = findShopInfoMap(map_1);
             List<Map<String,Object>>  workerTimeList = shopService.findShopTimeByCon(map2);
             map.put("shopTimeList",workerTimeList);
@@ -84,6 +88,7 @@ public class ShopController {
     }
 
     private Map<String,Object> findShopInfoMap(Map<String,Object> objectMap){
+        logger.info("findShopInfoMap===请求参数为：{}", JSON.toJSONString(objectMap));
         String beginTime = "";
         String endTime = "";
         Integer cur = Integer.parseInt(objectMap.get("cur").toString());
@@ -116,7 +121,8 @@ public class ShopController {
     @ResponseBody
     @RequestMapping(value = "/findShopInfoByWorker",method = RequestMethod.POST)
     public Map<String,Object> findShopInfoByWorker(@RequestBody Map<String,Object> map_1){
-        Map<String, Object> map = new HashMap<String, Object>();
+        logger.info("findShopInfoByWorker===请求参数为：{}", JSON.toJSONString(map_1));
+        Map<String, Object> map = new HashMap<>();
         map.put("success",true);
         map.put("msg","");
         try {
@@ -124,6 +130,7 @@ public class ShopController {
             List<Map<String,Object>>  shopList = shopService.findShopTimeConByWorkId(map_1);
             map.put("shopInfo",shopList.get(0));
         } catch (Exception e) {
+            logger.error("findShopInfoByWorker===错误信息为：{}", e);
             e.printStackTrace();
             map.put("success",false);
             map.put("msg","查询错误，请稍后重试");
@@ -137,6 +144,7 @@ public class ShopController {
     @ResponseBody
     @RequestMapping(value = "/findShopWorkInfoByCons",method = RequestMethod.POST)
     public Map<String,Object> findShopWorkInfoByCons(@RequestBody Map<String,Object> map_1){
+        logger.info("findShopWorkInfoByCons===请求参数为：{}", JSON.toJSONString(map_1));
         Map<String, Object> map = new HashMap<>();
         map.put("success",true);
         map.put("msg","");
@@ -153,7 +161,7 @@ public class ShopController {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("findShopWorkInfoByCons===错误信息为：{}", e);
             map.put("success",false);
             map.put("msg","查询错误，请稍后重试");
             map.put("shopInfo",null);
@@ -165,17 +173,18 @@ public class ShopController {
     @ResponseBody
     @RequestMapping(value = "/updateJishiOnline",method = RequestMethod.POST)
     public Map<String,Object> updateJishiOnline(@RequestBody Map<String,Object> map_1){
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("success",true);
         map.put("msg","");
         try {
+            logger.info("updateJishiOnline===请求参数信息为：{}", JSON.toJSONString(map_1));
             int  num = shopService.updateJishiOnline(map_1);
             if(num<0){
                 map.put("success",false);
                 map.put("msg","");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("updateJishiOnline===错误信息为：{}", e);
             map.put("success",false);
             map.put("msg","查询错误，请稍后重试");
         }
@@ -185,14 +194,15 @@ public class ShopController {
     @ResponseBody
     @RequestMapping(value = "/updShopTime",method = RequestMethod.POST)
     public Map<String,Object> updShopTime(@RequestBody Map<String,Object> map){
-        Map<String, Object> objectMap = new HashMap<String, Object>();
+        Map<String, Object> objectMap = new HashMap<>();
         objectMap.put("success",true);
         objectMap.put("msg","");
         try {
+            logger.info("updShopTime===请求参数信息为：{}", JSON.toJSONString(map));
             int  num = shopService.updateShopBusy(map);
             objectMap.put("num",num);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("updShopTime===错误信息为：{}", e);
             objectMap.put("success",false);
             objectMap.put("msg","修改错误");
             objectMap.put("num",0);
@@ -204,11 +214,11 @@ public class ShopController {
     @ResponseBody
     @RequestMapping(value = "/updWorkPoint",method = RequestMethod.POST)
     public Map<String,Object> updWorkPoint(@RequestBody Map<String,Object> map){
-        Map<String, Object> objectMap = new HashMap<String, Object>();
+        Map<String, Object> objectMap = new HashMap<>();
         objectMap.put("success",true);
         objectMap.put("msg","");
         try {
-            logger.info("===updWorkPoint==start==");
+            logger.info("===updWorkPoint==start==请求参数为：{}",JSON.toJSONString(map));
             int  num = shopService.updateWorkerJd(map);
             if(num>0){
                 objectMap.put("success",true);
@@ -218,7 +228,7 @@ public class ShopController {
                 objectMap.put("msg","修改失败");
             }
         } catch (Exception e) {
-            logger.info("updWorkPoint===error==="+e.getMessage());
+            logger.info("updWorkPoint===error==={}",e);
             e.printStackTrace();
             objectMap.put("success",false);
             objectMap.put("msg","修改错误");

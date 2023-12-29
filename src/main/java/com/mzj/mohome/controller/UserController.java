@@ -846,9 +846,9 @@ public class UserController {
     @ResponseBody
     @PostMapping("/addPayRecordInfo")
     public Map<String,Object> addPayRecordInfo(@RequestBody Map<String,Object> map){
-        Map<String,Object> result_map = new HashMap<String,Object>();
+        Map<String,Object> result_map = new HashMap<>();
         try {
-
+            logger.info("addPayRecordInfo===请求参数为：{}", JSON.toJSONString(map));
             String orderId = userService.addPayRecordInfo(map);
             if (StringUtils.isNotEmpty(orderId)) {
                 result_map.put("success", true);
@@ -860,6 +860,7 @@ public class UserController {
                 result_map.put("orderId",null);
             }
         }catch (Exception e){
+            logger.error("findProductTypeInfo==== 报错=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
             result_map.put("orderId",null);

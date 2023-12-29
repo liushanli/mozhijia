@@ -316,6 +316,7 @@ public class UserServiceImp implements UserService {
         payRecord.setBody(String.valueOf(map.get("body")));
         payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
         payRecord.setUserId(map.get("userId").toString());
+        logger.info("addPayRecordInfo==修改的订单号为：{}",JSON.toJSONString(payRecord));
         userMapper.addPayRecordInfoCard(payRecord);
         return orderId;
     }

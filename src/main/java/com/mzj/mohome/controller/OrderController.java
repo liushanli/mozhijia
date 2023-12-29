@@ -48,6 +48,7 @@ public class OrderController {
     public Map<String,Object> addUserOrder(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.info("addUserOrder===请求参数为：{}",JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             Map<String,Object> stringObjectMap = orderService.addOrderInfo(map);
@@ -59,7 +60,7 @@ public class OrderController {
                 resultMap.put("orderId",stringObjectMap.get("orderId"));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("addUserOrder===错误信息为：{}",e);
             resultMap.put("success",false);
             resultMap.put("msg","添加失败");
             resultMap.put("orderId","");
@@ -71,12 +72,12 @@ public class OrderController {
     public Map<String,Object> addUserOrderWx(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
-            log.info("请求信息为：{}",JSON.toJSONString(map));
+            log.info("addUserOrderWx==请求信息为：{}",JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             resultMap = orderService.addOrderInfoWx(map);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("addUserOrderWx===错误信息为：{}",e);
             resultMap.put("success",false);
             resultMap.put("msg","添加失败");
             resultMap.put("orderId","");
@@ -98,7 +99,7 @@ public class OrderController {
                 resultMap.put("msg","修改失败");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("updaSerOrder===错误信息为：{}",e);
         }
         return resultMap;
     }
@@ -108,12 +109,13 @@ public class OrderController {
     public Map<String,Object> findOrderStatusMsg(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.info("findOrderStatusMsg====请求参数：{}",JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             Map<String,Object> result = orderService.findOrderStatusMsg(map);
             resultMap.put("result",result);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("findOrderStatusMsg===错误信息为：{}",e);
         }
         return resultMap;
     }
@@ -126,10 +128,11 @@ public class OrderController {
 
         Map<String,Object> mapList = new HashMap<>();
         try{
+            log.info("findOrderInfoByStatus====请求参数：{}",JSON.toJSONString(map));
             List<Map<String,Object>>  orderList = orderService.findOrerListInfo(map);
             mapList.put("orderList",orderList);
         }catch (Exception e){
-            System.out.println("错误信息=="+e.getMessage());
+            log.error("findOrderInfoByStatus===错误信息为：{}",e);
         }
         return mapList;
     }
@@ -138,13 +141,13 @@ public class OrderController {
     @PostMapping("/findOrderInfoByStatusByCon")
     public Map<String,Object> findOrderInfoByStatusByCon(@RequestBody Map<String,Object> map){
         Order order = new Order();
-
-        Map<String,Object> mapList = new HashMap<String,Object>();
+        Map<String,Object> mapList = new HashMap<>();
         try{
+            log.info("findOrderInfoByStatusByCon====请求参数：{}",JSON.toJSONString(map));
             List<Map<String,Object>>  orderList = orderService.findOrerListInfoByCon(map);
             mapList.put("orderList",orderList);
         }catch (Exception e){
-            System.out.println("错误信息=="+e.getMessage());
+            log.error("findOrderInfoByStatusByCon===错误信息为：{}",e);
         }
         return mapList;
     }
@@ -155,13 +158,11 @@ public class OrderController {
     public Map<String,Object> updReturnOrder(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
-            log.info("请求参数为：{}",JSON.toJSONString(map));
-
+            log.info("updReturnOrder==请求参数为：{}",JSON.toJSONString(map));
             //添加记录
             String orderId = ToolsUtil.getString(map.get("orderId"));
             OrderVo order = orderService.findOrderDetail(orderId);
             userService.addReturnOrderHistory(orderId,order.getStatus());
-
             resultMap.put("success",true);
             resultMap.put("msg","");
             map.put("status",10);
@@ -173,7 +174,6 @@ public class OrderController {
             }
         } catch (Exception e) {
             log.error("updReturnOrder===修改状态失败，错误信息为：{}",e);
-            e.printStackTrace();
         }
         return resultMap;
     }
@@ -183,7 +183,7 @@ public class OrderController {
     public Map<String,Object> updReturnOrderBeforeStatus(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
-            log.info("请求参数为：{}",JSON.toJSONString(map));
+            log.info("updReturnOrderBeforeStatus==请求参数为：{}",JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             String orderId = ToolsUtil.getString(map.get("orderId"));
@@ -207,6 +207,7 @@ public class OrderController {
     public Map<String,Object> orderStatusInfo(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.info("orderStatusInfo==请求参数为：{}",JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             Map<String,Object> resultList = orderService.orderStatusList(map);
@@ -217,7 +218,7 @@ public class OrderController {
                 resultMap.put("orderStatusList",null);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("orderStatusInfo==错误信息为：{}",e);
             resultMap.put("orderStatusList",null);
             resultMap.put("success",false);
             resultMap.put("msg","查询失败");
@@ -240,7 +241,7 @@ public class OrderController {
                 resultMap.put("orderStatusList",null);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("findEvalDetail==错误信息为：{}",e);
             resultMap.put("orderStatusList",null);
             resultMap.put("success",false);
             resultMap.put("msg","查询失败");
@@ -252,14 +253,14 @@ public class OrderController {
     @RequestMapping(value = "/findAddPhoneUp",method = RequestMethod.POST)
     public Map<String,Object> findAddPhoneUp(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
-        log.info("拨打小号的信息：{}", JSON.toJSONString(map));
+        log.info("findAddPhoneUp==拨打小号的信息：{}", JSON.toJSONString(map));
         try {
             resultMap.put("success",true);
             resultMap.put("msg","");
             Map<String,Object> result_1 = orderService.addPhoneUp(map);
             resultMap.put("phone",result_1.get("trumpet"));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("findAddPhoneUp==拨打小号的错误信息：{}", e);
             resultMap.put("success",false);
             resultMap.put("msg","查询失败");
             resultMap.put("phone",null);
@@ -273,13 +274,14 @@ public class OrderController {
     public Map<String,Object> findPayOrder(@RequestBody Map<String,Object> map){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.info("findPayOrder==请求参数为：{}", JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             List<Map<String,Object>>  result_1 = orderService.findOrderList(map);
             resultMap.put("payRecordList",result_1);
         } catch (Exception e) {
+            log.error("findPayOrder==错误信息为：{}",e);
             resultMap.put("payRecordList",null);
-            e.printStackTrace();
             resultMap.put("success",false);
             resultMap.put("msg","查询失败");
         }
@@ -292,7 +294,7 @@ public class OrderController {
         Map<String,Object> resultMap = new HashMap<>();
         String orderId = map.get("orderId").toString();
         try {
-
+            log.info("delOrderInfo==请求参数信息为：{}",JSON.toJSONString(map));
             resultMap.put("success",true);
             resultMap.put("msg","");
             int count = orderService.delOrderInfo(orderId);
@@ -312,6 +314,7 @@ public class OrderController {
     public Map<String,Object> updOrderPayInfo(@RequestBody PayRecord payRecord){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.error("updOrderPayInfo===请求参数为信息为：{}",JSON.toJSONString(payRecord));
             resultMap.put("success",true);
             resultMap.put("msg","");
             int count = orderService.updOrderInfo(payRecord);
@@ -322,17 +325,17 @@ public class OrderController {
         } catch (Exception e) {
             resultMap.put("success",false);
             resultMap.put("msg","修改订单记录失败");
-            log.error("该订单id：{}修改订单记录失败：{}",payRecord.getOrderId(),e);
+            log.error("updOrderPayInfo===该订单id：{}修改订单记录失败：{}",payRecord.getOrderId(),e);
         }
         return resultMap;
     }
-
 
     @ResponseBody
     @RequestMapping(value = "/findOrderDetailInfo",method = RequestMethod.POST)
     public Map<String,Object> findOrderDetailInfo(String orderId){
         Map<String,Object> resultMap = new HashMap<>();
         try {
+            log.info("findOrderDetailInfo====请求参数信息为：{}",orderId);
             OrderVo orderVo = orderService.findOrderDetail(orderId);
             resultMap.put("success",true);
             resultMap.put("msg","");

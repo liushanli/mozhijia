@@ -1,4 +1,5 @@
 package com.mzj.mohome.controller;
+import com.alibaba.fastjson.JSON;
 import com.mzj.mohome.entity.ProductType;
 import com.mzj.mohome.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductTypeInfo===请求参数为：{}", JSON.toJSONString(objectMapmap));
             List<ProductType>  productTypeList = productService.findProductTypeList(objectMapmap);
             if(productTypeList.size()>0 && productTypeList != null){
                 stringObjectMap.put("productTypeList",productTypeList);
@@ -37,7 +39,7 @@ public class ProductController {
                 stringObjectMap.put("success",false);
             }
         }catch (Exception e){
-            logger.error("ProductController中findProductTypeInfo 报错=="+e.getMessage());
+            logger.error("ProductController中findProductTypeInfo 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","系统异常，请稍后操作");
         }
@@ -52,6 +54,7 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductTypeInfoByCon===请求参数为：{}", JSON.toJSONString(objectMapmap));
             List<ProductType>  productTypeList = productService.findProductListByCon(objectMapmap);
             if(productTypeList.size()>0 && productTypeList != null){
                 stringObjectMap.put("productTypeList",productTypeList);
@@ -59,9 +62,8 @@ public class ProductController {
                 stringObjectMap.put("productTypeList",null);
                 stringObjectMap.put("success",false);
             }
-
         }catch (Exception e){
-            logger.error("ProductController中findProductTypeInfo 报错=="+e.getMessage());
+            logger.error("findProductTypeInfoByCon==== 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","系统异常，请稍后操作");
             stringObjectMap.put("productTypeList",null);
@@ -78,10 +80,11 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductInfo===请求参数为：{}", JSON.toJSONString(objectMapmap));
             List<Map<String,Object>>  productList = productService.findProductList(objectMapmap);
             stringObjectMap.put("productList",productList);
         }catch (Exception e){
-            logger.error("ProductController中findProductInfo 报错=="+e.getMessage());
+            logger.error("ProductController中findProductInfo 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","系统异常，请稍后操作");
         }
@@ -96,10 +99,11 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductInfoByWorkId===请求参数为：{}", JSON.toJSONString(objectMapmap));
             List<Map<String,Object>>  productList = productService.findProductListByWork(objectMapmap);
             stringObjectMap.put("productList",productList);
         }catch (Exception e){
-            logger.error("ProductController中findProductInfo 报错=="+e.getMessage());
+            logger.error("ProductController中findProductInfoByWorkId 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","系统异常，请稍后操作");
         }
@@ -114,10 +118,11 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductInfoById===请求参数为：{}", JSON.toJSONString(objectMapmap));
             Map<String,Object> product = productService.findProductInfoById(String.valueOf(objectMapmap.get("productId")));
             stringObjectMap.put("product",product);
         }catch (Exception e){
-            logger.error("ProductController中findProductInfo 报错=="+e.getMessage());
+            logger.error("ProductController中findProductInfoById 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","系统异常，请稍后操作");
         }
@@ -131,10 +136,11 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductInfoByIdList===请求参数为：{}", JSON.toJSONString(objectMapmap));
             List<Map<String,Object>> product = productService.findProductList(String.valueOf(objectMapmap.get("productId")));
             stringObjectMap.put("productList",product);
         }catch (Exception e){
-            logger.error("ProductController中findProductInfo 报错=="+e.getMessage());
+            logger.error("ProductController中findProductInfoByIdList 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","系统异常，请稍后操作");
         }
@@ -149,10 +155,11 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductTypeShop===请求参数为：{}", JSON.toJSONString(objectMapmap));
             List<Map<String,Object>> productTypeList = productService.findProductWorkTypeList(objectMapmap);
             stringObjectMap.put("productTypeList",productTypeList);
         }catch (Exception e){
-            logger.error("ProductController中findProductInfo 报错=="+e.getMessage());
+            logger.error("ProductController中findProductTypeShop 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","系统异常，请稍后操作");
             stringObjectMap.put("productTypeList",null);
@@ -167,9 +174,11 @@ public class ProductController {
         stringObjectMap.put("success",true);
         stringObjectMap.put("msg","");
         try {
+            logger.info("findProductWorkTypeInfo===请求参数为：{}", JSON.toJSONString(objectMapmap));
             List<Map<String,Object>> productList = productService.findProductWorkList(objectMapmap);
             stringObjectMap.put("productList",productList);
         }catch (Exception e){
+            logger.error("ProductController中findProductWorkTypeInfo 报错=={}",e);
             stringObjectMap.put("success",false);
             stringObjectMap.put("msg","数据异常");
             stringObjectMap.put("productList",null);
