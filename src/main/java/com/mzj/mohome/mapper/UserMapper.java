@@ -555,8 +555,8 @@ public interface UserMapper {
      * 添加用户钱包信息
      * @return
      */
-    @Insert("insert into TB_UserMoneyInfo(userId,userName,money,type,addTime,updateTime)\n" +
-            "VALUES(#{userId},#{userName},#{money},#{type},GETDATE(),GETDATE())")
+    @Insert("insert into TB_UserMoneyInfo(userId,userName,type,addTime,updateTime)\n" +
+            "VALUES(#{userId},#{userName},#{type},GETDATE(),GETDATE())")
     int addUserMoneyInfo(UserMoneyRecord record);
 
     /**
@@ -620,5 +620,27 @@ public interface UserMapper {
      */
     @Select("select userName from TB_Worker where workerId = #{workerId}")
     String findWorkerName(String workerId);
+
+    /**
+     * 判断该订单的奖励是否已下放
+     * @param orderId
+     * @return
+     */
+    @Select("select a.money,a.userId,b.money userMoney from TB_UserMoneyInfoRecord a \n" +
+            "JOIN TB_UserMoneyInfo b " +
+            "on a.userId = b.userId " +
+            "where orderId = #{orderId} and sendStatus is null ")
+    Map<String,Object> findUserMoneyCount(String orderId);
+
+    /**
+     * 修改订单记录下发状态
+     * @param orderId
+     * @return
+     */
+    @Update("update TB_UserMoneyInfoRecord set sendStatus = '1',updateTime=GETDATE() where orderId = #{orderId}")
+    int updUserMoneySend(String orderId);
+
+    @Update("update TB_UserMoneyInfo set money=#{money},updateTime=GETDATE() where userId = #{userId}")
+    int updUserMoneyInfos(@Param("userId") String userId,@Param("money") Integer money);
 
 }

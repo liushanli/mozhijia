@@ -6,6 +6,8 @@ import com.mzj.mohome.entity.Order;
 import com.mzj.mohome.entity.PayRecord;
 import com.mzj.mohome.service.OrderService;
 import com.mzj.mohome.service.UserService;
+import com.mzj.mohome.service.WxTemplateService;
+import com.mzj.mohome.util.RequestApi;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.util.WxPayConfig;
 import com.mzj.mohome.util.WxPaySearchOrderUtil;
@@ -36,10 +38,14 @@ public class OrderController {
     private OrderService orderService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private RequestApi requestApi;
     @Resource
     private WxPayConfig wxPayConfig;
     @Autowired
     private CloseableHttpClient wxPayClient;
+    @Autowired
+    private WxTemplateService wxTemplateService;
     @ResponseBody
     @PostMapping("/findOrderInfo")
     public Map<String,Object> findOrderInfo(@RequestBody Map<String,Object> map){
@@ -48,7 +54,7 @@ public class OrderController {
             List<OrderVo> orderList = orderService.findOrerList(map);
             mapList.put("orderList",orderList);
         }catch (Exception e){
-            log.error("错误消息未：{}",e);
+            System.out.println("错误信息=="+e.getMessage());
         }
         return mapList;
     }
@@ -320,7 +326,16 @@ public class OrderController {
 
 
     public WxchatCallbackSuccessData getPayResult(String orderId) {
-        PrivateKey privateKey = WxPayConfig.getPrivateKey(wxPayConfig.getPrivateKeyPath());
+        //map_1.put("mchid", wxPayConfig.getMchId());
+               /* String url = "https://api.mch.weixin.qq.com/v3/pay/transactions/out-trade-no/" + payRecord.getTradeNo()+"?mchid="+wxPayConfig.getMchId();
+                log.info("updOrderPayInfo==支付成功，根据商户订单号查询相关信息请求链接：{},商户号为：{}", url, wxPayConfig.getMchId());
+                JSONObject jsonObject = requestApi.getApi(url, map_1);
+                resultMap.put("data",jsonObject);*/
+                /*String url = "https://api.mch.weixin.qq.com/v3/pay/transactions/out-trade-no/" + payRecord.getTradeNo()+"?mchid="+wxPayConfig.getMchId();
+                String schema = "WECHATPAY2-SHA256-RSA2048";
+                HttpUrl httpurl = HttpUrl.parse(url);
+                Map<String,Object> map = wxTemplateService.fn_GetShareData(url);*/
+        PrivateKey privateKey = wxPayConfig.getPrivateKey(wxPayConfig.getPrivateKeyPath());
         WxchatCallbackSuccessData data = WxPaySearchOrderUtil.searchByOrderId(wxPayConfig,orderId,wxPayClient);
         return data;
     }

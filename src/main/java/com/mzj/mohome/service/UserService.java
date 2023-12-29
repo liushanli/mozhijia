@@ -264,6 +264,10 @@ public interface UserService {
      * @return
      */
     int updUserMoneyInfo(UserMoneyRecord record);
+    /**
+     * 订单确认完成后，则可以随机获得3-5元红包奖励
+     */
+    int updUserMoney(UserMoneyRecord record);
 
     List<UserMoneyRecord> findUserMoneyInfoRecord(UserMoneyRecord record);
 }

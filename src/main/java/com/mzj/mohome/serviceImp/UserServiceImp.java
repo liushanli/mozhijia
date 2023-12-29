@@ -1115,9 +1115,9 @@ public class UserServiceImp implements UserService {
         if(record_1 != null){
             //收入类型，1：支出，2：收入
             if(record.getMoneyType() == 2){
+                money = record_1.getMoney();
                 //收入是，奖励在3-5元之间
                 int num = RandomUtil.getRandomMinAndMax(3,3);
-                money = num+record_1.getMoney();
                 moneyRecord.setMoney(num);
             }else{
                 money = record_1.getMoney()-record.getMoney();
@@ -1126,7 +1126,7 @@ public class UserServiceImp implements UserService {
             count = userMapper.updUserMoneyInfo(record);
         }else{
             //收入是，奖励在3-5元之间
-            int money_2= RandomUtil.getRandomMinAndMax(3,3);
+            int money_2= RandomUtil.getRandomMinAndMax(3,2);
             record.setMoney(money_2);
             moneyRecord.setMoney(money_2);
             count = userMapper.addUserMoneyInfo(record);
@@ -1149,6 +1149,18 @@ public class UserServiceImp implements UserService {
     @Override
     public int updUserMoneyInfo(UserMoneyRecord record) {
         return userMapper.updUserMoneyInfo(record);
+    }
+
+    public int updUserMoney(UserMoneyRecord record){
+        Map<String,Object> map = userMapper.findUserMoneyCount(record.getOrderId());
+        if(map!=null && !map.isEmpty()){
+            Integer money = StringUtils.isNotBlank(ToolsUtil.getString(map.get("money")))?Integer.parseInt(ToolsUtil.getString(map.get("money"))):0;
+            Integer userMoney = StringUtils.isNotBlank(ToolsUtil.getString(map.get("userMoney")))?Integer.parseInt(ToolsUtil.getString(map.get("userMoney"))):0;
+            String userId = StringUtils.isNotBlank(ToolsUtil.getString(map.get("userId")))?ToolsUtil.getString(map.get("userId")):null;
+            userMapper.updUserMoneySend(record.getOrderId());
+            userMapper.updUserMoneyInfos(userId,(money+userMoney));
+        }
+        return 0;
     }
 
     public List<UserMoneyRecord> findUserMoneyInfoRecord(UserMoneyRecord record){

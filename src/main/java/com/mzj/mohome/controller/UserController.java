@@ -1554,7 +1554,10 @@ public class UserController {
             map.put("msg","服务异常，请稍候重试");
             return map;
         }
-    }@ResponseBody
+    }
+
+
+    @ResponseBody
     @PostMapping("/updUserMoneyInfo")
     public Map<String,Object> updUserMoneyInfo(@RequestBody UserMoneyRecord record){
         Map<String,Object> map = new HashMap<>();
@@ -1566,6 +1569,25 @@ public class UserController {
             return map;
         }catch (Exception e){
             logger.error("updUserMoneyInfo==错误信息为：{}",e);
+            map.put("success",false);
+            map.put("msg","服务异常，请稍候重试");
+            return map;
+        }
+    }
+
+
+    @ResponseBody
+    @PostMapping("/updUserMoney")
+    public Map<String,Object> updUserMoney(@RequestBody UserMoneyRecord record){
+        Map<String,Object> map = new HashMap<>();
+        try {
+            logger.info("updUserMoney==请求参数为：{}==",JSON.toJSONString(record));
+            userService.updUserMoney(record);
+            map.put("success",true);
+            map.put("msg","");
+            return map;
+        }catch (Exception e){
+            logger.error("updUserMoney==错误信息为：{}",e);
             map.put("success",false);
             map.put("msg","服务异常，请稍候重试");
             return map;
