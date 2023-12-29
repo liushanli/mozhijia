@@ -183,6 +183,7 @@ public class OrderServiceImp implements OrderService {
                 sourceType = String.valueOf(map_1.get("sourceType"));
             }
             order.setSourceType(sourceType);
+            logger.info("addOrderInfo==添加订单表OrderServiceImp.addOrderInfo请求参数为：{}",JSON.toJSONString(order));
             num = orderMapper.addOrderInfo(order);
             if(num>0){
                 PayRecord payRecord = new PayRecord();
@@ -193,6 +194,7 @@ public class OrderServiceImp implements OrderService {
                 payRecord.setOnlinePay(order.getPayOnline());
                 payRecord.setUserId(order.getUserId());
                 payRecord.setSourceType(sourceType);
+                logger.info("addOrderInfo==添加记录表OrderServiceImp.addPayRecordInfoCard请求参数为：{}",JSON.toJSONString(payRecord));
                 userMapper.addPayRecordInfoCard(payRecord);
                 map_2.put("orderId",order.getOrderId());
             }
@@ -261,6 +263,7 @@ public class OrderServiceImp implements OrderService {
                 sourceType = String.valueOf(map_1.get("sourceType"));
             }
             order.setSourceType(sourceType);
+            logger.info("添加订单表addOrderInfoWx====OrderServiceImp.addOrderInfo请求参数为：{}",JSON.toJSONString(order));
             num = orderMapper.addOrderInfo(order);
             if(num>0){
                 PayRecord payRecord = new PayRecord();
@@ -271,6 +274,7 @@ public class OrderServiceImp implements OrderService {
                 payRecord.setOnlinePay(order.getPayOnline());
                 payRecord.setUserId(order.getUserId());
                 payRecord.setSourceType(sourceType);
+                logger.info("添加记录表addOrderInfoWx====OrderServiceImp.addPayRecordInfoCard请求参数为：{}",JSON.toJSONString(payRecord));
                 userMapper.addPayRecordInfoCard(payRecord);
                 map_2.put("orderId",order.getOrderId());
                 map_2.put("subject",payRecord.getSubject());
@@ -682,6 +686,7 @@ public class OrderServiceImp implements OrderService {
             logger.info("该订单"+order.getOrderId()+"修改为1,已付款");
             orderMapper.updateOrderInfoById(order);
         }
+        logger.info("updOrderInfo==payRecord==修改信息为：{}",JSON.toJSONString(payRecord));
         return userMapper.updPayRecordOrderInfo(payRecord);
     }
 

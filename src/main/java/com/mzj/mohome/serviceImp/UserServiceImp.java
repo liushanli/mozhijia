@@ -232,7 +232,11 @@ public class UserServiceImp implements UserService {
                 payRecord.setOrderId(orderId);
                 payRecord.setBody(String.valueOf(map.get("body")));
                 payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+                if(Float.parseFloat(map.get("payOnline").toString())<10){
+                    payRecord.setOnlinePay(10000f);
+                }
                 payRecord.setUserId(map.get("userId").toString());
+                logger.info("添加UserServiceImp.addPayRecordInfoVip的请求信息为：{}",JSON.toJSONString(payRecord));
                 userMapper.addPayRecordInfoVip(payRecord);
             } else {
                 payRecord.setBuyType(3);
@@ -243,7 +247,11 @@ public class UserServiceImp implements UserService {
                 payRecord.setOrderId(orderId);
                 payRecord.setBody(String.valueOf(map.get("body")));
                 payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+                if(Float.parseFloat(map.get("payOnline").toString())<10){
+                    payRecord.setOnlinePay(10000f);
+                }
                 payRecord.setUserId(map.get("userId").toString());
+                logger.info("添加UserServiceImp.addPayRecordInfoCard的请求信息为：{}",JSON.toJSONString(payRecord));
                 userMapper.addPayRecordInfoCard(payRecord);
             }
         } catch (Exception e) {
@@ -271,7 +279,11 @@ public class UserServiceImp implements UserService {
                 payRecord.setOrderId(orderId);
                 payRecord.setBody(String.valueOf(map.get("body")));
                 payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+                if(Float.parseFloat(map.get("payOnline").toString())<10){
+                    payRecord.setOnlinePay(10000f);
+                }
                 payRecord.setUserId(map.get("userId").toString());
+                logger.info("添加UserServiceImp.addPayRecordInfoVip的请求信息为：{}",JSON.toJSONString(payRecord));
                 userMapper.addPayRecordInfoVip(payRecord);
             } else {
                 payRecord.setBuyType(3);
@@ -282,7 +294,11 @@ public class UserServiceImp implements UserService {
                 payRecord.setOrderId(orderId);
                 payRecord.setBody(String.valueOf(map.get("body")));
                 payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+                if(Float.parseFloat(map.get("payOnline").toString())<10){
+                    payRecord.setOnlinePay(10000f);
+                }
                 payRecord.setUserId(map.get("userId").toString());
+                logger.info("添加UserServiceImp.addPayRecordInfoCard的请求信息为：{}",JSON.toJSONString(payRecord));
                 userMapper.addPayRecordInfoCard(payRecord);
             }
         } catch (Exception e) {
@@ -315,7 +331,11 @@ public class UserServiceImp implements UserService {
         payRecord.setOrderId2(String.valueOf(map.get("orderId")));
         payRecord.setBody(String.valueOf(map.get("body")));
         payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+        if(Float.parseFloat(map.get("payOnline").toString())<10){
+            payRecord.setOnlinePay(10000f);
+        }
         payRecord.setUserId(map.get("userId").toString());
+        logger.info("添加记录表OrderServiceImp.addPayRecordInfoCard请求参数为：{}",JSON.toJSONString(payRecord));
         userMapper.addPayRecordInfoCard(payRecord);
         return orderId;
     }
@@ -337,12 +357,16 @@ public class UserServiceImp implements UserService {
             payRecord.setOrderId2(ToolsUtil.getString(map.get("orderId")));
             payRecord.setBody(ToolsUtil.getString(map.get("body")));
             payRecord.setOnlinePay(Float.parseFloat(map.get("payOnline").toString()));
+            if(Float.parseFloat(map.get("payOnline").toString())<10){
+                payRecord.setOnlinePay(10000f);
+            }
             payRecord.setUserId(ToolsUtil.getString(map.get("userId")));
             map1.put("orderId", orderId);
             map1.put("subject", payRecord.getSubject());
             map1.put("money", payRecord.getOnlinePay());
             map1.put("image", orderMapper.findProductImg(ToolsUtil.getString(map.get("orderId"))));
             map1.put("userMoney", userMapper.findUserMoney(payRecord.getUserId()));
+            logger.info("添加记录表UserServiceImp.addPayRecordInfoCard请求参数为：{}",JSON.toJSONString(payRecord));
             userMapper.addPayRecordInfoCard(payRecord);
         } catch (Exception e) {
             logger.error("该订单：{}，补差价失败：错误信息为：{}", ToolsUtil.getString(map.get("orderId")), e);

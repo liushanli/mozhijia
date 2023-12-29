@@ -59,7 +59,7 @@ public class UserController {
             /*String jsonData = "{employees:[{'firstName':'Bill','lastName':'Gills'},{'firstName':'Bill2','lastName':'Gills2'},{'firstName':'Bill3','lastName':'Gills3'}]}";
             JSONObject jsonObject = JSON.parseObject(jsonData);*/
         }catch (Exception e){
-            logger.error("findAllUser报错=="+e.getMessage());
+            logger.error("findAllUser报错=="+e);
         }
 
         return map;
@@ -84,7 +84,7 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
-            logger.error("findUserByPhone=="+e.getMessage());
+            logger.error("findUserByPhone=={}",e);
         }
 
         return map;
@@ -110,7 +110,7 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
-            logger.error("findUserByPhone=="+e.getMessage());
+            logger.error("findUserByPhone=={}",e);
         }
 
         return map;
@@ -120,6 +120,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value="/findUserByUserId",method=RequestMethod.POST)
     public Map<String,Object> findUserByUserId(@RequestBody Map<String,Object> map_1){
+        logger.info("findUserByUserId===请求参数为：{}", JSON.toJSONString(map_1));
         Map<String,Object> map = new HashMap<>();
         try{
             logger.info("=======findUserByUserId=======");
@@ -141,7 +142,7 @@ public class UserController {
                 map.put("userVo", "");
             }
         }catch (Exception e){
-            logger.error("findUserByUserId==="+e.getMessage());
+            logger.error("findUserByUserId=={}",e);
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
@@ -153,6 +154,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping("/findUserByPhoneCount")
     public Map<String,Object> findUserByPhoneCount(String phone){
+        logger.info("findUserByPhoneCount===请求参数为：{}", phone);
         Map<String,Object> map = new HashMap<>();
         try{
             logger.info("==-findUserByPhoneCount-===");
@@ -161,7 +163,7 @@ public class UserController {
             map.put("msg","");
             map.put("userList",users);
         }catch (Exception e){
-            logger.error("==--findUserByPhoneCount==="+e.getMessage());
+            logger.error("findUserByPhoneCount==== 报错信息=={}",e);
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
@@ -173,6 +175,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping("/bangDingPhoneInfo")
     public Map<String,Object> bangDingPhoneInfo(@RequestBody Map<String,String> paramMap){
+        logger.info("bangDingPhoneInfo===请求参数为：{}", JSON.toJSONString(paramMap));
         Map<String,Object> map = new HashMap<>();
         try{
             logger.info("==-bangDingPhoneInfo-==请求参数为：={}",paramMap);
@@ -189,6 +192,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value="/SmsSendMsg",method=RequestMethod.POST)
     public Map<String,Object> SmsSendMsg(String phone){
+        logger.info("SmsSendMsg===请求参数为：{}", phone);
         Map<String,Object> map = new HashMap<String,Object>();
         try{
             logger.info("====SmsSendMsg====");
@@ -200,9 +204,9 @@ public class UserController {
                 map.put("msg",str);
             }
         }catch (Exception e){
-            logger.info("SmsSendMsg=="+e.getMessage());
+            logger.error("SmsSendMsg==== 报错信息=={}",e);
             map.put("success",false);
-            map.put("msg",e.getMessage());
+            map.put("msg",e);
         }
         return map;
     }
@@ -210,6 +214,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value="/SmsSendMsgNew",method=RequestMethod.POST)
     public Map<String,Object> SmsSendMsgNew(String phone){
+        logger.info("SmsSendMsgNew===请求参数为：{}", phone);
         Map<String,Object> map = new HashMap<String,Object>();
         try{
             logger.info("====SmsSendMsgNew====");
@@ -221,9 +226,9 @@ public class UserController {
                 map.put("msg",str);
             }
         }catch (Exception e){
-            logger.info("SmsSendMsg=="+e.getMessage());
+            logger.error("SmsSendMsgNew==== 报错信息=={}",e);
             map.put("success",false);
-            map.put("msg",e.getMessage());
+            map.put("msg",e);
         }
         return map;
     }
@@ -231,6 +236,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value="/SmsSendMsgNew_1",method=RequestMethod.POST)
     public Map<String,Object> SmsSendMsgNew_1(String phone){
+        logger.info("SmsSendMsgNew_1===请求参数为：{}", phone);
         Map<String,Object> map = new HashMap<>();
         try{
             logger.info("====SmsSendMsgNew_1====请求参数为：{}",phone);
@@ -238,7 +244,7 @@ public class UserController {
         }catch (Exception e){
             logger.info("SmsSendMsgNew_1=={}",e);
             map.put("success",false);
-            map.put("msg",e.getMessage());
+            map.put("msg",e);
         }
         return map;
     }
@@ -246,7 +252,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value="/SmsSendMsgOrder",method=RequestMethod.POST)
     public Map<String,Object> SmsSendMsgOrder(@RequestBody Map<String,Object> map_1){
-
+        logger.info("===请求参数为：{}", JSON.toJSONString(map_1));
         Map<String,Object> map = new HashMap<String,Object>();
         try{
             logger.info("====SmsSendMsgOrder===");
@@ -257,9 +263,9 @@ public class UserController {
             map.put("payTime",stringObjectMap.get("payTime"));
             map.put("surplusMoney",stringObjectMap.get("surplusMoney"));
         }catch (Exception e){
-            logger.info("--SmsSendMsgOrder-===="+e.getMessage());
+            logger.info("--SmsSendMsgOrder-===={}",e);
             map.put("success",false);
-            map.put("status",e.getMessage());
+            map.put("status",e);
             map.put("payTime",null);
             map.put("surplusMoney",null);
         }
@@ -269,6 +275,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping("findProvinceInfo")
     public  Map<String,Object> findProvinceInfo(@RequestBody Map<String,Object> map){
+        logger.info("findProvinceInfo===请求参数为：{}", JSON.toJSONString(map));
         logger.info("=====findProvinceInfo=======");
         String level = (String) map.get("level");
         String pid = String.valueOf(map.get("pid"));
@@ -296,13 +303,14 @@ public class UserController {
             objectMap.put("success",true);
             logger.info("bannerList="+list.size());
         }catch (Exception e){
-            logger.error("====findBannerList="+e.getMessage());
+            logger.error("==findBannerList==findBannerList={}",e);
         }
         return objectMap;
     }
     @ResponseBody
     @RequestMapping("findRepayList")
     public Map<String,Object> findRepayList(@RequestBody Map<String,Object> map){
+        logger.info("findRepayList===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> objectMap = new HashMap<String,Object>();
         String out_trade_no=new SimpleDateFormat("yyyymmddmmhhss").format(new Date());//产生一组随机的订单号
         //实例化客户端
@@ -326,7 +334,7 @@ public class UserController {
             objectMap.put("order",response.getBody());
             objectMap.put("out_trade_no",out_trade_no);
         } catch (AlipayApiException e) {
-            e.printStackTrace();
+            logger.error("findRepayList==== 报错信息=={}",e);
         }
         return objectMap;
     }
@@ -335,6 +343,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/addCompanyMade")
     public Map<String,Object> addCompanyMade(@RequestBody Map<String,Object> map){
+        logger.info("addCompanyMade===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addCompanyInfo(map);
@@ -346,6 +355,7 @@ public class UserController {
                 result_map.put("message", "保存错误");
             }
         }catch (Exception e){
+            logger.error("addCompanyMade==== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -355,6 +365,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/updUserInfo")
     public Map<String,Object> updUserInfo(@RequestBody Map<String,Object> map){
+        logger.info("updUserInfo===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.updUser(map);
@@ -366,6 +377,7 @@ public class UserController {
                 result_map.put("message", "更改错误");
             }
         }catch (Exception e){
+            logger.error("updUserInfo==== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -377,6 +389,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/updUserInfoCard")
     public Map<String,Object> updUserInfoCard(@RequestBody Map<String,Object> map){
+        logger.info("=updUserInfoCard==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<>();
         try {
             String orderId = userService.updUserInfo(map);
@@ -390,6 +403,7 @@ public class UserController {
                 result_map.put("orderId",null);
             }
         }catch (Exception e){
+            logger.error("=updUserInfoCard=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
             result_map.put("orderId",null);
@@ -400,12 +414,14 @@ public class UserController {
     @ResponseBody
     @PostMapping("/updUserInfoCardWX")
     public Map<String,Object> updUserInfoCardWX(@RequestBody Map<String,Object> map){
+        logger.info("updUserInfoCardWX===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<>();
         try {
             logger.info("updUserInfoCardWX===请求信息为：{}",JSON.toJSONString(map));
             result_map = userService.updUserInfoWx(map);
             logger.info("updUserInfoCardWX===获取信息为：{}",JSON.toJSONString(result_map));
         }catch (Exception e){
+            logger.error("=updUserInfoCardWX=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
             result_map.put("orderId",null);
@@ -424,6 +440,7 @@ public class UserController {
             result_map.put("success", true);
             result_map.put("cardList", cardList);
         }catch (Exception e){
+            logger.error("=findCardList=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("cardList", "null");
         }
@@ -434,6 +451,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/addUpUserAddress")
     public Map<String,Object> addUpUserAddress(@RequestBody Map<String,Object> map){
+        logger.info("addUpUserAddress===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addUPDTbAddress(map);
@@ -445,6 +463,7 @@ public class UserController {
                 result_map.put("message", "修改失败");
             }
         }catch (Exception e){
+            logger.error("==addUpUserAddress== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -454,6 +473,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/findUserAddress")
     public Map<String,Object> findUserAddress(@RequestBody Map<String,Object> map){
+        logger.info("findUserAddress===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             List<Address> addressList= userService.findAddress(map);
@@ -467,6 +487,7 @@ public class UserController {
                 result_map.put("addressList",null);
             }
         }catch (Exception e){
+            logger.error("=findUserAddress=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现问题");
             result_map.put("addressList",null);
@@ -477,6 +498,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/addEvaluate")
     public Map<String,Object> addEvaluate(@RequestBody Map<String,Object> map){
+        logger.info("=addEvaluate==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addEvaluate(map);
@@ -488,6 +510,7 @@ public class UserController {
                 result_map.put("message", "保存错误");
             }
         }catch (Exception e){
+            logger.error("=addEvaluate=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -498,6 +521,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/addPartnet",method = RequestMethod.POST)
     public Map<String,Object> addPartnet(@RequestBody Map<String,Object> map){
+        logger.info("=addPartnet==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addPartnet(map);
@@ -509,6 +533,7 @@ public class UserController {
                 result_map.put("message", "保存错误");
             }
         }catch (Exception e){
+            logger.error("=addPartnet=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -518,6 +543,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/addSuggest",method = RequestMethod.POST)
     public Map<String,Object> addSuggest(@RequestBody Map<String,Object> map){
+        logger.info("=addSuggest==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addSuggest(map);
@@ -529,6 +555,7 @@ public class UserController {
                 result_map.put("message", "保存错误");
             }
         }catch (Exception e){
+            logger.error("=addSuggest=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -538,6 +565,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/updAddressStatus",method = RequestMethod.POST)
     public Map<String,Object> updAddressStatus(@RequestBody Map<String,Object> map){
+        logger.info("updAddressStatus==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.updAddressById(map);
@@ -549,6 +577,7 @@ public class UserController {
                 result_map.put("message", "保存错误");
             }
         }catch (Exception e){
+            logger.error("=updAddressStatus=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -558,6 +587,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/delAddressStatus",method = RequestMethod.POST)
     public Map<String,Object> delAddressStatus(@RequestBody Map<String,Object> map){
+        logger.info("=delAddressStatus==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.delAddressById((Integer)(map.get("id")));
@@ -569,6 +599,7 @@ public class UserController {
                 result_map.put("message", "保存错误");
             }
         }catch (Exception e){
+            logger.error("=delAddressStatus=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -579,6 +610,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/addRecruit",method = RequestMethod.POST)
     public Map<String,Object> addRecruit(@RequestBody Recurit recurit){
+        logger.info("=addRecruit==请求参数为：{}", JSON.toJSONString(recurit));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addRecurit(recurit);
@@ -590,6 +622,7 @@ public class UserController {
                 result_map.put("message", "保存错误");
             }
         }catch (Exception e){
+            logger.error("=addRecruit=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -599,6 +632,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/findEvalListInfo",method = RequestMethod.POST)
     public Map<String,Object> findEvalListInfo(@RequestBody Map<String,Object> map){
+        logger.info("findEvalListInfo===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<>();
         try {
             logger.info("findEvalListInfo==请求参数为：{}",JSON.toJSONString(map));
@@ -623,6 +657,7 @@ public class UserController {
                 result_map.put("resultList", null);
             }
         }catch (Exception e){
+            logger.error("=findEvalListInfo=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("resultList", null);
         }
@@ -632,6 +667,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "/findEvalListInfoCon",method = RequestMethod.POST)
     public Map<String,Object> findEvalListInfoCon(@RequestBody Map<String,Object> map){
+        logger.info("=findEvalListInfoCon==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<>();
         try {
             List<Map<String,Object>> resultList = userService.findEvaluateListByUserIdCon(map);
@@ -643,6 +679,7 @@ public class UserController {
                 result_map.put("resultList", null);
             }
         }catch (Exception e){
+            logger.error("=findEvalListInfoCon=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("resultList", null);
         }
@@ -652,6 +689,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/updEvalInfo")
     public Map<String,Object> updEvalInfo(@RequestBody Evaluate evaluate){
+        logger.info("=updEvalInfo==请求参数为：{}", JSON.toJSONString(evaluate));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.updEvalById(evaluate);
@@ -663,6 +701,7 @@ public class UserController {
                 result_map.put("message", "更改失败");
             }
         }catch (Exception e){
+            logger.error("=updEvalInfo=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -683,6 +722,7 @@ public class UserController {
                 result_map.put("message", "删除失败");
             }
         }catch (Exception e){
+            logger.error("=delEvalInfo=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -703,9 +743,9 @@ public class UserController {
                 result_map.put("evaluate",null);
             }
         }catch (Exception e){
+            logger.error("==findEvalInfoById== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("evaluate",null);
-            System.out.println("查询="+e.getMessage());
         }
         return result_map;
     }
@@ -713,6 +753,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/getUserInfo")
     public Map<String,Object> getUserInfo(@RequestBody Map<String,Object> map){
+        logger.info("=getUserInfo==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             //对identityToken解码
@@ -736,6 +777,7 @@ public class UserController {
                 result_map.put("message", "更改失败");
             }*/
         }catch (Exception e){
+            logger.error("getUserInfo==== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -745,6 +787,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/addWhatUserInfo")
     public Map<String,Object> addWhatUserInfo(@RequestBody Map<String,Object> map){
+        logger.info("=addWhatUserInfo==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addWhatUserInfo(map);
@@ -763,6 +806,7 @@ public class UserController {
                 result_map.put("message", "更改失败");
             }
         }catch (Exception e){
+            logger.error("=addWhatUserInfo=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -772,6 +816,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/updWhatUserInfo")
     public Map<String,Object> updWhatUserInfo(@RequestBody Map<String,Object> map){
+        logger.info("=updWhatUserInfo==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.updUserInfoByPhone(map);
@@ -783,6 +828,7 @@ public class UserController {
                 result_map.put("message", "更改失败");
             }
         }catch (Exception e){
+            logger.error("=updWhatUserInfo=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -805,6 +851,7 @@ public class UserController {
                 result_map.put("message", "查询失败");
             }
         }catch (Exception e){
+            logger.error("findAccountInfo==== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
             result_map.put("list",null);
@@ -815,6 +862,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/findAccountInfoRecord")
     public Map<String,Object> findAccountInfoRecord(@RequestBody Map<String,Object> map){
+        logger.info("findAccountInfoRecord===请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             List<Map<String,Object>> list = userService.findAccountInfoRecord(map);
@@ -828,6 +876,7 @@ public class UserController {
                 result_map.put("message", "查询失败");
             }
         }catch (Exception e){
+            logger.error("=findAccountInfoRecord=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
             result_map.put("list",null);
@@ -838,6 +887,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/addSchoolInfo")
     public Map<String,Object> addSchoolInfo(@RequestBody Map<String,Object> map){
+        logger.info("==addSchoolInfo=请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             int count = userService.addSchoolInfo(map);
@@ -849,6 +899,7 @@ public class UserController {
                 result_map.put("message", "添加失败");
             }
         }catch (Exception e){
+            logger.error("==addSchoolInfo== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -859,6 +910,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/addPayRecordInfo")
     public Map<String,Object> addPayRecordInfo(@RequestBody Map<String,Object> map){
+        logger.info("==addPayRecordInfo=请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
 
@@ -873,6 +925,7 @@ public class UserController {
                 result_map.put("orderId",null);
             }
         }catch (Exception e){
+            logger.error("addPayRecordInfo==== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
             result_map.put("orderId",null);
@@ -892,6 +945,7 @@ public class UserController {
     @ResponseBody
     @PostMapping("/findCityInfo")
     public Map<String,Object> findCityInfo(@RequestBody Map<String,Object> map){
+        logger.info("=findCityInfo==请求参数为：{}", JSON.toJSONString(map));
         Map<String,Object> result_map = new HashMap<String,Object>();
         try {
             List<ProvinceCityArea> cityAreas= userService.findProvinceByNameInfo(map);
@@ -905,10 +959,10 @@ public class UserController {
                 result_map.put("cityAreas",null);
             }
         }catch (Exception e){
+            logger.error("=findCityInfo=== 报错信息=={}",e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
             result_map.put("cityAreas",null);
-            System.out.println(e.getMessage());
         }
         return result_map;
     }
@@ -925,8 +979,7 @@ public class UserController {
             result_map.put("cityName","");
             //result_map.put("cityName","上海市");
         }catch (Exception e){
-            logger.error("===findIPhoneByStatus==="+e.getMessage());
-            System.out.println(e.getMessage());
+            logger.error("=findIPhoneByStatus=== 报错信息=={}",e);
         }
         return result_map;
     }
@@ -949,7 +1002,7 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
-            logger.error("findUserByPhone=="+e.getMessage());
+            logger.error("addPhoneUserInfo=="+e);
         }
 
         return map;
@@ -974,7 +1027,7 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
-            logger.error("addPhoneUserInfoWx=="+e.getMessage());
+            logger.error("addPhoneUserInfoWx=="+e);
         }
         return map;
     }
@@ -1000,7 +1053,7 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
-            logger.error("findByPhone=="+e.getMessage());
+            logger.error("findByPhone=="+e);
         }
 
         return map;
@@ -1027,7 +1080,7 @@ public class UserController {
             }
             logger.info("=====addCouponByUserId end=====");
         }catch (Exception e){
-            logger.info("=====addCouponByUserId 异常====="+e.getMessage());
+            logger.info("=====addCouponByUserId 异常====="+e);
             result_map.put("success", false);
             result_map.put("message", "系统出现错误");
         }
@@ -1057,7 +1110,7 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("userVo","");
-            logger.error("addUserByInfo=="+e.getMessage());
+            logger.error("addUserByInfo=="+e);
         }
 
         return map;
@@ -1085,7 +1138,7 @@ public class UserController {
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
             map.put("couponList",null);
-            logger.error("findUserByInfo=="+e.getMessage());
+            logger.error("findUserByInfo=="+e);
         }
         return map;
     }
@@ -1107,7 +1160,7 @@ public class UserController {
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
-            logger.error("updateTbCoupon=="+e.getMessage());
+            logger.error("updateTbCoupon=="+e);
         }
         return map;
     }
@@ -1133,7 +1186,7 @@ public class UserController {
             map.put("content","");
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
-            logger.error("findContent=="+e.getMessage());
+            logger.error("findContent=="+e);
         }
         return map;
     }
@@ -1160,7 +1213,7 @@ public class UserController {
             map.put("content","");
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
-            logger.error("findContent=="+e.getMessage());
+            logger.error("findContent=="+e);
         }
         return map;
     }
@@ -1185,7 +1238,7 @@ public class UserController {
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success","false");
-            logger.error("findVersion=="+e.getMessage());
+            logger.error("findVersion=="+e);
         }
         return map;
     }
@@ -1203,7 +1256,7 @@ public class UserController {
         }catch (Exception e){
             map.put("msg","系统出现异常，请稍后重试");
             map.put("success",false);
-            logger.error("findVersionNew=="+e.getMessage());
+            logger.error("findVersionNew=="+e);
         }
         return map;
     }
@@ -1374,7 +1427,7 @@ public class UserController {
         try {
             logger.info("=========updUserOrderInfo======请求信息为：{}",JSON.toJSONString(map));
             userService.updUserOrderRecord(ToolsUtil.getString(map.get("orderId")),ToolsUtil.getString(map.get("orderPayType")));
-            logger.info("=========updUserOrderInfo======返回信息为：{}",JSON.toJSONString(map_1));
+            logger.info("=========updUserOrderInfo======返回信息为：{}",JSON.toJSONString(map));
         }catch (Exception e){
             map_1.put("success",false);
             map_1.put("msg","修改失败");

@@ -1,14 +1,9 @@
 package com.mzj.mohome.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.mzj.mohome.entity.Worker;
 import com.mzj.mohome.entity.WorkerPic;
 import com.mzj.mohome.service.WorkerService;
 import com.mzj.mohome.util.ImageUtil;
-import com.mzj.mohome.util.RequestApi;
-import com.mzj.mohome.util.ToolVideo;
 import com.mzj.mohome.util.ToolsUtil;
 import com.mzj.mohome.vo.PageUtil;
 import com.mzj.mohome.vo.WorkerVo;
@@ -19,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
